@@ -52,12 +52,12 @@ public class Facade implements IFacade {
 
 	@Override
 	public double getX(Worm worm) {
-		return worm.getXPosition();
+		return worm.getXCoordinate();
 	}
 
 	@Override
 	public double getY(Worm worm) {
-		return worm.getYPosition();
+		return worm.getYCoordinate();
 	}
 
 	@Override

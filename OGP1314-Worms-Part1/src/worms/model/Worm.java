@@ -11,25 +11,26 @@ import be.kuleuven.cs.som.annotate.Raw;
  * @version 1.0
  *
  * @invar 	The position of the worm is a valid position. 
- * 		 	| isValidPosition(getXPosition(),getYPosition())
+ * 		 	| isValidPosition(getXCoordinate(),getYCoordinate())
  */
 public class Worm {
 
 	/**
-	 * Initialize the new worm with the given position, direction, radius and name.
+	 * Create a new worm that is positioned at the given location, looks in the given direction, has the given radius and the given name.
 	 * 
 	 * @param x
-	 * 			The x-position of the worm.
+	 * 			The x-coordinate of the position of the new worm (in meter)
 	 * @param y
-	 * 			The y-position of the worm.
+	 * 			The y-coordinate of the position of the new worm (in meter)
 	 * @param direction
-	 * 			The direction of the worm
+	 * 			The direction of the new worm (in radians)
 	 * @param radius
-	 * 			The radius of the worm.
+	 * 			The radius of the new worm (in meter)
 	 * @param name
-	 * 			The name of the worm.
-	 * @throws IllegalArgumentException When the given position is not a valid position.
-	 * 									| !isValidPosition(x,y)
+	 * 			The name of the new worm
+	 * @throws IllegalArgumentException 
+	 * 			When the given position is not a valid position.
+	 * 			| !isValidPosition(x,y)
 	 */
 	@Raw
 	public Worm(double x, double y, double direction, double radius, String name) throws IllegalArgumentException{
@@ -40,92 +41,92 @@ public class Worm {
 		//if(!isValidPosition(x,y))
 		//		throw new IllegalArgumentException("Illegal Position");
 
-		setXPosition(x);
-		setYPosition(y);
+		setXCoordinate(x);
+		setYCoordinate(y);
 	}
 	
 	/**
 	 * Check whether a position (with x- and y-coordinates) is a valid position.
 	 * 
-	 * @param x The x-position to check.
-	 * @param y The y-position to check.
-	 * @effect 	Check whether the x-position and y-position both are valid.
-	 * 			| isValidXPosition(x) && isValidYPosition(y)
+	 * @param x The x-coordinate of the location to check.
+	 * @param y The y-coordinate of the location to check.
+	 * @effect 	Check whether the x-coordinate and y-coordinate both are valid.
+	 * 			| isValidXPCoordinate(x) && isValidYCoordinate(y)
 	 */
-	public boolean isValidPosition(double x, double y){
-		return isValidXPosition(x) && isValidYPosition(y);
+	public static boolean isValidPosition(double x, double y){
+		return isValidXCoordinate(x) && isValidYCoordinate(y);
 	}
 	
 	/**
-	 * Return the x-position of this worm.
+	 * Returns the x-coordinate of the current location of the given worm.
 	 */
 	@Basic @Raw
-	public double getXPosition(){
-		return this.xPosition;
+	public double getXCoordinate(){
+		return this.xCoordinate;
 	}
 	
 	/**
-	 * Check whether the given x-position is a valid x-position.
+	 * Check whether the given x-coordinate is a valid x-coordinate.
 	 * @param x
-	 * 			The x-position to check.
+	 * 			The x-coordinate to check.
 	 * @return 	Whether or not x is a valid number.
-	 * 			| !Double.isNan(x)
+	 * 			| result == !Double.isNan(x)
 	 */
-	public static boolean isValidXPosition(double x){
+	public static boolean isValidXCoordinate(double x){
 		return !Double.isNaN(x);
 	}
 	
 	/**
-	 * Set the x-position of this worm.
+	 * Set the x-coordinate of the location of this worm.
 	 * @param x 
-	 * 			The new x-position of this worm.
-	 * @post The x-position of this worm equals the given position
-	 * 		 | new.getXPosition() == x
-	 * @throws IllegalArgumentException The given position is not a valid (x-)position.
-	 * 									| !isValidXPosition(x)
+	 * 			The new x-coordinate of this worm.
+	 * @post The x-coordinate of this worm equals the given x-coordinate
+	 * 		 | new.getXCoordinate() == x
+	 * @throws IllegalArgumentException The given position is not a valid x-coordinate.
+	 * 									| !isValidXCoordinate(x)
 	 */
 	@Raw
-	private void setXPosition(double x) throws IllegalArgumentException{
-		if (!isValidXPosition(x))
-			throw new IllegalArgumentException("The given x-position is not a valid x-position.");
-		this.xPosition = x;
+	private void setXCoordinate(double x) throws IllegalArgumentException{
+		if (!isValidXCoordinate(x))
+			throw new IllegalArgumentException("The given x-coordinate is not a valid x-coordinate.");
+		this.xCoordinate = x;
 	}
-	private double xPosition;
+	private double xCoordinate;
 	
 	/**
-	 * Return the y-position of this worm.
+	 * Returns the y-coordinate of the current location of the given worm.
 	 */
 	@Basic @Raw
-	public double getYPosition(){
-		return this.yPosition;
+	public double getYCoordinate(){
+		return this.yCoordinate;
 	}
 	
 	/**
-	 * Check whether the given y-position is a valid y-position.
-	 * @param x
-	 * 			The x-position to check.
+	 * Check whether the given y-coordinate is a valid y-coordinate.
+	 * @param y
+	 * 			The y-coordinate to check.
 	 * @return 	Whether or not y is a valid number.
 	 * 			| !Double.isNan(y)
 	 */
-	public static boolean isValidYPosition(double y){
+	public static boolean isValidYCoordinate(double y){
 		return !Double.isNaN(y);
 	}
 	
 	/**
-	 * Set the y-position of this worm.
+	 * Set the y-coordinate of the location of this worm.
 	 * @param y
-	 * 			The new y-position of this worm.
-	 * @post The y-position of this worm equals the given position
-	 * 		 | new.getYPosition() == y
-	 * @throws IllegalArgumentException The given position is not a valid (y-)position.
-	 * 									| !isValidYPosition(y)
+	 * 			The new y-coordinate of the location of this worm.
+	 * @post The y-coordinate of this worm equals the given y-coordinate
+	 * 		 | new.getYCoordinate() == y
+	 * @throws IllegalArgumentException The given position is not a valid y-coordinate.
+	 * 									| !isValidYCoordinate(y)
 	 */
 	@Raw
-	private void setYPosition(double y){
-		if (!isValidYPosition(y))
-			throw new IllegalArgumentException("The given y-position is not a valid y-position.");
-		this.yPosition = y;
+	private void setYCoordinate(double y){
+		if (!isValidYCoordinate(y))
+			throw new IllegalArgumentException("The given y-coordinate is not a valid y-coordinate.");
+		this.yCoordinate = y;
 	}
-	private double yPosition;
+	private double yCoordinate;
 	
 }
