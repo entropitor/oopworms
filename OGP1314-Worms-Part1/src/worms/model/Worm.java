@@ -16,7 +16,7 @@ import be.kuleuven.cs.som.annotate.Raw;
 public class Worm {
 
 	/**
-	 * Create a new worm that is positioned at the given location, looks in the given direction, has the given radius and the given name.
+	 * Creates a new worm that is positioned at the given location, looks in the given direction, has the given radius and the given name.
 	 * 
 	 * @param x
 	 * 			The x-coordinate of the position of the new worm (in meter)
@@ -46,7 +46,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Check whether a position (with x- and y-coordinates) is a valid position.
+	 * Checks whether a position (with x- and y-coordinates) is a valid position.
 	 * 
 	 * @param x The x-coordinate of the location to check.
 	 * @param y The y-coordinate of the location to check.
@@ -58,7 +58,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Returns the x-coordinate of the current location of the given worm.
+	 * Returns the x-coordinate of the current location of this worm.
 	 */
 	@Basic @Raw
 	public double getXCoordinate(){
@@ -66,7 +66,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Check whether the given x-coordinate is a valid x-coordinate.
+	 * Checks whether the given x-coordinate is a valid x-coordinate.
 	 * @param x
 	 * 			The x-coordinate to check.
 	 * @return 	Whether or not x is a valid number.
@@ -77,7 +77,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Set the x-coordinate of the location of this worm.
+	 * Sets the x-coordinate of the location of this worm.
 	 * @param x 
 	 * 			The new x-coordinate of this worm.
 	 * @post The x-coordinate of this worm equals the given x-coordinate
@@ -94,7 +94,7 @@ public class Worm {
 	private double xCoordinate;
 	
 	/**
-	 * Returns the y-coordinate of the current location of the given worm.
+	 * Returns the y-coordinate of the current location of this worm.
 	 */
 	@Basic @Raw
 	public double getYCoordinate(){
@@ -102,7 +102,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Check whether the given y-coordinate is a valid y-coordinate.
+	 * Checks whether the given y-coordinate is a valid y-coordinate.
 	 * @param y
 	 * 			The y-coordinate to check.
 	 * @return 	Whether or not y is a valid number.
@@ -113,7 +113,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Set the y-coordinate of the location of this worm.
+	 * Sets the y-coordinate of the location of this worm.
 	 * @param y
 	 * 			The new y-coordinate of the location of this worm.
 	 * @post The y-coordinate of this worm equals the given y-coordinate
