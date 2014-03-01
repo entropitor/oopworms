@@ -19,6 +19,7 @@ public class WormTest {
 		double precision = 1e-10;
 		assertFuzzyEquals(worm.getXCoordinate(), -8.45, precision);
 		assertFuzzyEquals(worm.getYCoordinate(), 9.16, precision);
+		assertFuzzyEquals(worm.getDirection(),Math.PI/2,precision);
 		//TODO complete constructor test.
 	}
 	
@@ -50,6 +51,29 @@ public class WormTest {
 	@Test
 	public void testIsValidPositionBothFalseCase(){
 		assertFalse(Worm.isValidPosition(Double.NaN, Double.NaN));
+	}
+	
+	@Test
+	public void testIsValidDirectionTrueCases(){
+		assertTrue(Worm.isValidDirection(0));
+		assertTrue(Worm.isValidDirection(Math.PI*2-0.001));
+		assertTrue(Worm.isValidDirection(Math.PI));
+		assertTrue(Worm.isValidDirection(2.14));
+	}
+	
+	@Test
+	public void testIsValidDirectionFalseNaNCase(){
+		assertFalse(Worm.isValidDirection(Double.NaN));
+	}
+	
+	@Test
+	public void testIsValidDirectionFalseNegativeCase(){
+		assertFalse(Worm.isValidDirection(-2));
+	}
+	
+	@Test
+	public void testIsValidDirectionFalsePositiveCase(){
+		assertFalse(Worm.isValidDirection(5*Math.PI/2));
 	}
 	
 }
