@@ -141,7 +141,7 @@ public class Worm {
 	 * 									| !isValidYCoordinate(y)
 	 */
 	@Raw
-	private void setYCoordinate(double y){
+	private void setYCoordinate(double y) throws IllegalArgumentException{
 		if (!isValidYCoordinate(y))
 			throw new IllegalArgumentException("The given y-coordinate is not a valid y-coordinate.");
 		this.yCoordinate = y;
