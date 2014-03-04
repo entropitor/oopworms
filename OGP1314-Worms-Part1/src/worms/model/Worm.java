@@ -12,6 +12,8 @@ import be.kuleuven.cs.som.annotate.Raw;
  *
  * @invar 	The position of the worm is a valid position. 
  * 		 	| isValidPosition(getXCoordinate(),getYCoordinate())
+ * @invar	The direction of the worm is a valid direction.
+ * 			| isValidDirection(getDirection())
  */
 public class Worm {
 
@@ -28,6 +30,14 @@ public class Worm {
 	 * 			The radius of the new worm (in meter)
 	 * @param name
 	 * 			The name of the new worm
+	 * @pre		The given direction is a valid direction.
+	 * 			| isValidDirection(direction)
+	 * @post 	The x-coordinate of the position of the new worm equals the given x-coordinate
+	 * 			| new.getXCoordinate() == x
+	 * @post 	The y-coordinate of the position of the new worm equals the given y-coordinate
+	 * 			| new.getYCoordinate() == y
+	 * @post	The direction of the new worm equals the given direction
+	 * 			| new.getDirection() == direction
 	 * @throws IllegalArgumentException 
 	 * 			When the given position is not a valid position.
 	 * 			| !isValidPosition(x,y)
@@ -41,8 +51,13 @@ public class Worm {
 		//if(!isValidPosition(x,y))
 		//		throw new IllegalArgumentException("Illegal Position");
 
+		//Implicit in setDirection:
+		//assert isValidDirection(direction);
+
 		setXCoordinate(x);
 		setYCoordinate(y);
+
+		setDirection(direction);
 	}
 	
 	/**
@@ -129,4 +144,39 @@ public class Worm {
 	}
 	private double yCoordinate;
 	
+	/**
+	 * Returns the direction of this worm (in radians).
+	 */
+	@Basic @Raw
+	public double getDirection(){
+		return direction;
+	}
+	
+	/**
+	 * Checks whether the given direction is a valid direction.
+	 * @param direction The direction to check
+	 * @return 	Whether or not direction is a valid number between 0 and 2*Math.PI
+	 * 			| result == (!double.isNaN(direction) && 0<= direction && direction < 2*Math.PI)
+	 */
+	public static boolean isValidDirection(double direction){
+		if(Double.isNaN(direction))
+			return false;
+		return 0 <= direction && direction < 2*Math.PI;
+	}
+	
+	/**
+	 * Sets the direction of this worm to the given direction.
+	 * @param direction
+	 * 			The new direction of the worm.
+	 * @pre 	The given direction is a valid direction.
+	 * 			| isValidDirection(direction)
+	 * @post 	The new direction of this worm equals the given direction.
+	 * 			| new.getDirection() == direction
+	 */
+	@Raw
+	private void setDirection(double direction){
+		assert isValidDirection(direction);
+		this.direction = direction;
+	}
+	private double direction;
 }
