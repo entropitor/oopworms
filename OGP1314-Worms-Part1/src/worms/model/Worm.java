@@ -65,7 +65,7 @@ public class Worm {
 	 * 
 	 * @param x The x-coordinate of the location to check.
 	 * @param y The y-coordinate of the location to check.
-	 * @effect 	Check whether the x-coordinate and y-coordinate both are valid.
+	 * @effect 	Check whether the x-coordinate and y-coordinate are both valid.
 	 * 			| isValidXPCoordinate(x) && isValidYCoordinate(y)
 	 */
 	public static boolean isValidPosition(double x, double y){
