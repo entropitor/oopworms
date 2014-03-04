@@ -82,6 +82,7 @@ public class Worm {
 	
 	/**
 	 * Checks whether the given x-coordinate is a valid x-coordinate.
+	 * 
 	 * @param x
 	 * 			The x-coordinate to check.
 	 * @return 	Whether or not x is a valid number.
@@ -93,6 +94,7 @@ public class Worm {
 	
 	/**
 	 * Sets the x-coordinate of the location of this worm.
+	 * 
 	 * @param x 
 	 * 			The new x-coordinate of this worm.
 	 * @post The x-coordinate of this worm equals the given x-coordinate
@@ -118,6 +120,7 @@ public class Worm {
 	
 	/**
 	 * Checks whether the given y-coordinate is a valid y-coordinate.
+	 * 
 	 * @param y
 	 * 			The y-coordinate to check.
 	 * @return 	Whether or not y is a valid number.
@@ -129,6 +132,7 @@ public class Worm {
 	
 	/**
 	 * Sets the y-coordinate of the location of this worm.
+	 * 
 	 * @param y
 	 * 			The new y-coordinate of the location of this worm.
 	 * @post The y-coordinate of this worm equals the given y-coordinate
@@ -154,6 +158,7 @@ public class Worm {
 	
 	/**
 	 * Checks whether the given direction is a valid direction.
+	 * 
 	 * @param direction The direction to check
 	 * @return 	Whether or not direction is a valid number between 0 and 2*Math.PI
 	 * 			| result == (!double.isNaN(direction) && 0<= direction && direction < 2*Math.PI)
@@ -166,6 +171,7 @@ public class Worm {
 	
 	/**
 	 * Sets the direction of this worm to the given direction.
+	 * 
 	 * @param direction
 	 * 			The new direction of the worm.
 	 * @pre 	The given direction is a valid direction.
