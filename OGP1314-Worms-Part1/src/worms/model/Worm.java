@@ -14,6 +14,8 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 		 	| isValidPosition(getXCoordinate(),getYCoordinate())
  * @invar	The direction of the worm is a valid direction.
  * 			| isValidDirection(getDirection())
+ * @invar	The name of the worm is a valid name.
+ * 			| isValidName(getName())
  */
 public class Worm {
 
@@ -38,9 +40,14 @@ public class Worm {
 	 * 			| new.getYCoordinate() == y
 	 * @post	The direction of the new worm equals the given direction
 	 * 			| new.getDirection() == direction
+	 * @post	The name of the new worm equals the given name
+	 * 			| new.getName() == name
 	 * @throws IllegalArgumentException 
 	 * 			When the given position is not a valid position.
 	 * 			| !isValidPosition(x,y)
+	 * @throws IllegalArgumentException
+	 * 			When the given name is not a valid name.
+	 * 			| !isValidName(name)
 	 */
 	@Raw
 	public Worm(double x, double y, double direction, double radius, String name) throws IllegalArgumentException{
@@ -53,11 +60,17 @@ public class Worm {
 
 		//Implicit in setDirection:
 		//assert isValidDirection(direction);
+		
+		//Implicit in setName:
+		//if(!isValidName(name))
+		//		throw new IllegalArgumentException("Illegal Name");
 
 		setXCoordinate(x);
 		setYCoordinate(y);
 
 		setDirection(direction);
+		
+		setName(name);
 	}
 	
 	/**
@@ -185,4 +198,81 @@ public class Worm {
 		this.direction = direction;
 	}
 	private double direction;
+	
+	
+	/**
+	 * Returns the name of this worm.
+	 */
+	@Basic @Raw
+	public String getName(){
+		return this.name;
+	}
+	
+	/**
+	 * Checks whether or not the given name is a valid name for a worm.
+	 * 
+	 * @param name The name to check.
+	 * @return	Whether or not the name is at least 2 characters long, starts with an uppercase letter and only contains valid characters.
+	 * 			|	result == (name.length() >= 2 && Character.isUpperCase(name.charAt(0)) 
+	 * 			|				&& for all Character c in name:
+	 * 			|						isValidCharacterForName(c))
+	 */
+	public static boolean isValidName(String name){
+		if(name.length() < 2)
+			return false;
+		if(!Character.isUpperCase(name.charAt(0)))
+			return false;
+		for(Character c : name.toCharArray()){
+			if(!isValidCharacterForName(c))
+				return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Checks whether or not the given character is a valid character to be used in a name for a worm.
+	 * 
+	 * <p>In the current version, the valid characters consist of (latin) letters (both uppercase and lowercase), quotes (both single and double) and spaces.
+	 * In short the list looks like this: [A-Za-z'" ].
+	 * 
+	 * @param c The character to check.
+	 * @return	Whether or not the character is a (latin) letter, quote or space.
+	 * 			| result == (c == 32 || c == 34 || c == 39 || (65 <= c && c <= 90) || (97 <= c && c <= 122))
+	 */
+	public static boolean isValidCharacterForName(char c){
+		//Space is allowed.
+		if(c == 32)
+			return true;
+		//Single and double quotes are allowed.
+		if(c == 34 || c == 39)
+			return true;
+		
+		//Uppercase characters are allowed.
+		if(65 <= c && c <= 90)
+			return true;
+		//Lowercase characters are allowed.
+		if(97 <= c && c <= 122)
+			return true;
+		
+		//All the rest isn't allowed (at the moment).
+		return false;
+	}
+	
+	/**
+	 * Sets the name for this worm.
+	 * 
+	 * @param name The name to set
+	 * @throws IllegalArgumentException 
+	 * 			When the given name is not a valid name.
+	 * 			| !isValidName(name)
+	 * @post 	The name for this worm equals the given name.
+	 * 			| new.getName() == name
+	 */
+	@Raw
+	public void setName(String name) throws IllegalArgumentException{
+		if(!isValidName(name))
+			throw new IllegalArgumentException("Illegal Name");
+		this.name = name;
+	}
+	private String name;
 }
