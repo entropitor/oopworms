@@ -65,7 +65,7 @@ public class Facade implements IFacade {
 	@Override
 	public double getOrientation(Worm worm) {
 		// TODO Auto-generated method stub
-		return 0;
+		return worm.getDirection();
 	}
 
 	@Override
