@@ -8,8 +8,11 @@ import org.junit.Test;
 
 public class WormTest {
 	
+	private static Worm donald;
+	
 	@Before
 	public void setup(){
+		donald = new Worm(0,0,3,5,"D'Onald Duck");
 	}
 	
 	@Test
@@ -20,6 +23,7 @@ public class WormTest {
 		assertFuzzyEquals(worm.getXCoordinate(), -8.45, precision);
 		assertFuzzyEquals(worm.getYCoordinate(), 9.16, precision);
 		assertFuzzyEquals(worm.getDirection(), Math.PI/2, precision);
+		assertEquals(worm.getName(), "Bar");
 		//TODO complete constructor test.
 	}
 	
@@ -31,6 +35,11 @@ public class WormTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructor_IllegalYPosition() throws Exception{
 		new Worm(-8.45, Double.NaN, Math.PI/2, 2.14, "Bar");
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructor_IllegalName() throws Exception{
+		new Worm(-8.45, Double.NaN, Math.PI/2, 2.14, "Foo	Bar");
 	}
 	
 	@Test
@@ -76,4 +85,75 @@ public class WormTest {
 		assertFalse(Worm.isValidDirection(5*Math.PI/2));
 	}
 	
+	@Test
+	public void testIsValidCharacterForName_TrueCases(){
+		assertTrue(Worm.isValidCharacterForName(' '));
+		assertTrue(Worm.isValidCharacterForName('\''));
+		assertTrue(Worm.isValidCharacterForName('\"'));
+		assertTrue(Worm.isValidCharacterForName('X'));
+		assertTrue(Worm.isValidCharacterForName('d'));
+	}
+	
+	@Test
+	public void testIsValidCharacterForName_Symbols(){
+		assertFalse(Worm.isValidCharacterForName('$'));
+		assertFalse(Worm.isValidCharacterForName('~'));
+	}
+	
+	@Test
+	public void testIsValidCharacterForName_Numbers(){
+		assertFalse(Worm.isValidCharacterForName('3'));
+	}
+	
+	@Test
+	public void testIsValidCharacterForName_Tab(){
+		assertFalse(Worm.isValidCharacterForName('\t'));
+	}
+	
+	@Test
+	public void testIsValidCharacterForName_WeirdLetters(){
+		assertFalse(Worm.isValidCharacterForName('Ö'));
+		assertFalse(Worm.isValidCharacterForName('å'));
+	}
+	
+	@Test
+	public void testIsValidName_TrueCase(){
+		assertTrue(Worm.isValidName("James o'Har\"a"));
+	}
+	
+	@Test
+	public void testIsValidName_TooShort(){
+		assertFalse(Worm.isValidName("Q"));
+	}
+	
+	@Test
+	public void testIsValidName_NonUpperCaseStart(){
+		assertFalse(Worm.isValidName("james o'Hara"));
+		assertFalse(Worm.isValidName("'O Donald"));
+	}
+	
+	@Test
+	public void testIsValidName_WeirdSymbols(){
+		assertFalse(Worm.isValidName("James *ö'Hara*"));
+	}
+	
+	@Test
+	public void testSetName_LegalCase(){
+		donald.setName("Donald 'Fauntleroy' Duck");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testSetName_TooShort(){
+		donald.setName("D");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testSetName_IllegalSymbols(){
+		donald.setName("D*n*ld D*ck");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testSetName_LowerCaseStart(){
+		donald.setName("donald duck");
+	}	
 }
