@@ -14,33 +14,45 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 		 	| isValidPosition(getXCoordinate(),getYCoordinate())
  * @invar	The direction of the worm is a valid direction.
  * 			| isValidDirection(getDirection())
+ * @invar	The radius of the worm is a valid radius.
+ * 			| canHaveAsRadius(getRadius())
  */
 public class Worm {
 
 	/**
+	 * The constant density of a worm, in kg/m³.
+	 */
+	public static final int DENSITY = 1062;
+	
+	/**
 	 * Creates a new worm that is positioned at the given location, looks in the given direction, has the given radius and the given name.
 	 * 
 	 * @param x
-	 * 			The x-coordinate of the position of the new worm (in meter)
+	 * 			The x-coordinate of the position of the new worm (in meters)
 	 * @param y
-	 * 			The y-coordinate of the position of the new worm (in meter)
+	 * 			The y-coordinate of the position of the new worm (in meters)
 	 * @param direction
 	 * 			The direction of the new worm (in radians)
 	 * @param radius
-	 * 			The radius of the new worm (in meter)
+	 * 			The radius of the new worm (in meters)
 	 * @param name
 	 * 			The name of the new worm
 	 * @pre		The given direction is a valid direction.
 	 * 			| isValidDirection(direction)
-	 * @post 	The x-coordinate of the position of the new worm equals the given x-coordinate
+	 * @post 	The x-coordinate of the position of the new worm equals the given x-coordinate.
 	 * 			| new.getXCoordinate() == x
-	 * @post 	The y-coordinate of the position of the new worm equals the given y-coordinate
+	 * @post 	The y-coordinate of the position of the new worm equals the given y-coordinate.
 	 * 			| new.getYCoordinate() == y
-	 * @post	The direction of the new worm equals the given direction
+	 * @post	The direction of the new worm equals the given direction.
 	 * 			| new.getDirection() == direction
+	 * @post	The radius of the new worm equals the given radius.
+	 * 			| new.getRadius() == radius
 	 * @throws IllegalArgumentException 
 	 * 			When the given position is not a valid position.
 	 * 			| !isValidPosition(x,y)
+	 * @throws IllegalArgumentException 
+	 * 			When the given radius is not a valid radius.
+	 * 			| !canHaveAsRadius(radius)
 	 */
 	@Raw
 	public Worm(double x, double y, double direction, double radius, String name) throws IllegalArgumentException{
@@ -53,11 +65,17 @@ public class Worm {
 
 		//Implicit in setDirection:
 		//assert isValidDirection(direction);
+		
+		//Implicit in setRadius:
+		//if(!canHaveAsRadius(radius))
+		//		throw new IllegalArgumentException("Illegal radius");
 
 		setXCoordinate(x);
 		setYCoordinate(y);
 
 		setDirection(direction);
+		
+		setRadius(radius);
 	}
 	
 	/**
@@ -73,7 +91,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Returns the x-coordinate of the current location of this worm.
+	 * Returns the x-coordinate of the current location of this worm (in meters).
 	 */
 	@Basic @Raw
 	public double getXCoordinate(){
@@ -96,11 +114,12 @@ public class Worm {
 	 * Sets the x-coordinate of the location of this worm.
 	 * 
 	 * @param x 
-	 * 			The new x-coordinate of this worm.
-	 * @post The x-coordinate of this worm equals the given x-coordinate
-	 * 		 | new.getXCoordinate() == x
-	 * @throws IllegalArgumentException The given position is not a valid x-coordinate.
-	 * 									| !isValidXCoordinate(x)
+	 * 			The new x-coordinate of this worm (in meters).
+	 * @post	The x-coordinate of this worm equals the given x-coordinate
+	 * 		 	| new.getXCoordinate() == x
+	 * @throws IllegalArgumentException 
+	 * 			The given position is not a valid x-coordinate.
+	 * 			| !isValidXCoordinate(x)
 	 */
 	@Raw
 	private void setXCoordinate(double x) throws IllegalArgumentException{
@@ -111,7 +130,7 @@ public class Worm {
 	private double xCoordinate;
 	
 	/**
-	 * Returns the y-coordinate of the current location of this worm.
+	 * Returns the y-coordinate of the current location of this worm (in meters).
 	 */
 	@Basic @Raw
 	public double getYCoordinate(){
@@ -134,11 +153,12 @@ public class Worm {
 	 * Sets the y-coordinate of the location of this worm.
 	 * 
 	 * @param y
-	 * 			The new y-coordinate of the location of this worm.
-	 * @post The y-coordinate of this worm equals the given y-coordinate
-	 * 		 | new.getYCoordinate() == y
-	 * @throws IllegalArgumentException The given position is not a valid y-coordinate.
-	 * 									| !isValidYCoordinate(y)
+	 * 			The new y-coordinate of the location of this worm (in meters).
+	 * @post	The y-coordinate of this worm equals the given y-coordinate
+	 * 		 	| new.getYCoordinate() == y
+	 * @throws IllegalArgumentException
+	 * 			The given position is not a valid y-coordinate.
+	 * 			| !isValidYCoordinate(y)
 	 */
 	@Raw
 	private void setYCoordinate(double y) throws IllegalArgumentException{
@@ -173,7 +193,7 @@ public class Worm {
 	 * Sets the direction of this worm to the given direction.
 	 * 
 	 * @param direction
-	 * 			The new direction of the worm.
+	 * 			The new direction of the worm (in radians).
 	 * @pre 	The given direction is a valid direction.
 	 * 			| isValidDirection(direction)
 	 * @post 	The new direction of this worm equals the given direction.
@@ -185,4 +205,74 @@ public class Worm {
 		this.direction = direction;
 	}
 	private double direction;
+	
+	/**
+	 * Returns the radius of this worm (in meters).
+	 */
+	@Basic @Raw
+	public double getRadius(){
+		return this.radius;
+	}
+	
+	/**
+	 * Returns a lower bound on the radius of this worm.
+	 * 
+	 * @return A strictly positive lower bound on the radius of this worm.
+	 * 		   | result > 0
+	 */
+	@Raw
+	public double getRadiusLowerBound(){
+		return 0.25;
+	}
+	
+	/**
+	 * Checks whether the given radius is a valid radius for this worm.
+	 * 
+	 * @param radius
+	 * 			The radius to check.
+	 * @return	Whether or not radius is a valid number, finite 
+	 * 			and at least as big as the lower bound on radiuses 
+	 * 			of this worm.
+	 * 			| result == (!Double.isNaN(radius))
+	 *			|			&& (radius >= this.getRadiusLowerBound()) 
+     *			|			&& (radius < Double.POSITIVE_INFINITY)
+	 */
+	@Raw
+	public boolean canHaveAsRadius(double radius){
+		return  (!Double.isNaN(radius))
+				&& (radius >= this.getRadiusLowerBound()) 
+				&& (radius < Double.POSITIVE_INFINITY);
+	}
+	
+	/**
+	 * Sets the radius of this worm.
+	 * 
+	 * @param radius
+	 * 			The new radius of this worm (in meters).
+	 * @post	The radius of this worm is the given radius.
+	 * 			| new.getRadius() == radius
+	 * @throws	IllegalArgumentException
+	 * 			The given radius is not a valid radius for this worm.
+	 * 			| !this.canHaveAsRadius(radius)
+	 */
+	@Raw
+	public void setRadius(double radius) throws IllegalArgumentException{
+		if (!this.canHaveAsRadius(radius))
+			throw new IllegalArgumentException("The given radius is not a valid radius for this worm");
+		this.radius = radius;
+	}
+	private double radius;
+	
+	/**
+	 * Returns the mass of this worm.
+	 * 
+	 * @return	The mass of this worm (in kilograms),
+	 * 			assuming the worm has a spherical body with a 
+	 * 			homogeneous density of Worm.DENSITY:
+	 * 			m = ρ*4/3*π*r³
+	 * 			| result == Worm.DENSITY*4.0/3*Math.PI*Math.pow(this.getRadius(), 3)
+	 */
+	public double getMass(){
+		return Worm.DENSITY*4.0/3*Math.PI*Math.pow(this.getRadius(), 3);
+	}
 }
