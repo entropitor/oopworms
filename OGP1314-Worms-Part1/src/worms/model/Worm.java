@@ -15,7 +15,7 @@ import be.kuleuven.cs.som.annotate.Raw;
  * @invar	The direction of the worm is a valid direction.
  * 			| isValidDirection(getDirection())
  * @invar	The radius of the worm is a valid radius.
- * 			| isValidRadius(getRadius())
+ * 			| canHaveAsRadius(getRadius())
  */
 public class Worm {
 
@@ -52,7 +52,7 @@ public class Worm {
 	 * 			| !isValidPosition(x,y)
 	 * @throws IllegalArgumentException 
 	 * 			When the given radius is not a valid radius.
-	 * 			| !isValidRadius(radius)
+	 * 			| !canHaveAsRadius(radius)
 	 */
 	@Raw
 	public Worm(double x, double y, double direction, double radius, String name) throws IllegalArgumentException{
@@ -67,7 +67,8 @@ public class Worm {
 		//assert isValidDirection(direction);
 		
 		//Implicit in setRadius:
-		//assert isValidRadius(radius);
+		//if(!canHaveAsRadius(radius))
+		//		throw new IllegalArgumentException("Illegal radius");
 
 		setXCoordinate(x);
 		setYCoordinate(y);
@@ -206,7 +207,7 @@ public class Worm {
 	private double direction;
 	
 	/**
-	 * Returns the radius of this worm (in meter).
+	 * Returns the radius of this worm (in meters).
 	 */
 	@Basic @Raw
 	public double getRadius(){
@@ -219,6 +220,7 @@ public class Worm {
 	 * @return A strictly positive lower bound on the radius of this worm.
 	 * 		   | result > 0
 	 */
+	@Raw
 	public double getRadiusLowerBound(){
 		return 0.25;
 	}
@@ -235,7 +237,8 @@ public class Worm {
 	 *			|			&& (radius >= this.getRadiusLowerBound()) 
      *			|			&& (radius < Double.POSITIVE_INFINITY)
 	 */
-	public boolean isValidRadius(double radius){
+	@Raw
+	public boolean canHaveAsRadius(double radius){
 		return  (!Double.isNaN(radius))
 				&& (radius >= this.getRadiusLowerBound()) 
 				&& (radius < Double.POSITIVE_INFINITY);
@@ -250,11 +253,11 @@ public class Worm {
 	 * 			| new.getRadius() == radius
 	 * @throws	IllegalArgumentException
 	 * 			The given radius is not a valid radius for this worm.
-	 * 			| !this.isValidRadius(radius)
+	 * 			| !this.canHaveAsRadius(radius)
 	 */
 	@Raw
 	public void setRadius(double radius) throws IllegalArgumentException{
-		if (!this.isValidRadius(radius))
+		if (!this.canHaveAsRadius(radius))
 			throw new IllegalArgumentException("The given radius is not a valid radius for this worm");
 		this.radius = radius;
 	}

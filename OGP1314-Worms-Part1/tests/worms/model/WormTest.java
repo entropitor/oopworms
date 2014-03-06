@@ -9,7 +9,7 @@ import org.junit.Test;
 public class WormTest {
 	
 	private Worm willy;
-	private final double precision = 1e-6;
+	private static final double PRECISION = 1e-6;
 	
 	@Before
 	public void setup(){
@@ -20,11 +20,11 @@ public class WormTest {
 	@Test
 	public void testConstructor_LegalCase(){
 		Worm worm = new Worm(-8.45, 9.16, Math.PI/2, 2.14, "Bar");
-		//Constructor should have enough precision to set the variables => 1e-10 instead of 1e-4
-		assertFuzzyEquals(worm.getXCoordinate(), -8.45, precision);
-		assertFuzzyEquals(worm.getYCoordinate(), 9.16, precision);
-		assertFuzzyEquals(worm.getDirection(), Math.PI/2, precision);
-		assertFuzzyEquals(worm.getRadius(), 2.14, precision);
+		//Constructor should have enough precision to set the variables => 1e-6 instead of 1e-4
+		assertFuzzyEquals(worm.getXCoordinate(), -8.45, PRECISION);
+		assertFuzzyEquals(worm.getYCoordinate(), 9.16, PRECISION);
+		assertFuzzyEquals(worm.getDirection(), Math.PI/2, PRECISION);
+		assertFuzzyEquals(worm.getRadius(), 2.14, PRECISION);
 		//TODO complete constructor test.
 	}
 	
@@ -92,32 +92,32 @@ public class WormTest {
 	}
 	
 	@Test
-	public void testIsValidRadius_TrueCase(){
+	public void testCanHaveAsRadius_TrueCase(){
 		// We assume that willy.getRadiusLowerBound() < 500 here.
-		assertTrue(willy.isValidRadius(500));
-		assertTrue(willy.isValidRadius(willy.getRadiusLowerBound()));
+		assertTrue(willy.canHaveAsRadius(500));
+		assertTrue(willy.canHaveAsRadius(willy.getRadiusLowerBound()));
 	}
 	
 	@Test
-	public void testIsValidRadius_NaN(){
-		assertFalse(willy.isValidRadius(Double.NaN));
+	public void testCanHaveAsRadius_NaN(){
+		assertFalse(willy.canHaveAsRadius(Double.NaN));
 	}
 	
 	@Test
-	public void testIsValidRadius_TooSmall(){
-		assertFalse(willy.isValidRadius(0));
-		assertFalse(willy.isValidRadius(willy.getRadiusLowerBound()-1e-4));
+	public void testCanHaveAsRadius_TooSmall(){
+		assertFalse(willy.canHaveAsRadius(0));
+		assertFalse(willy.canHaveAsRadius(willy.getRadiusLowerBound()-1e-4));
 	}
 	
 	@Test
-	public void testIsValidRadius_TooBig(){
-		assertFalse(willy.isValidRadius(Double.POSITIVE_INFINITY));
+	public void testCanHaveAsRadius_TooBig(){
+		assertFalse(willy.canHaveAsRadius(Double.POSITIVE_INFINITY));
 	}
 	
 	@Test
 	public void testSetRadius_TrueCase(){
 		willy.setRadius(97);
-		assertFuzzyEquals(97, willy.getRadius(), precision);
+		assertFuzzyEquals(97, willy.getRadius(), PRECISION);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
@@ -142,7 +142,6 @@ public class WormTest {
 	
 	@Test
 	public void testGetMass(){
-		System.out.println(willy.getMass());
-		assertFuzzyEquals(183466713.419263797, willy.getMass(), precision);
+		assertFuzzyEquals(183466713.419263797, willy.getMass(), PRECISION);
 	}
 }
