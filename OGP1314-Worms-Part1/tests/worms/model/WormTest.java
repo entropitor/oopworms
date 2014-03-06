@@ -8,8 +8,11 @@ import org.junit.Test;
 
 public class WormTest {
 	
+	private static Worm donald;
+	
 	@Before
 	public void setup(){
+		donald = new Worm(0,0,3,5,"D'Onald Duck");
 	}
 	
 	@Test
@@ -115,7 +118,7 @@ public class WormTest {
 	
 	@Test
 	public void testIsValidName_TrueCase(){
-		assertTrue(Worm.isValidName("James o'Hara"));
+		assertTrue(Worm.isValidName("James o'Har\"a"));
 	}
 	
 	@Test
@@ -126,10 +129,31 @@ public class WormTest {
 	@Test
 	public void testIsValidName_NonUpperCaseStart(){
 		assertFalse(Worm.isValidName("james o'Hara"));
+		assertFalse(Worm.isValidName("'O Donald"));
 	}
 	
 	@Test
 	public void testIsValidName_WeirdSymbols(){
 		assertFalse(Worm.isValidName("James *ö'Hara*"));
 	}
+	
+	@Test
+	public void testSetName_LegalCase(){
+		donald.setName("Donald 'Fauntleroy' Duck");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testSetName_TooShort(){
+		donald.setName("D");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testSetName_IllegalSymbols(){
+		donald.setName("D*n*ld D*ck");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testSetName_LowerCaseStart(){
+		donald.setName("donald duck");
+	}	
 }
