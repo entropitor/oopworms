@@ -28,13 +28,13 @@ public class Worm {
 	 * Creates a new worm that is positioned at the given location, looks in the given direction, has the given radius and the given name.
 	 * 
 	 * @param x
-	 * 			The x-coordinate of the position of the new worm (in meters)
+	 * 			The x-coordinate of the position of the new worm (in metres)
 	 * @param y
-	 * 			The y-coordinate of the position of the new worm (in meters)
+	 * 			The y-coordinate of the position of the new worm (in metres)
 	 * @param direction
 	 * 			The direction of the new worm (in radians)
 	 * @param radius
-	 * 			The radius of the new worm (in meters)
+	 * 			The radius of the new worm (in metres)
 	 * @param name
 	 * 			The name of the new worm
 	 * @pre		The given direction is a valid direction.
@@ -91,7 +91,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Returns the x-coordinate of the current location of this worm (in meters).
+	 * Returns the x-coordinate of the current location of this worm (in metres).
 	 */
 	@Basic @Raw
 	public double getXCoordinate(){
@@ -114,7 +114,7 @@ public class Worm {
 	 * Sets the x-coordinate of the location of this worm.
 	 * 
 	 * @param x 
-	 * 			The new x-coordinate of this worm (in meters).
+	 * 			The new x-coordinate of this worm (in metres).
 	 * @post	The x-coordinate of this worm equals the given x-coordinate
 	 * 		 	| new.getXCoordinate() == x
 	 * @throws IllegalArgumentException 
@@ -130,7 +130,7 @@ public class Worm {
 	private double xCoordinate;
 	
 	/**
-	 * Returns the y-coordinate of the current location of this worm (in meters).
+	 * Returns the y-coordinate of the current location of this worm (in metres).
 	 */
 	@Basic @Raw
 	public double getYCoordinate(){
@@ -153,7 +153,7 @@ public class Worm {
 	 * Sets the y-coordinate of the location of this worm.
 	 * 
 	 * @param y
-	 * 			The new y-coordinate of the location of this worm (in meters).
+	 * 			The new y-coordinate of the location of this worm (in metres).
 	 * @post	The y-coordinate of this worm equals the given y-coordinate
 	 * 		 	| new.getYCoordinate() == y
 	 * @throws IllegalArgumentException
@@ -207,7 +207,7 @@ public class Worm {
 	private double direction;
 	
 	/**
-	 * Returns the radius of this worm (in meters).
+	 * Returns the radius of this worm (in metres).
 	 */
 	@Basic @Raw
 	public double getRadius(){
@@ -248,7 +248,7 @@ public class Worm {
 	 * Sets the radius of this worm.
 	 * 
 	 * @param radius
-	 * 			The new radius of this worm (in meters).
+	 * 			The new radius of this worm (in metres).
 	 * @post	The radius of this worm is the given radius.
 	 * 			| new.getRadius() == radius
 	 * @throws	IllegalArgumentException
