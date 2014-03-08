@@ -44,6 +44,7 @@ public class WormTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructor_IllegalName() throws Exception{
 		new Worm(-8.45, Double.NaN, Math.PI/2, 2.14, "Foo	Bar");
+	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructor_IllegalRadius() throws Exception{
