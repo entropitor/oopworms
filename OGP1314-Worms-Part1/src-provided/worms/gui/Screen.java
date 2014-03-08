@@ -130,9 +130,12 @@ public abstract class Screen {
 	protected void paintScreen(Graphics2D g) {
 	}
 
-	public void screenStarted() {
+	public final void startScreen() {
 		getPanel().requestFocusInWindow();
+		screenStarted();
 	}
+	
+	protected abstract void screenStarted();
 
 	public int getScreenHeight() {
 		return getPanel().getHeight();

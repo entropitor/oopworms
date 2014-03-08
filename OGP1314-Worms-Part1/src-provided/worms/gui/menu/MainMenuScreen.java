@@ -40,7 +40,7 @@ public class MainMenuScreen extends AbstractMenuScreen<MainMenuOption> {
 	}
 
 	@Override
-	public void screenStarted() {
+	protected void screenStarted() {
 		MainMenuOption option = select();
 		switch (option) {
 		case Play:

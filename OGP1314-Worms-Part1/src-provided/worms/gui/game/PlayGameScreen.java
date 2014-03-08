@@ -290,8 +290,7 @@ public class PlayGameScreen extends Screen {
 	}
 
 	@Override
-	public void screenStarted() {
-		super.screenStarted();
+	protected void screenStarted() {
 		createSprites();
 		runGameLoop();
 	}

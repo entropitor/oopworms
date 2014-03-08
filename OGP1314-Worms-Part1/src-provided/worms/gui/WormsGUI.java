@@ -36,7 +36,7 @@ public class WormsGUI {
 		screenPanel.add(newScreen.getPanel(), BorderLayout.CENTER);
 		screenPanel.validate();
 		currentScreen = newScreen;
-		newScreen.screenStarted();
+		newScreen.startScreen();
 	}
 
 	public void start() {

@@ -65,25 +65,22 @@ public class Facade implements IFacade {
 	@Override
 	public double getOrientation(Worm worm) {
 		// TODO Auto-generated method stub
-		return 0;
+		return worm.getDirection();
 	}
 
 	@Override
 	public double getRadius(Worm worm) {
-		// TODO Auto-generated method stub
-		return 0;
+		return worm.getRadius();
 	}
 
 	@Override
 	public void setRadius(Worm worm, double newRadius) {
-		// TODO Auto-generated method stub
-
+		worm.setRadius(newRadius);
 	}
 
 	@Override
 	public double getMinimalRadius(Worm worm) {
-		// TODO Auto-generated method stub
-		return 0;
+		return worm.getRadiusLowerBound();
 	}
 
 	@Override
@@ -112,8 +109,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public double getMass(Worm worm) {
-		// TODO Auto-generated method stub
-		return 0;
+		return worm.getMass();
 	}
 
 }

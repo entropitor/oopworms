@@ -12,6 +12,10 @@ public class ErrorScreen extends Screen {
 		super(gui);
 		this.message = message;
 	}
+	
+	@Override
+	protected void screenStarted() {
+	}
 
 	@Override
 	protected InputMode createDefaultInputMode() {

@@ -7,23 +7,27 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class WormTest {
-	
+	private Worm willy;
 	private static Worm donald;
-	
+	private static final double PRECISION = 1e-6;
+
 	@Before
 	public void setup(){
+		//				  x    y    dir.     r       name
+		willy = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
 		donald = new Worm(0,0,3,5,"D'Onald Duck");
 	}
 	
 	@Test
 	public void testConstructor_LegalCase(){
 		Worm worm = new Worm(-8.45, 9.16, Math.PI/2, 2.14, "Bar");
-		//Constructor should have enough precision to set the variables => 1e-10 instead of 1e-4
-		double precision = 1e-10;
-		assertFuzzyEquals(worm.getXCoordinate(), -8.45, precision);
-		assertFuzzyEquals(worm.getYCoordinate(), 9.16, precision);
-		assertFuzzyEquals(worm.getDirection(), Math.PI/2, precision);
+
+		assertFuzzyEquals(worm.getXCoordinate(), -8.45, PRECISION);
+		assertFuzzyEquals(worm.getYCoordinate(), 9.16, PRECISION);
+		assertFuzzyEquals(worm.getDirection(), Math.PI/2, PRECISION);
 		assertEquals(worm.getName(), "Bar");
+		assertFuzzyEquals(worm.getRadius(), 2.14, PRECISION);
+
 		//TODO complete constructor test.
 	}
 	
@@ -40,6 +44,10 @@ public class WormTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructor_IllegalName() throws Exception{
 		new Worm(-8.45, Double.NaN, Math.PI/2, 2.14, "Foo	Bar");
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructor_IllegalRadius() throws Exception{
+		new Worm(-8.45, 9.16, Math.PI/2, 0, "Bar");
 	}
 	
 	@Test
@@ -156,4 +164,63 @@ public class WormTest {
 	public void testSetName_LowerCaseStart(){
 		donald.setName("donald duck");
 	}	
+	
+	@Test
+	public void testGetRadiusLowerBound(){
+		assertTrue(willy.getRadiusLowerBound() > 0);
+	}
+	
+	@Test
+	public void testCanHaveAsRadius_TrueCase(){
+		// We assume that willy.getRadiusLowerBound() < 500 here.
+		assertTrue(willy.canHaveAsRadius(500));
+		assertTrue(willy.canHaveAsRadius(willy.getRadiusLowerBound()));
+	}
+	
+	@Test
+	public void testCanHaveAsRadius_NaN(){
+		assertFalse(willy.canHaveAsRadius(Double.NaN));
+	}
+	
+	@Test
+	public void testCanHaveAsRadius_TooSmall(){
+		assertFalse(willy.canHaveAsRadius(0));
+		assertFalse(willy.canHaveAsRadius(willy.getRadiusLowerBound()-1e-4));
+	}
+	
+	@Test
+	public void testCanHaveAsRadius_TooBig(){
+		assertFalse(willy.canHaveAsRadius(Double.POSITIVE_INFINITY));
+	}
+	
+	@Test
+	public void testSetRadius_TrueCase(){
+		willy.setRadius(97);
+		assertFuzzyEquals(97, willy.getRadius(), PRECISION);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testSetRadius_NaN(){
+		willy.setRadius(Double.NaN);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testSetRadius_Zero(){
+		willy.setRadius(0);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testSetRadius_TooSmall(){
+		willy.setRadius(willy.getRadiusLowerBound()-1e-4);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testSetRadius_TooBig(){
+		willy.setRadius(Double.POSITIVE_INFINITY);
+	}
+	
+	@Test
+	public void testGetMass(){
+		assertFuzzyEquals(183466713.419263797, willy.getMass(), PRECISION);
+	}
 }
