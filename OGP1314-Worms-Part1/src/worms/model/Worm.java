@@ -362,7 +362,7 @@ public class Worm {
 	 * @return	The mass of this worm (in kilograms),
 	 * 			assuming the worm has a spherical body with a 
 	 * 			homogeneous density of Worm.DENSITY:
-	 * 			m = �?*4/3*π*r³
+	 * 			m = ρ*4/3*π*r³
 	 * 			| result == Worm.DENSITY*4.0/3*Math.PI*Math.pow(this.getRadius(), 3)
 	 */
 	public double getMass(){
