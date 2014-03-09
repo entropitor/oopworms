@@ -18,6 +18,8 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 			| isValidName(getName())
  * @invar	The radius of the worm is a valid radius.
  * 			| canHaveAsRadius(getRadius())
+ * @invar	This worm's action points are nonnegative not bigger than a maximum value.
+ *			| 0 <= getActionPoints() && getActionPoints() <= getMaxActionPoints()
  */
 public class Worm {
 
@@ -51,6 +53,8 @@ public class Worm {
 	 * 			| new.getName() == name
 	 * @post	The radius of the new worm equals the given radius.
 	 * 			| new.getRadius() == radius
+	 * @post	The new worm has all its action points.
+	 *			| new.getActionPoints() == new.getMaxActionPoints()
 	 * @throws IllegalArgumentException 
 	 * 			When the given position is not a valid position.
 	 * 			| !isValidPosition(x,y)
@@ -60,7 +64,6 @@ public class Worm {
 	 * @throws IllegalArgumentException 
 	 * 			When the given radius is not a valid radius.
 	 * 			| !canHaveAsRadius(radius)
->>>>>>> master
 	 */
 	@Raw
 	public Worm(double x, double y, double direction, double radius, String name) throws IllegalArgumentException{
@@ -89,10 +92,11 @@ public class Worm {
 
 		setDirection(direction);
 		
-
 		setName(name);
 
 		setRadius(radius);
+
+		replenishActionPoints();
 	}
 	
 	/**
@@ -362,50 +366,96 @@ public class Worm {
 	 * @return	The mass of this worm (in kilograms),
 	 * 			assuming the worm has a spherical body with a 
 	 * 			homogeneous density of Worm.DENSITY:
-	 * 			m = ρ*4/3*π*r³
+	 * 			m = �?*4/3*π*r³
 	 * 			| result == Worm.DENSITY*4.0/3*Math.PI*Math.pow(this.getRadius(), 3)
 	 */
 	public double getMass(){
 		return Worm.DENSITY*4.0/3*Math.PI*Math.pow(this.getRadius(), 3);
 	}
 	
+	/**
+	 * Returns the current number of action points of this worm.
+	 */
+	@Basic
+	public int getActionPoints(){
+		return this.actionPoints;
+	}
+	
+	/**
+	 * Returns the maximum number of action points this worm can have.
+	 * 
+	 * @return	The maximum number of this worm, equal to its mass
+	 * 			rounded to the nearest integer.
+	 * 			| result == (int) Math.round(getMass());
+	 */
 	public int getMaxActionPoints(){
 		return (int) Math.round(this.getMass());
 	}
 	
-	public int getActionPoints(){
-		return this.actionPoints;
+	/**
+	 * Sets this worm's action points (APs) to the given amount.
+	 * 
+	 * @param amount
+	 * 			The number of APs 
+	 * @post	| if (0 < amount && amount < getMaxActionPoints())
+	 * 			| 	new.getActionPoints() == amount
+	 * @post	| if (amount < 0)
+	 *			| 	new.getActionPoints() == 0
+	 * @post	| if (amount > this.getMaxActionPoints())
+	 *			| 	new.getActionPoints() == getMaxActionPoints()
+	 */
+	private void setActionPoints(int amount){
+		if (amount < 0)
+			this.actionPoints = 0;
+		else if (amount > this.getMaxActionPoints())
+			this.actionPoints = this.getMaxActionPoints();
+		else
+			this.actionPoints = amount;
 	}
 	private int actionPoints;
 	
+	/**
+	 * Subract a number of action points (APs) from this worm's APs. 
+	 *
+	 * @param amount
+	 * 			The number of APs to be subtracted from the current amount of APs.
+	 * @effect	If the specified amount is positive, set this worms APs to be 
+	 *			the current amount of APs minus the specified amount.
+	 *			| if (amount > 0)
+	 *			| 	then setActionPoints(getActionPoints() - amount)		
+	 */
 	private void decreaseActionPoints(int amount){
-		if (amount < 0)
-			this.increaseActionPoints(-amount);
-		else if (amount > this.getMaxActionPoints())
-			this.actionPoints = 0;
-		else
-			this.actionPoints = this.getActionPoints() - amount;
-	}
-	
-	private void increaseActionPoints(int amount){
-		if (amount < 0)
-			this.decreaseActionPoints(-amount);
-		else if (this.getActionPoints() + amount > this.getMaxActionPoints())
-			this.actionPoints = this.getMaxActionPoints();
-		else
-			this.actionPoints = this.getActionPoints() + amount;
-	}
-	
-	private void _decreaseActionPoints(int amount) {
-		this._increaseActionPoints(-amount);
+		if (amount > 0)
+			this.setActionPoints(this.getActionPoints() - amount);
 	}
 
-	private void _increaseActionPoints(int amount) {
-		if (amount < -this.getActionPoints())
-			this.actionPoints = 0;
-		else if (amount > this.getMaxActionPoints())
-			this.actionPoints = this.getMaxActionPoints();
-		else
-			this.actionPoints = this.getActionPoints() + amount;
+	/**
+	 * Add a number of action points (APs) to this worm's APs. 
+	 *
+	 * @param amount
+	 * 			The number of APs to be added to the current amount of APs.
+	 * @effect	If the specified amount is positive, set this worms APs to be 
+	 *			the current amount of APs plus the specified amount.
+	 *			| if (amount > 0)
+	 *			| 	then setActionPoints(getActionPoints() + amount)
+	 * @note	Note that, while convenient maybe, a call like for example increaseActionPoints(-5) 
+	 * 			will <i>not</i> decrease the amount of APs by 5.
+	 * 			This is the reasoning behind this decision:
+	 * 			When calling <i>increase</i>ActionPoints(), one should not expect
+	 * 			a decrease in APs.
+	 */
+	private void increaseActionPoints(int amount){
+		if (amount > 0)
+			this.setActionPoints(this.getActionPoints() + amount);
+	}
+
+	/**
+	 * Gives this worm all his action points (APs).
+	 *
+	 * @effect	Sets this worm's APs to the maximum allowed number.
+	 *			| setActionPoints(getMaxActionPoints())		
+	 */
+	private void replenishActionPoints(){
+		this.setActionPoints(this.getMaxActionPoints());
 	}
 }
