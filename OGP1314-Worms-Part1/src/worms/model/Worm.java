@@ -1,7 +1,6 @@
 package worms.model;
 
-import be.kuleuven.cs.som.annotate.Basic;
-import be.kuleuven.cs.som.annotate.Raw;
+import be.kuleuven.cs.som.annotate.*;
 
 /**
  * A class of worms with position, direction, radius and a name.
@@ -16,10 +15,10 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 			| isValidDirection(getDirection())
  * @invar	The name of the worm is a valid name.
  * 			| isValidName(getName())
- * @invar	The radius of the worm is a valid radius.
+ * @invar	The radius of the worm is a valid radius for this worm.
  * 			| canHaveAsRadius(getRadius())
- * @invar	This worm's action points are nonnegative not bigger than a maximum value.
- *			| 0 <= getActionPoints() && getActionPoints() <= getMaxActionPoints()
+ * @invar	The amount of action points is a valid amount of action points for this worm.
+ * 			| canHaveAsActionPoints(getActionPoints())
  */
 public class Worm {
 
@@ -105,7 +104,7 @@ public class Worm {
 	 * @param x The x-coordinate of the location to check.
 	 * @param y The y-coordinate of the location to check.
 	 * @effect 	Check whether the x-coordinate and y-coordinate are both valid.
-	 * 			| isValidXPCoordinate(x) && isValidYCoordinate(y)
+	 * 			| isValidXCoordinate(x) && isValidYCoordinate(y)
 	 */
 	public static boolean isValidPosition(double x, double y){
 		return isValidXCoordinate(x) && isValidYCoordinate(y);
@@ -366,7 +365,7 @@ public class Worm {
 	 * @return	The mass of this worm (in kilograms),
 	 * 			assuming the worm has a spherical body with a 
 	 * 			homogeneous density of Worm.DENSITY:
-	 * 			m = �?*4/3*π*r³
+	 * 			m = ρ*4/3*π*r³
 	 * 			| result == Worm.DENSITY*4.0/3*Math.PI*Math.pow(this.getRadius(), 3)
 	 */
 	public double getMass(){
@@ -376,7 +375,7 @@ public class Worm {
 	/**
 	 * Returns the current number of action points of this worm.
 	 */
-	@Basic
+	@Basic @Raw
 	public int getActionPoints(){
 		return this.actionPoints;
 	}
@@ -392,38 +391,59 @@ public class Worm {
 		return (int) Math.round(this.getMass());
 	}
 	
+	 /**
+	  * Checks whether or not the given amount of action points (APs) 
+	  * is a valid amount of action points for this worm.
+	  * 
+	  * @param amount
+	  * 		The amount of action points to check.
+	  * @return	Whether or not the given number of APs is nonnegative
+	  * 		and not bigger than the maximum allowed number of action
+	  * 		points for this worm.
+	  *			| result == 0 <= amount 
+	  *			| 			&& amount <= getMaxActionPoints()
+	  */
+	public boolean canHaveAsActionPoints(int amount){
+		return 0 <= amount 
+				&& amount <= this.getMaxActionPoints();
+	}
+	
 	/**
 	 * Sets this worm's action points (APs) to the given amount.
 	 * 
 	 * @param amount
 	 * 			The number of APs 
-	 * @post	| if (0 < amount && amount < getMaxActionPoints())
+	 * @post	| if (canHaveAsActionPoints(amount))
 	 * 			| 	new.getActionPoints() == amount
 	 * @post	| if (amount < 0)
 	 *			| 	new.getActionPoints() == 0
 	 * @post	| if (amount > this.getMaxActionPoints())
 	 *			| 	new.getActionPoints() == getMaxActionPoints()
 	 */
+	@Raw @Model
 	private void setActionPoints(int amount){
+		if (this.canHaveAsActionPoints(amount))
+			this.actionPoints = amount;
 		if (amount < 0)
 			this.actionPoints = 0;
-		else if (amount > this.getMaxActionPoints())
+		if (amount > this.getMaxActionPoints())
 			this.actionPoints = this.getMaxActionPoints();
-		else
-			this.actionPoints = amount;
 	}
 	private int actionPoints;
 	
 	/**
-	 * Subract a number of action points (APs) from this worm's APs. 
+	 * Subtract a number of action points (APs) from this worm's APs. 
 	 *
 	 * @param amount
 	 * 			The number of APs to be subtracted from the current amount of APs.
 	 * @effect	If the specified amount is positive, set this worms APs to be 
 	 *			the current amount of APs minus the specified amount.
 	 *			| if (amount > 0)
-	 *			| 	then setActionPoints(getActionPoints() - amount)		
+	 *			| 	then setActionPoints(getActionPoints() - amount)
+	 * @note	Note that provoking an overflow (underflow) is not possible here,
+	 * 			given that this.getActionPoints() >= 0.
 	 */
+	@Model
 	private void decreaseActionPoints(int amount){
 		if (amount > 0)
 			this.setActionPoints(this.getActionPoints() - amount);
@@ -436,17 +456,27 @@ public class Worm {
 	 * 			The number of APs to be added to the current amount of APs.
 	 * @effect	If the specified amount is positive, set this worms APs to be 
 	 *			the current amount of APs plus the specified amount.
+	 *			Handle possible overflows by maximising this worm's APs.
 	 *			| if (amount > 0)
-	 *			| 	then setActionPoints(getActionPoints() + amount)
+	 *			| 	if ((Integer.MAX_VALUE - this.getActionPoints()) <= amount)
+	 *			| 		then setActionPoints(getActionPoints() + amount);
+	 *			| 	else
+	 *			| 		// Overflow would occur.
+	 *			| 		replenishActionPoints();
 	 * @note	Note that, while convenient maybe, a call like for example increaseActionPoints(-5) 
 	 * 			will <i>not</i> decrease the amount of APs by 5.
 	 * 			This is the reasoning behind this decision:
 	 * 			When calling <i>increase</i>ActionPoints(), one should not expect
 	 * 			a decrease in APs.
 	 */
+	@Model
 	private void increaseActionPoints(int amount){
 		if (amount > 0)
-			this.setActionPoints(this.getActionPoints() + amount);
+			if ((Integer.MAX_VALUE - this.getActionPoints()) <= amount)
+				this.setActionPoints(this.getActionPoints() + amount);
+			else
+				// Overflow would occur.
+				this.replenishActionPoints();
 	}
 
 	/**
@@ -455,6 +485,7 @@ public class Worm {
 	 * @effect	Sets this worm's APs to the maximum allowed number.
 	 *			| setActionPoints(getMaxActionPoints())		
 	 */
+	@Raw
 	private void replenishActionPoints(){
 		this.setActionPoints(this.getMaxActionPoints());
 	}
