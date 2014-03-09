@@ -13,13 +13,14 @@ public class WormTest {
 
 	@Before
 	public void setup(){
-		//				  x    y    dir.     r       name
-		willy = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
-		donald = new Worm(0,0,3,5,"D'Onald Duck");
+		//				   x    y    dir.     r       name
+		willy  = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
+		donald = new Worm(0,     0,     3,     5, "D'Onald Duck");
 	}
 	
 	@Test
 	public void testConstructor_LegalCase(){
+		//			     	   x       y    dir.       r   name
 		Worm worm = new Worm(-8.45, 9.16, Math.PI/2, 2.14, "Bar");
 
 		assertFuzzyEquals(worm.getXCoordinate(), -8.45, PRECISION);
@@ -27,8 +28,9 @@ public class WormTest {
 		assertFuzzyEquals(worm.getDirection(), Math.PI/2, PRECISION);
 		assertEquals(worm.getName(), "Bar");
 		assertFuzzyEquals(worm.getRadius(), 2.14, PRECISION);
-
-		//TODO complete constructor test.
+		assertFuzzyEquals(worm.getMass(), 43596.78321768277701414403, PRECISION);
+		assertEquals(worm.getMaxActionPoints(), 43597);
+		assertEquals(worm.getActionPoints(), 43597);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
@@ -223,5 +225,15 @@ public class WormTest {
 	@Test
 	public void testGetMass(){
 		assertFuzzyEquals(183466713.419263797, willy.getMass(), PRECISION);
+	}
+	
+	@Test
+	public void testGetMaxActionPoints(){
+		assertEquals(183466713, willy.getMaxActionPoints());
+	}
+	
+	@Test
+	public void testGetActionPoints(){
+		assertEquals(183466713, willy.getActionPoints());
 	}
 }
