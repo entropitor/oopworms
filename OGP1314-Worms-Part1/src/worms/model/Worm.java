@@ -368,4 +368,44 @@ public class Worm {
 	public double getMass(){
 		return Worm.DENSITY*4.0/3*Math.PI*Math.pow(this.getRadius(), 3);
 	}
+	
+	public int getMaxActionPoints(){
+		return (int) Math.round(this.getMass());
+	}
+	
+	public int getActionPoints(){
+		return this.actionPoints;
+	}
+	private int actionPoints;
+	
+	private void decreaseActionPoints(int amount){
+		if (amount < 0)
+			this.increaseActionPoints(-amount);
+		else if (amount > this.getMaxActionPoints())
+			this.actionPoints = 0;
+		else
+			this.actionPoints = this.getActionPoints() - amount;
+	}
+	
+	private void increaseActionPoints(int amount){
+		if (amount < 0)
+			this.decreaseActionPoints(-amount);
+		else if (this.getActionPoints() + amount > this.getMaxActionPoints())
+			this.actionPoints = this.getMaxActionPoints();
+		else
+			this.actionPoints = this.getActionPoints() + amount;
+	}
+	
+	private void _decreaseActionPoints(int amount) {
+		this._increaseActionPoints(-amount);
+	}
+
+	private void _increaseActionPoints(int amount) {
+		if (amount < -this.getActionPoints())
+			this.actionPoints = 0;
+		else if (amount > this.getMaxActionPoints())
+			this.actionPoints = this.getMaxActionPoints();
+		else
+			this.actionPoints = this.getActionPoints() + amount;
+	}
 }
