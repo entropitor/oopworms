@@ -17,9 +17,6 @@ import be.kuleuven.cs.som.annotate.*;
  * 			| isValidName(getName())
  * @invar	The radius of the worm is a valid radius for this worm.
  * 			| canHaveAsRadius(getRadius())
- * @invar	The mass of this worm is the mass of a spherical body with a 
- * 			homogeneous density of DENSITY and a radius of getRadius().
- * 			| getMass() == DENSITY*4.0/3*Math.PI*Math.pow(getRadius(), 3)
  * @invar	The amount of action points is a valid amount of action points for this worm.
  * 			| canHaveAsActionPoints(getActionPoints())
  * @invar	The maximum number of action points of this worms equals its mass, rounded to the nearest integer.
