@@ -482,7 +482,7 @@ public class Worm {
 	@Model
 	private void increaseActionPoints(int amount){
 		if (amount > 0)
-			if ((Integer.MAX_VALUE - this.getActionPoints()) <= amount)
+			if ((Integer.MAX_VALUE - this.getActionPoints()) >= amount)
 				this.setActionPoints(this.getActionPoints() + amount);
 			else
 				// Overflow would occur.
