@@ -17,8 +17,13 @@ import be.kuleuven.cs.som.annotate.*;
  * 			| isValidName(getName())
  * @invar	The radius of the worm is a valid radius for this worm.
  * 			| canHaveAsRadius(getRadius())
+ * @invar	The mass of this worm is the mass of a spherical body with a 
+ * 			homogeneous density of DENSITY and a radius of getRadius().
+ * 			| getMass() == DENSITY*4.0/3*Math.PI*Math.pow(getRadius(), 3)
  * @invar	The amount of action points is a valid amount of action points for this worm.
  * 			| canHaveAsActionPoints(getActionPoints())
+ * @invar	The maximum number of action points of this worms equals its mass, rounded to the nearest integer.
+ * 			| getMaxActionPoints() == (int) Math.round(getMass());
  */
 public class Worm {
 
@@ -356,6 +361,10 @@ public class Worm {
 		if (!this.canHaveAsRadius(radius))
 			throw new IllegalArgumentException("The given radius is not a valid radius for this worm");
 		this.radius = radius;
+		// Check and possibly correct if this worm's action points (APs)
+		// are still smaller than the maximum amount of APs for this worm
+		// (which depends on this worm's radius via its mass).
+		this.setActionPoints(this.getActionPoints());
 	}
 	private double radius;
 	
@@ -400,12 +409,13 @@ public class Worm {
 	  * @return	Whether or not the given number of APs is nonnegative
 	  * 		and not bigger than the maximum allowed number of action
 	  * 		points for this worm.
-	  *			| result == 0 <= amount 
-	  *			| 			&& amount <= getMaxActionPoints()
+	  *			| result == (0 <= amount 
+	  *			| 			&& amount <= getMaxActionPoints())
 	  */
+	@Raw
 	public boolean canHaveAsActionPoints(int amount){
-		return 0 <= amount 
-				&& amount <= this.getMaxActionPoints();
+		return (0 <= amount 
+				&& amount <= this.getMaxActionPoints());
 	}
 	
 	/**
@@ -456,7 +466,7 @@ public class Worm {
 	 * 			The number of APs to be added to the current amount of APs.
 	 * @effect	If the specified amount is positive, set this worms APs to be 
 	 *			the current amount of APs plus the specified amount.
-	 *			Handle possible overflows by maximising this worm's APs.
+	 *			If an overflow would occur, the APs of this worm are set to their maximum value.
 	 *			| if (amount > 0)
 	 *			| 	if ((Integer.MAX_VALUE - this.getActionPoints()) <= amount)
 	 *			| 		then setActionPoints(getActionPoints() + amount);
