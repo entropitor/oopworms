@@ -19,8 +19,6 @@ import be.kuleuven.cs.som.annotate.*;
  * 			| canHaveAsRadius(getRadius())
  * @invar	The amount of action points is a valid amount of action points for this worm.
  * 			| canHaveAsActionPoints(getActionPoints())
- * @invar	The maximum number of action points of this worms equals its mass, rounded to the nearest integer.
- * 			| getMaxActionPoints() == (int) Math.round(getMass());
  */
 public class Worm {
 
