@@ -347,6 +347,10 @@ public class Worm {
 	 * 			The new radius of this worm (in metres).
 	 * @post	The radius of this worm is the given radius.
 	 * 			| new.getRadius() == radius
+	 * @post	If the given radius is smaller than the current radius so that the current action points 
+	 * 			are no longer smaller than the (new) maximum of action points, the new current action points will equal the new maximum of action points.
+	 * 			| if((int) Math.round(Worm.DENSITY*4.0/3*Math.PI*Math.pow(radius, 3)) <= this.getActionPoints())
+	 * 			|		then new.getActionPoints() == new.getMaxActionPoints()
 	 * @throws	IllegalArgumentException
 	 * 			The given radius is not a valid radius for this worm.
 	 * 			| !this.canHaveAsRadius(radius)
