@@ -3,19 +3,55 @@ package worms.model;
 import static org.junit.Assert.*;
 import static worms.util.AssertUtil.*;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class WormTest {
 	private Worm willy;
-	private static Worm donald;
 	private static final double PRECISION = 1e-6;
+	
+	private static Method setXCoordinate;
+	private static Method setYCoordinate;
+	private static Method setDirection;
+	private static Method setActionPoints;
+	private static Method decreaseActionPoints;
+	private static Method increaseActionPoints;
+	private static Method replenishActionPoints;
 
 	@Before
 	public void setup(){
 		//				   x    y    dir.     r       name
 		willy  = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
-		donald = new Worm(0,     0,     3,     5, "D'Onald Duck");
+	}
+	
+	@BeforeClass
+	public static void setupClass() throws NoSuchMethodException, SecurityException{
+		Worm worm = new Worm(0,0,1,1,"Ba");
+		
+		setXCoordinate = worm.getClass().getDeclaredMethod("setXCoordinate", double.class);
+		setXCoordinate.setAccessible(true);
+		
+		setYCoordinate = worm.getClass().getDeclaredMethod("setYCoordinate", double.class);
+		setYCoordinate.setAccessible(true);
+		
+		setDirection = worm.getClass().getDeclaredMethod("setDirection", double.class);
+		setDirection.setAccessible(true);
+		
+		setActionPoints = worm.getClass().getDeclaredMethod("setActionPoints", int.class);
+		setActionPoints.setAccessible(true);
+		
+		decreaseActionPoints = worm.getClass().getDeclaredMethod("decreaseActionPoints", int.class);
+		decreaseActionPoints.setAccessible(true);
+		
+		increaseActionPoints = worm.getClass().getDeclaredMethod("increaseActionPoints", int.class);
+		increaseActionPoints.setAccessible(true);
+		
+		replenishActionPoints = worm.getClass().getDeclaredMethod("replenishActionPoints");
+		replenishActionPoints.setAccessible(true);
 	}
 	
 	@Test
@@ -74,6 +110,48 @@ public class WormTest {
 	}
 	
 	@Test
+	public void testSetXCoordinate_LegalCase() throws Exception{
+		setXCoordinate.invoke(willy, 10);
+		assertFuzzyEquals(willy.getXCoordinate(),10,PRECISION);
+	}
+	
+	@Test
+	public void testSetXCoordinate_InfinityCase() throws Exception{
+		setXCoordinate.invoke(willy, Double.POSITIVE_INFINITY);
+		assertFuzzyEquals(willy.getXCoordinate(),Double.POSITIVE_INFINITY);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testSetXCoordinate_IllegalCase() throws Throwable{
+		try {
+			setXCoordinate.invoke(willy, Double.NaN);
+		} catch (InvocationTargetException e) {
+			throw e.getCause();
+		}
+	}
+	
+	@Test
+	public void testSetYCoordinate_LegalCase() throws Exception{
+		setYCoordinate.invoke(willy, 10);
+		assertFuzzyEquals(willy.getYCoordinate(),10,PRECISION);
+	}
+	
+	@Test
+	public void testSetYCoordinate_InfinityCase() throws Exception{
+		setYCoordinate.invoke(willy, Double.NEGATIVE_INFINITY);
+		assertFuzzyEquals(willy.getYCoordinate(),Double.NEGATIVE_INFINITY);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testSetYCoordinate_IllegalCase() throws Throwable{
+		try {
+			setYCoordinate.invoke(willy, Double.NaN);
+		} catch (InvocationTargetException e) {
+			throw e.getCause();
+		}
+	}
+	
+	@Test
 	public void testIsValidDirection_TrueCases(){
 		assertTrue(Worm.isValidDirection(0));
 		assertTrue(Worm.isValidDirection(Math.PI*2-0.001));
@@ -94,6 +172,12 @@ public class WormTest {
 	@Test
 	public void testIsValidDirection_TooBig(){
 		assertFalse(Worm.isValidDirection(5*Math.PI/2));
+	}
+	
+	@Test
+	public void testSetDirection_LegalCase() throws Exception{
+		setDirection.invoke(willy,Math.PI);
+		assertFuzzyEquals(willy.getDirection(),Math.PI,PRECISION);
 	}
 	
 	@Test
@@ -150,22 +234,22 @@ public class WormTest {
 	
 	@Test
 	public void testSetName_LegalCase(){
-		donald.setName("Donald 'Fauntleroy' Duck");
+		willy.setName("Donald 'Fauntleroy' Duck");
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetName_TooShort(){
-		donald.setName("D");
+		willy.setName("D");
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetName_IllegalSymbols(){
-		donald.setName("D*n*ld D*ck");
+		willy.setName("D*n*ld D*ck");
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetName_LowerCaseStart(){
-		donald.setName("donald duck");
+		willy.setName("donald duck");
 	}	
 	
 	@Test
@@ -202,6 +286,12 @@ public class WormTest {
 		assertFuzzyEquals(97, willy.getRadius(), PRECISION);
 	}
 	
+	@Test
+	public void testSetRadius_ConflictForActionPointsCase(){
+		willy.setRadius(1);
+		assertEquals(willy.getActionPoints(),4448);
+	}
+	
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetRadius_NaN(){
 		willy.setRadius(Double.NaN);
@@ -235,5 +325,68 @@ public class WormTest {
 	@Test
 	public void testGetActionPoints(){
 		assertEquals(183466713, willy.getActionPoints());
+	}
+	
+	@Test
+	public void testSetActionPoints_NormalCase() throws Exception{
+		setActionPoints.invoke(willy, 500);
+		assertEquals(willy.getActionPoints(),500);
+	}
+	
+	@Test
+	public void testSetActionPoints_TooBigCase() throws Exception{
+		setActionPoints.invoke(willy, Integer.MAX_VALUE);
+		assertEquals(willy.getActionPoints(),willy.getMaxActionPoints());
+	}
+	
+	@Test
+	public void testSetActionPoints_TooSmallCase() throws Exception{
+		setActionPoints.invoke(willy, -100);
+		assertEquals(willy.getActionPoints(),0);
+	}
+	
+	@Test
+	public void testDecreaseActionPoints_NormalCase() throws Exception{
+		decreaseActionPoints.invoke(willy,100);
+		assertEquals(willy.getActionPoints(),willy.getMaxActionPoints()-100);
+	}
+	
+	@Test
+	public void testDecreaseActionPoints_LargeNumberCase() throws Exception{
+		decreaseActionPoints.invoke(willy,Integer.MAX_VALUE);
+		assertEquals(willy.getActionPoints(),0);
+	}
+	
+	@Test
+	public void testDecreaseActionPoints_NegativeCase() throws Exception{
+		decreaseActionPoints.invoke(willy,100);
+		decreaseActionPoints.invoke(willy,-100);
+		assertEquals(willy.getActionPoints(),willy.getMaxActionPoints()-100);
+	}
+	
+	@Test
+	public void testIncreaseActionPoints_NormalCase() throws Exception{
+		decreaseActionPoints.invoke(willy, 1000);
+		increaseActionPoints.invoke(willy,100);
+		assertEquals(willy.getActionPoints(),willy.getMaxActionPoints()-900);
+	}
+	
+	@Test
+	public void testIncreaseActionPoints_LargeNumberCase() throws Exception{
+		increaseActionPoints.invoke(willy,Integer.MAX_VALUE);
+		assertEquals(willy.getActionPoints(),willy.getMaxActionPoints());
+	}
+	
+	@Test
+	public void testIncreaseActionPoints_NegativeCase() throws Exception{
+		increaseActionPoints.invoke(willy,-100);
+		assertEquals(willy.getActionPoints(),willy.getMaxActionPoints());
+	}
+	
+	@Test
+	public void testReplenishActionPoints_SingleCase() throws Exception{
+		decreaseActionPoints.invoke(willy,100);
+		replenishActionPoints.invoke(willy);
+		assertEquals(willy.getActionPoints(),willy.getMaxActionPoints());
 	}
 }
