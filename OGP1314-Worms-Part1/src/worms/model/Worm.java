@@ -1,5 +1,6 @@
 package worms.model;
 
+import worms.util.MathUtil;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -96,6 +97,125 @@ public class Worm {
 		setRadius(radius);
 
 		replenishActionPoints();
+	}
+	
+	/**
+	 * Checks whether this worm has enough action points to move it the given number of steps.
+	 * 
+	 * @param nbSteps 	The number of steps this worm wants to move.
+	 * @return 			Return whether nbSteps is non-negative and the cost to move the given number of steps 
+	 * 					(in the direction of this worm) is smaller or equal to the current action points of this worm.
+	 * 					| result == (nbSteps >= 0 && getCostForMove(nbSteps,getDirection()) <= getActionPoints())
+	 */
+	public boolean canMove(int nbSteps){
+		if(nbSteps < 0)
+			return false;
+		return getCostForMove(nbSteps,getDirection()) <= getActionPoints();
+	}
+	
+	/**
+	 * Calculates the cost for a worm to move nbSteps in a given direction.
+	 * 
+	 * @param nbSteps 		The number of steps in the movement.
+	 * @param direction		The direction in which the worm will move.
+	 * @return				The result equals nbSteps times the cost of a unit step in the current direction, rounded up to the next integer.
+	 * 						| result == (int)(Math.ceil(nbSteps*getUnitStepCost(direction)))
+	 * @throws IllegalArgumentException 
+	 * 						Thrown when nbSteps is less than zero.
+	 * 						| nbSteps < 0
+	 * @throws IllegalArgumentException 
+	 * 						Thrown when the given direction is an invalid direction.
+	 * 						| !isValidDirection(direction)
+	 */
+	public static int getCostForMove(int nbSteps, double direction) throws IllegalArgumentException{
+		if(nbSteps < 0)
+			throw new IllegalArgumentException("Illegal number of steps");
+		if(!isValidDirection(direction))
+			throw new IllegalArgumentException("Illegal direction");
+		
+		return (int)(Math.ceil(nbSteps*getUnitStepCost(direction)));
+	}
+	
+	/**
+	 * Calculates the cost for one step in a given direction.
+	 * 
+	 * <p>A horizontal step costs 1 action point.<br>
+	 * A vertical step costs 4 action points.<br>
+	 * Every other step is the sum of the costs of the horizontal and vertical components 
+	 * (in which the cost of a component is proportional to the fraction of the step and to the cost of a step along that component).<br>
+	 * Because of floating point precision problems, the components are rounded to a precision of 1e-12.<br>
+	 * 
+	 * @param direction		The direction for which the cost of the unit step should be calculated.
+	 * @return				Returns the cost of a unit step in the given direction. 
+	 * 						| result == Math.abs(MathUtil.round(Math.cos(direction),12))+4*Math.abs(MathUtil.round(Math.sin(direction),12))
+	 * @note				This method does not round of the cost to the next integer, it just calculates the fraction 
+	 * 						of action points required for a unit step in the given direction.
+	 * @throws IllegalArgumentException
+	 * 						Thrown when the direction is not a valid direction
+	 * 						| !isValidDirection(direction)
+	 */
+	public static double getUnitStepCost(double direction) throws IllegalArgumentException{
+		if(!isValidDirection(direction))
+			throw new IllegalArgumentException("Illegal Direction");
+		
+		int precision = 12;
+		
+		double xCost = Math.cos(direction);
+		xCost = MathUtil.round(xCost, precision);
+		xCost = Math.abs(xCost);
+		
+		double yCost = 4*Math.sin(direction);
+		yCost = MathUtil.round(yCost, precision);
+		yCost = Math.abs(yCost);
+		
+		return xCost+yCost;
+	}
+	
+	/**
+	 * Moves this worm a given number of steps in the current direction.
+	 * 
+	 * @param nbSteps		The number of steps to move this worm.
+	 * @post				This worm has moved nbSteps in the current direction
+	 * 						| new.getXCoordinate() == getXCoordinate()+nbSteps*Math.cos(getDirection) && 
+	 * 						| new.getYCoordinate() == getYCoordinate()+nbSteps*Math.sin(getDirection)
+	 * @post				The action points are decreased with the cost of the movement.
+	 * 						| new.getActionPoints() == getActionPoints()-getCostForMovement(nbSteps,getDirection())
+	 * @throws IllegalArgumentException
+	 * 						Thrown when nbSteps is less than zero
+	 * 						| nbSteps < 0
+	 * @throws IllegalStateException	
+	 * 						Thrown when this worm has not enough action points to move the given number of steps in the current direction.
+	 * 						| !canMove(nbSteps)
+	 */
+	public void move(int nbSteps) throws IllegalStateException,IllegalArgumentException{
+		if(nbSteps < 0)
+			throw new IllegalArgumentException("Illegal number of steps");
+		if(!canMove(nbSteps))
+			throw new IllegalStateException("Has not enough action points to move.");
+		
+		moveWith(nbSteps*Math.cos(getDirection()),nbSteps*Math.sin(getDirection()));
+		decreaseActionPoints(getCostForMove(nbSteps,getDirection()));
+	}
+	
+	/**
+	 * Moves this worm with the given number of metres along the x-axis and the given number of metres along the y-axis.
+	 * 
+	 * @param x		The number of metres to move along the x-axis
+	 * @param y		The number of metres to move along the y-axis
+	 * @post		The new x-coordinate of this worm equals the old x-coordinate plus the given offset along the x-axis.
+	 * 				| new.getXCoordinate() == getXCoordinate()+x
+	 * @post		The new y-coordinate of this worm equals the old y-coordinate plus the given offset along the y-axis.
+	 * 				| new.getYCoordinate() == getYCoordinate()+y
+	 * @throws IllegalArgumentException
+	 * 				Thrown when x or y is not a valid number
+	 * 				| Double.isNaN(x) || Double.isNaN(y)
+	 */
+	public void moveWith(double x, double y) throws IllegalArgumentException{
+		if(Double.isNaN(x) || Double.isNaN(y))
+			throw new IllegalArgumentException("Illegal offset. Both offsets should be valid numbers.");
+		
+		setXCoordinate(getXCoordinate()+x);
+		setYCoordinate(getYCoordinate()+y);
 	}
 	
 	/**
