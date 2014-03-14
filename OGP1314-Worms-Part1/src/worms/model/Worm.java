@@ -418,11 +418,16 @@ public class Worm {
 	 * 
 	 * @param amount
 	 * 			The number of APs 
-	 * @post	| if (canHaveAsActionPoints(amount))
+	 * @post	If the given amount of APs is a valid amount of APs for this worm,
+	 * 			set this worm's APs to the given amount.
+	 * 			| if (canHaveAsActionPoints(amount))
 	 * 			| 	new.getActionPoints() == amount
-	 * @post	| if (amount < 0)
+	 * @post	A negative amount zeroes this worm's APs.
+	 * 			| if (amount < 0)
 	 *			| 	new.getActionPoints() == 0
-	 * @post	| if (amount > this.getMaxActionPoints())
+	 * @post	An amount larger than the maximum allowed number of APs
+	 * 			sets this worm's APs to this maximum allowed number.
+	 * 			| if (amount > this.getMaxActionPoints())
 	 *			| 	new.getActionPoints() == getMaxActionPoints()
 	 */
 	@Raw @Model
