@@ -1,6 +1,8 @@
 package worms.model;
 
 import be.kuleuven.cs.som.annotate.*;
+import static worms.util.Util.*;
+import static worms.util.ModuloUtil.posMod;
 
 /**
  * A class of worms with position, direction, radius and a name.
@@ -96,6 +98,76 @@ public class Worm {
 		setRadius(radius);
 
 		replenishActionPoints();
+	}
+	
+	/**
+	 * Checks whether the given angle is a valid angle to turn a Worm over.
+	 * 
+	 * @param angle
+	 * 			The turning angle (in radians) to check.
+	 * @return	Whether or not the given angle is in the range [-pi, pi]
+	 * 			| result == fuzzyGreaterThanOrEqualTo(angle, -Math.PI)
+	 *			|			&& fuzzyLessThanOrEqualTo(angle, Math.PI)
+	 * @note	(NaN check is implicit in "worms.util.Util.fuzzy[..]") 
+	 */
+	public static boolean isValidTurningAngle(double angle){
+		return fuzzyGreaterThanOrEqualTo(angle, -Math.PI)
+				&& fuzzyLessThanOrEqualTo(angle, Math.PI);
+	}
+	
+	/**
+	 * Returns the action points (AP) cost of a turn
+	 * over the given angle.
+	 * 
+	 * @param angle
+	 * 			The angle (in radians) of the turn.
+	 * @pre		The given angle must be a valid angle to turn over.
+	 * 			| isValidTurningAngle(angle)
+	 * @return	The number of APs a turn over the given angle
+	 * 			would cost.
+	 */
+	public static int getTurningCost(double angle){
+		assert isValidTurningAngle(angle);
+		return (int) Math.ceil(Math.abs(60*angle/(2*Math.PI)));
+	}
+	
+	/**
+	 * Checks whether this worm can make a turn over
+	 * the given angle.
+	 * 
+	 * @param angle
+	 * 			The turning angle (in radians) to check.
+	 * @pre		The given angle must be a valid angle to turn over.
+	 * 			| isValidTurningAngle(angle)
+	 * @return	Whether or not this worm has enough action points (APs) left
+	 * 			to perform a turn over the given angle.
+	 * 			| result == getActionPoints() >= getTurningCost(angle)
+	 */
+	public boolean canTurn(double angle){
+		// assert isValidTurningAngle(angle);
+		return getTurningCost(angle) <= this.getActionPoints();
+	}
+	
+	/**
+	 * Turns this worm over the given angle and inflicts a
+	 * proportional amount of action points (APs).
+	 * 
+	 * @param angle
+	 * 			The angle, in radians, to make this worm turn over.
+	 * @pre 	The given angle is a valid angle to turn over.
+	 * 			| isValidTurningAngle(angle)
+	 * @pre		The worm is able to turn over the given angle.
+	 * 			| canTurn(angle)
+	 * @post	This worm has turned over the given angle.
+	 * 			| new.getDirection() == posMod((getDirection() + angle), (2*Math.PI))
+	 * @post	The action points of this worm decreased appropriately.
+	 * 			| new.getActionPoints() == getActionPoints() - getTurningCost(angle)
+	 */
+	public void turn(double angle){
+		assert isValidTurningAngle(angle);
+		assert canTurn(angle);
+		this.setDirection(posMod((this.getDirection() + angle), (2*Math.PI)));
+		this.decreaseActionPoints(getTurningCost(angle));
 	}
 	
 	/**
@@ -201,7 +273,7 @@ public class Worm {
 	 * 
 	 * @param direction The direction to check
 	 * @return 	Whether or not direction is a valid number between 0 and 2*Math.PI
-	 * 			| result == (!double.isNaN(direction) && 0<= direction && direction < 2*Math.PI)
+	 * 			| result == (!double.isNaN(direction) && 0 <= direction && direction < 2*Math.PI)
 	 */
 	public static boolean isValidDirection(double direction){
 		if(Double.isNaN(direction))
