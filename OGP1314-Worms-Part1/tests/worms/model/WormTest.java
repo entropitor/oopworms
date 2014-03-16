@@ -9,6 +9,7 @@ import org.junit.Test;
 public class WormTest {
 	private Worm willy;
 	private static Worm donald;
+	private Worm skippy,eiffelTower;
 	private static final double PRECISION = 1e-6;
 
 	@Before
@@ -16,6 +17,8 @@ public class WormTest {
 		//				   x    y    dir.     r       name
 		willy  = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
 		donald = new Worm(0,     0,     3,     5, "D'Onald Duck");
+		skippy = new Worm(2.72, -3.14, 2, 1.5, "Skippy The Bush Kangaroo");
+		eiffelTower = new Worm(48.51, 2.21, 3.4, 21851, "The Eiffel Tower");
 	}
 	
 	@Test
@@ -235,5 +238,102 @@ public class WormTest {
 	@Test
 	public void testGetActionPoints(){
 		assertEquals(183466713, willy.getActionPoints());
+	}
+	
+	@Test
+	public void testJump_CanJumpCase(){
+		skippy.jump();
+		assertFuzzyEquals(skippy.getXCoordinate(), -1.5098204, PRECISION);
+		assertFuzzyEquals(skippy.getYCoordinate(), -3.14, PRECISION);
+		assertEquals(skippy.getActionPoints(), 0);
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void testJump_CanNotJumpCase() throws Exception{
+		eiffelTower.jump();
+	}
+	
+	@Test
+	public void testGetJumpForce_CanJumpCase(){
+		assertFuzzyEquals(skippy.getJumpForce(), 222303.8195708, PRECISION);
+	}
+	
+	@Test
+	public void testGetJumpForce_CanNotJumpCase(){
+		assertFuzzyEquals(eiffelTower.getJumpForce(), 0, PRECISION);
+	}
+	
+	@Test
+	public void testGetJumpVelocity_CanJumpCase(){
+		assertFuzzyEquals(skippy.getJumpVelocity(), 7.4033797, PRECISION);
+	}
+	
+	@Test
+	public void testGetJumpVelocity_CanNotJumpCase(){
+		assertFuzzyEquals(eiffelTower.getJumpVelocity(), 0, PRECISION);
+	}
+	
+	@Test
+	public void testCanJump_TrueCase(){
+		assertTrue(skippy.canJump());
+	}
+	
+	@Test
+	public void testCanJump_FalseCase(){
+		assertFalse(eiffelTower.canJump());
+	}
+	
+	@Test
+	public void testGetJumpTime_CanJumpCase(){
+		assertFuzzyEquals(skippy.getJumpTime(), 1.3729202, PRECISION);
+	}
+	
+	@Test
+	public void testGetJumpTime_CanNotJumpCase(){
+		assertFuzzyEquals(eiffelTower.getJumpTime(), 0, PRECISION);
+	}
+	
+	@Test
+	public void testGetJumpStep_MidAirCase(){
+		double[] jumpstep = skippy.getJumpStep(1);
+		assertEquals(jumpstep.length, 2);
+		assertFuzzyEquals(jumpstep[0], -0.36089306, PRECISION);
+		assertFuzzyEquals(jumpstep[1], -1.3114509, PRECISION);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testGetJumpStep_NegativeTimeCase() throws Exception{
+		skippy.getJumpStep(-1);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testGetJumpStep_NaNCase() throws Exception{
+		skippy.getJumpStep(Double.NaN);
+	}
+	
+	@Test
+	public void testGetJumpStep_AfterJumpCase(){
+		double[] jumpstep = skippy.getJumpStep(5);
+		System.out.println(jumpstep[0]);
+		System.out.println(jumpstep[1]);
+		assertEquals(jumpstep.length, 2);
+		assertFuzzyEquals(jumpstep[0], -1.5098204, PRECISION);
+		assertFuzzyEquals(jumpstep[1], -3.14, PRECISION);
+	}
+	
+	@Test
+	public void testGetJumpStep_BeforeJumpCase(){
+		double[] jumpstep = skippy.getJumpStep(0);
+		assertEquals(jumpstep.length, 2);
+		assertFuzzyEquals(jumpstep[0], 2.72, PRECISION);
+		assertFuzzyEquals(jumpstep[1], -3.14, PRECISION);
+	}
+	
+	@Test
+	public void testGetJumpStep_CanNotJumpCase(){
+		double[] jumpstep = eiffelTower.getJumpStep(1);
+		assertEquals(jumpstep.length, 2);
+		assertFuzzyEquals(jumpstep[0], 48.51, PRECISION);
+		assertFuzzyEquals(jumpstep[1], 2.21, PRECISION);
 	}
 }

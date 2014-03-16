@@ -26,6 +26,10 @@ public class Worm {
 	 * The constant density of a worm, in kg/m³.
 	 */
 	public static final int DENSITY = 1062;
+	/**
+	 * The gravitational acceleration on earth, in m/s².
+	 */
+	public static final double GRAVITATIONAL_ACCELERATION = 9.80665;
 	
 	/**
 	 * Creates a new worm that is positioned at the given location, looks in the given direction, has the given radius and the given name.
@@ -498,5 +502,110 @@ public class Worm {
 	@Raw
 	private void replenishActionPoints(){
 		this.setActionPoints(this.getMaxActionPoints());
+	}
+	
+	/**
+	 * Makes this worm jump.
+	 * 
+	 * @post		The new x- and y-coordinate of this worm will equal the x- and y-coordinates as 
+	 * 				calculated by getJumpStemp() after the jump is completed
+	 * 				| new.getXCoordinate() == getJumpStep(getJumpTime())[0]
+	 * 				| new.getYCoordinate() == getJumpStep(getJumpTime())[1]
+	 * @post		The action points are set to zero.
+	 * 				| new.getActionPoints() == 0
+	 * @note		With the current physics, the new y-coordinate will (almost) equal the old y-coordinate
+	 * 				(taking floating point precision in calculation).
+	 * @throws IllegalStateException
+	 * 				Thrown when the worm can't jump from his current position.
+	 * 				| !canJump()
+	 */
+	public void jump() throws IllegalStateException{
+		if(!canJump())
+			throw new IllegalStateException();
+		double[] newCoordinates = getJumpStep(getJumpTime());
+		setXCoordinate(newCoordinates[0]);
+		setYCoordinate(newCoordinates[1]);
+		
+		decreaseActionPoints(getActionPoints());
+	}
+	
+	/**
+	 * Calculates the force exerted by this worm (in Newton) in a potential jump from his current position.
+	 * 
+	 * @return	The (virtual) force exerted by this worm (in Newton) equals the sum of 5 times its action points and 
+	 * 			its weight (its mass times the gravitational acceleration), in case he can jump.
+	 * 			Otherwise the result equals 0 Newton.
+	 * 			| if(canJump())
+	 * 			| 		then result == ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION))
+	 * 			| else
+	 * 			|		then result == 0
+	 */
+	public double getJumpForce(){
+		if(!canJump())
+			return 0;
+		return ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION));
+	}
+	
+	/**
+	 * Calculates the initial velocity of this worm (in m/s) in a potential jump from his current position.
+	 * 
+	 * @return	The (virtual) velocity of this worm (in m/s) equals the (virtual) force exerted by this worm divided by its mass and multiplied with 0.5 seconds.
+	 * 			| result == (getJumpForce()/getMass())*0.5;
+	 * @note	This method will return 0 if the worm can't jump because getJumpForce() will equal 0.
+	 */
+	public double getJumpVelocity(){
+		return (getJumpForce()/getMass())*0.5;
+	}
+	
+	/**
+	 * Checks whether this worm is in a position to jump.
+	 * 
+	 * @return		Whether or not this worm is facing upwards.
+	 * 				| result == (getDirection() <= Math.PI)
+	 */
+	public boolean canJump(){
+		return (getDirection() <= Math.PI);
+	}
+	
+	/**
+	 * Calculates the time this worm will take to complete a potential jump from his current position.
+	 * 
+	 * @return 	Returns the amount of time needed to complete his (virtual) jump from his current position when he can jump.
+	 * 			This time equals 2 times the y-component of the initial velocity divided by the gravitational acceleration.
+	 * 			| result == (2*getJumpVelocity()*Math.sin(getDirection())/GRAVITATIONAL_ACCELERATION)
+	 * @note	This method will return 0 if the worm can't jump because getJumpVelocity() will equal 0.
+	 */
+	public double getJumpTime(){
+		return (2*getJumpVelocity()*Math.sin(getDirection())/GRAVITATIONAL_ACCELERATION);
+	}
+	
+	/**
+	 * Calculates the x- and y-coordinate of this worm in a potential jump from his current position after
+	 * the given period of time t.
+	 * 
+	 * @param t		The time after the jump (in seconds).
+	 * @return		An array of two doubles, the first one equals the x-coordinate t seconds after the jump, 
+	 * 				the second one equals the y-coordinate t seconds after the jump.
+	 * 				|	result.length == 2 &&
+	 * 				|	result[0] == (getXCoordinate()+(getJumpVelocity()*Math.cos(getDirection())*Math.min(t,getJumpTime())) &&
+	 * 				|	result[1] == (getYCoordinate()+(getJumpVelocity()*Math.sin(getDirection())*Math.min(t,getJumpTime()))-(GRAVITATIONAL_ACCELERATION/2*Math.pow(time,2))
+	 * @throws IllegalArgumentException
+	 * 				Thrown when t is not a valid number or is less than zero
+	 * 				| Double.isNaN(t) || t < 0
+	 * @note		When this worm is unable to jump, this method will just return an array containing
+	 * 				the current x and y position, invariant of the given t.
+	 */
+	public double[] getJumpStep(double t) throws IllegalArgumentException{
+		if(Double.isNaN(t) || t < 0)
+			throw new IllegalArgumentException("Illegal timestep");
+		
+		//If t > getJumpTime() => jump is over, use getJumpTime() as time instead of t.
+		double time = Math.min(t,getJumpTime());
+		double velocity = getJumpVelocity();
+		double direction = getDirection();
+		
+		double newX = getXCoordinate()+(velocity*Math.cos(direction)*time);
+		double newY = getYCoordinate()+(velocity*Math.sin(direction)*time)-(GRAVITATIONAL_ACCELERATION/2*Math.pow(time,2));
+		return new double[]{newX,newY};
 	}
 }
