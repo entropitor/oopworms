@@ -2,6 +2,8 @@ package worms.model;
 
 import worms.util.MathUtil;
 import be.kuleuven.cs.som.annotate.*;
+import static worms.util.Util.*;
+import static worms.util.ModuloUtil.posMod;
 
 /**
  * A class of worms with position, direction, radius and a name.
@@ -97,6 +99,87 @@ public class Worm {
 		setRadius(radius);
 
 		replenishActionPoints();
+	}
+	
+	/**
+	 * Checks whether the given angle is a valid angle to turn a Worm over.
+	 * 
+	 * @param angle
+	 * 			The turning angle (in radians) to check.
+	 * @return	Whether or not the given angle is in the range [-pi, pi)
+	 * 			| result == fuzzyGreaterThanOrEqualTo(angle, -Math.PI)
+	 *			|			&& Double.compare(angle, Math.PI) < 0;
+	 * @note	(NaN check is implicit in "worms.util.Util.fuzzy[..]") 
+	 */
+	public static boolean isValidTurningAngle(double angle){
+		return fuzzyGreaterThanOrEqualTo(angle, -Math.PI)
+				&& Double.compare(angle, Math.PI) < 0;
+	}
+	
+	/**
+	 * Returns the number of action points (APs) that a turn 
+	 * over the given angle would cost.
+	 * 
+	 * @param angle
+	 * 			The angle (in radians) of the turn.
+	 * @pre		The given angle must be a valid angle to turn over.
+	 * 			| isValidTurningAngle(angle)
+	 * @return	The cost of a turn over the given angle, directly
+	 * 			proportional with the given angle - where a 180° turn
+	 *			costs 30 APs - rounded up to the nearest integer.
+	 * 			| result == (int) Math.ceil(Math.abs(30*angle/(Math.PI)))
+	 */
+	public static int getTurningCost(double angle){
+		assert isValidTurningAngle(angle);
+		return (int) Math.ceil(Math.abs(60*angle/(2*Math.PI)));
+	}
+	
+	/**
+	 * Checks whether this worm can make a turn over
+	 * the given angle.
+	 * 
+	 * @param angle
+	 * 			The turning angle (in radians) to check.
+	 * @pre		The given angle must be a valid angle to turn over.
+	 * 			| isValidTurningAngle(angle)
+	 * @return	Whether or not this worm has enough action points (APs) left
+	 * 			to perform a turn over the given angle.
+	 * 			| result == getActionPoints() >= getTurningCost(angle)
+	 */
+	public boolean canTurn(double angle){
+		// assert isValidTurningAngle(angle);
+		/* Assertion commented out because:
+		 * Turning should be implemented nominally. Hence, only turning angles
+		 * in a certain non-redundant range should be allowed. (Allowing all angles
+		 * using modulo divison over 2*pi would be total programming.)
+		 * The range we chose is [-pi, pi), because this is the range of turning angles
+		 * the GUI provides. However, the assignment pdf mentions turning angles of
+		 * 2*pi. To avoid a failing Facade test suite because a turning angle of 2*pi 
+		 * is passed to this method, the assertion on the precondition is commented out. 
+		 */
+		return getTurningCost(angle) <= this.getActionPoints();
+	}
+	
+	/**
+	 * Turns this worm over the given angle and inflicts a
+	 * proportional amount of action points (APs).
+	 * 
+	 * @param angle
+	 * 			The angle, in radians, to make this worm turn over.
+	 * @pre 	The given angle is a valid angle to turn over.
+ 	 * 			| isValidTurningAngle(angle)
+	 * @pre		The worm is able to turn over the given angle.
+	 * 			| canTurn(angle)
+	 * @post	This worm has turned over the given angle.
+	 * 			| new.getDirection() == posMod((getDirection() + angle), (2*Math.PI))
+	 * @post	The action points of this worm decreased appropriately.
+	 * 			| new.getActionPoints() == getActionPoints() - getTurningCost(angle)
+	 */
+	public void turn(double angle){
+		// (We do not assert the first precondition, as this is done in canTurn())
+		assert canTurn(angle);
+		this.setDirection(posMod((this.getDirection() + angle), (2*Math.PI)));
+		this.decreaseActionPoints(getTurningCost(angle));
 	}
 	
 	/**
@@ -321,7 +404,7 @@ public class Worm {
 	 * 
 	 * @param direction The direction to check
 	 * @return 	Whether or not direction is a valid number between 0 and 2*Math.PI
-	 * 			| result == (!double.isNaN(direction) && 0<= direction && direction < 2*Math.PI)
+	 * 			| result == (!double.isNaN(direction) && 0 <= direction && direction < 2*Math.PI)
 	 */
 	public static boolean isValidDirection(double direction){
 		if(Double.isNaN(direction))

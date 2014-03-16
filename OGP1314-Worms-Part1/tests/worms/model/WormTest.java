@@ -2,6 +2,7 @@ package worms.model;
 
 import static org.junit.Assert.*;
 import static worms.util.AssertUtil.*;
+import static worms.util.Util.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +58,94 @@ public class WormTest {
 	}
 	
 	@Test
+	public void testIsValidTurningAngle_TrueCases(){
+		assertTrue(Worm.isValidTurningAngle(1.321));
+		assertTrue(Worm.isValidTurningAngle(0));
+		assertTrue(Worm.isValidTurningAngle(Math.PI-1E-3));
+		assertTrue(Worm.isValidTurningAngle(-Math.PI));
+	}
+	
+	@Test
+	public void testIsValidTurningAngle_NonInclusiveUpperBound(){
+		assertFalse(Worm.isValidTurningAngle(Math.PI));
+	}
+	
+	@Test
+	public void testIsValidTurningAngle_NaN(){
+		assertFalse(Worm.isValidTurningAngle(Double.NaN));
+	}
+	
+	@Test
+	public void testIsValidTurningAngle_TooPositive(){
+		assertFalse(Worm.isValidTurningAngle(1964));
+		assertFalse(Worm.isValidTurningAngle(Math.PI+1e-2));
+	}
+	
+	@Test
+	public void testIsValidTurningAngle_TooNegative(){
+		assertFalse(Worm.isValidTurningAngle(-Math.PI-1e-2));
+	}
+	
+	@Test
+	public void testGetTurningCost(){
+		assertEquals(Worm.getTurningCost(0), 0);
+		assertEquals(Worm.getTurningCost(1), 10);
+		assertEquals(Worm.getTurningCost(-1.321), 13);
+		assertEquals(Worm.getTurningCost(Math.PI-1E-3), 30);
+		assertEquals(Worm.getTurningCost(-Math.PI), 30);
+	}
+	
+	@Test
+	public void testCanTurn(){
+		Worm fatboy = new Worm(0, 0, 0, 20, "Big radius so lots 'o APs");
+		assertTrue(fatboy.canTurn(-Math.PI));
+		
+//		Minimum radius is 0.25 atm., so no testing in this way.
+//		Worm slim = new Worm(0, 0, 0, 0.1889, "Radius so APs is thirty");
+//		assertTrue(slim.canTurn(Math.PI));
+//		
+//		Worm nope = new Worm(0, 0, 0, 0.1000, "Radius too small so not enough APs");
+//		assertFalse(nope.canTurn(Math.PI));
+		
+		Worm slim = new Worm(0, 0, 0, 0.25, "Slim shady");
+		assertEquals(slim.getActionPoints(), 70);
+		assertTrue(slim.canTurn(-Math.PI));
+		
+		slim.turn(-Math.PI);
+		assertEquals(slim.getActionPoints(), 40);
+		assertTrue(slim.canTurn(-Math.PI));
+		
+		slim.turn(-Math.PI/3);
+		assertEquals(slim.getActionPoints(), 30);
+		assertTrue(slim.canTurn(-Math.PI));
+		
+		slim.turn(-Math.PI/30);
+		assertEquals(slim.getActionPoints(), 29);
+		assertFalse(slim.canTurn(-Math.PI));
+	}
+	
+	@Test
+	public void testTurn(){
+		assertFuzzyEquals(willy.getDirection(), 1.321);
+		assertEquals(willy.getActionPoints(), 183466713);
+		
+		willy.turn(1);
+		assertFuzzyEquals(willy.getDirection(), 2.321);
+		assertEquals(willy.getActionPoints(), 183466713-10);
+		
+		willy.turn(-1);
+		assertFuzzyEquals(willy.getDirection(), 1.321);
+		assertEquals(willy.getActionPoints(), 183466713-10-10);
+		
+		willy.turn(-1.321);
+		assertTrue(fuzzyEquals(willy.getDirection(), 0));
+		assertEquals(willy.getActionPoints(), 183466713-10-10-13);
+		
+		willy.turn(-Math.PI);
+		assertFuzzyEquals(willy.getDirection(), Math.PI);
+		assertEquals(willy.getActionPoints(), 183466713-10-10-13-30);
+	}
+	
 	public void testCanMove_TrueCase(){
 		assertTrue(left.canMove(1));
 	}
