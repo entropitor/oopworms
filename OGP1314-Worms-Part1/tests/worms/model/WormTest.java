@@ -314,8 +314,6 @@ public class WormTest {
 	@Test
 	public void testGetJumpStep_AfterJumpCase(){
 		double[] jumpstep = skippy.getJumpStep(5);
-		System.out.println(jumpstep[0]);
-		System.out.println(jumpstep[1]);
 		assertEquals(jumpstep.length, 2);
 		assertFuzzyEquals(jumpstep[0], -1.5098204, PRECISION);
 		assertFuzzyEquals(jumpstep[1], -3.14, PRECISION);
