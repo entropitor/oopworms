@@ -1,12 +1,15 @@
 <project name="Worms" basedir="." default="main">
 
-    <property name="src.dir"     value="src;src-provided"/>
+    <property name="src.own.dir"  value="src"/>
+    <property name="src.given.dir"  value="src-provided"/>
+    <property name="src.dir"     value="${src.given.dir};${src.own.dir}"/>
 
     <property name="build.dir"   value="build"/>
     <property name="classes.dir" value="${build.dir}/classes"/>
     <property name="jar.dir"     value="${build.dir}/jar"/>
     <property name="jar.file"    value="${jar.dir}/${ant.project.name}.jar"/>
     <property name="testjar.file"    value="${jar.dir}/test${ant.project.name}.jar"/>
+    <property name="submitjar.file" value="${jar.dir}/submit${ant.project.name}.jar"/>
 
     <property name="test.dir"   value="tests"/>
     <property name="report.dir"  value="${build.dir}/testreport"/>
@@ -25,7 +28,7 @@
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
         <pathelement location="${jar.file}"/>
     </path>
-        
+
     <target name="clean">
         <delete dir="${build.dir}"/>
     </target>
@@ -34,7 +37,7 @@
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
     </target>
-    
+
     <target name="testcompile">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="${test.dir}" destdir="${classes.dir}" classpathref="classpath"/>
@@ -86,6 +89,21 @@
             <fileset dir="${report.dir}" includes="TEST-*.xml"/>
             <report todir="${report.dir}"/>
         </junitreport>
+    </target>
+
+    <target name="submitjar" depends="clean,compile,testcompile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${submitjar.file}">
+            <fileset dir="${classes.dir}"/>
+            <fileset dir=".">
+                <include name="${src.own.dir}/**/*"/>
+                <include name="${src.given.dir}/**/*"/>
+                <include name="${test.dir}/**/*"/>
+            </fileset>
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
     </target>
 
     <target name="clean-build" depends="clean,jar"/>
