@@ -143,12 +143,12 @@ public class Worm {
 	 * A vertical step costs 4 action points.<br>
 	 * Every other step is the sum of the costs of the horizontal and vertical components 
 	 * (in which the cost of a component is proportional to the fraction of the step and to the cost of a step along that component).<br>
-	 * Because of floating point precision problems, the components are rounded to a precision of 1e-12.<br>
+	 * Because of floating point precision problems, the components are rounded to a precision of 1e-12.<br></p>>
 	 * 
 	 * @param direction		The direction for which the cost of the unit step should be calculated.
 	 * @return				Returns the cost of a unit step in the given direction. 
 	 * 						| result == Math.abs(MathUtil.round(Math.cos(direction),12))+4*Math.abs(MathUtil.round(Math.sin(direction),12))
-	 * @note				This method does not round of the cost to the next integer, it just calculates the fraction 
+	 * @note				This method does not round the cost to the next integer, it just calculates the fraction 
 	 * 						of action points required for a unit step in the given direction.
 	 * @throws IllegalArgumentException
 	 * 						Thrown when the direction is not a valid direction
