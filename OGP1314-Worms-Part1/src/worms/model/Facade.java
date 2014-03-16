@@ -24,32 +24,31 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean canTurn(Worm worm, double angle) {
-		// TODO Auto-generated method stub
-		return false;
+		return worm.canTurn(angle);
 	}
 
 	@Override
 	public void turn(Worm worm, double angle) {
-		// TODO Auto-generated method stub
-
+		worm.turn(angle);
 	}
 
 	@Override
 	public void jump(Worm worm) {
-		// TODO Auto-generated method stub
-
+		try{
+			worm.jump();
+		}catch(IllegalStateException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
 	public double getJumpTime(Worm worm) {
-		// TODO Auto-generated method stub
-		return 0;
+		return worm.getJumpTime();
 	}
 
 	@Override
 	public double[] getJumpStep(Worm worm, double t) {
-		// TODO Auto-generated method stub0
-		return null;
+		return worm.getJumpStep(t);
 	}
 
 	@Override

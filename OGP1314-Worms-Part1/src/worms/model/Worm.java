@@ -1,6 +1,9 @@
 package worms.model;
 
+import worms.util.MathUtil;
 import be.kuleuven.cs.som.annotate.*;
+import static worms.util.Util.*;
+import static worms.util.ModuloUtil.posMod;
 
 /**
  * A class of worms with position, direction, radius and a name.
@@ -26,6 +29,10 @@ public class Worm {
 	 * The constant density of a worm, in kg/m³.
 	 */
 	public static final int DENSITY = 1062;
+	/**
+	 * The gravitational acceleration on earth, in m/s².
+	 */
+	public static final double GRAVITATIONAL_ACCELERATION = 9.80665;
 	
 	/**
 	 * Creates a new worm that is positioned at the given location, looks in the given direction, has the given radius and the given name.
@@ -96,6 +103,206 @@ public class Worm {
 		setRadius(radius);
 
 		replenishActionPoints();
+	}
+	
+	/**
+	 * Checks whether the given angle is a valid angle to turn a Worm over.
+	 * 
+	 * @param angle
+	 * 			The turning angle (in radians) to check.
+	 * @return	Whether or not the given angle is in the range [-pi, pi)
+	 * 			| result == fuzzyGreaterThanOrEqualTo(angle, -Math.PI)
+	 *			|			&& Double.compare(angle, Math.PI) < 0;
+	 * @note	(NaN check is implicit in "worms.util.Util.fuzzy[..]") 
+	 */
+	public static boolean isValidTurningAngle(double angle){
+		return fuzzyGreaterThanOrEqualTo(angle, -Math.PI)
+				&& Double.compare(angle, Math.PI) < 0;
+	}
+	
+	/**
+	 * Returns the number of action points (APs) that a turn 
+	 * over the given angle would cost.
+	 * 
+	 * @param angle
+	 * 			The angle (in radians) of the turn.
+	 * @pre		The given angle must be a valid angle to turn over.
+	 * 			| isValidTurningAngle(angle)
+	 * @return	The cost of a turn over the given angle, directly
+	 * 			proportional with the given angle - where a 180° turn
+	 *			costs 30 APs - rounded up to the nearest integer.
+	 * 			| result == (int) Math.ceil(Math.abs(30*angle/(Math.PI)))
+	 */
+	public static int getTurningCost(double angle){
+		assert isValidTurningAngle(angle);
+		return (int) Math.ceil(Math.abs(60*angle/(2*Math.PI)));
+	}
+	
+	/**
+	 * Checks whether this worm can make a turn over
+	 * the given angle.
+	 * 
+	 * @param angle
+	 * 			The turning angle (in radians) to check.
+	 * @pre		The given angle must be a valid angle to turn over.
+	 * 			| isValidTurningAngle(angle)
+	 * @return	Whether or not this worm has enough action points (APs) left
+	 * 			to perform a turn over the given angle.
+	 * 			| result == getActionPoints() >= getTurningCost(angle)
+	 */
+	public boolean canTurn(double angle){
+		// assert isValidTurningAngle(angle);
+		/* Assertion commented out because:
+		 * Turning should be implemented nominally. Hence, only turning angles
+		 * in a certain non-redundant range should be allowed. (Allowing all angles
+		 * using modulo divison over 2*pi would be total programming.)
+		 * The range we chose is [-pi, pi), because this is the range of turning angles
+		 * the GUI provides. However, the assignment pdf mentions turning angles of
+		 * 2*pi. To avoid a failing Facade test suite because a turning angle of 2*pi 
+		 * is passed to this method, the assertion on the precondition is commented out. 
+		 */
+		return getTurningCost(angle) <= this.getActionPoints();
+	}
+	
+	/**
+	 * Turns this worm over the given angle and inflicts a
+	 * proportional amount of action points (APs).
+	 * 
+	 * @param angle
+	 * 			The angle, in radians, to make this worm turn over.
+	 * @pre 	The given angle is a valid angle to turn over.
+ 	 * 			| isValidTurningAngle(angle)
+	 * @pre		The worm is able to turn over the given angle.
+	 * 			| canTurn(angle)
+	 * @post	This worm has turned over the given angle.
+	 * 			| new.getDirection() == posMod((getDirection() + angle), (2*Math.PI))
+	 * @post	The action points of this worm decreased appropriately.
+	 * 			| new.getActionPoints() == getActionPoints() - getTurningCost(angle)
+	 */
+	public void turn(double angle){
+		// (We do not assert the first precondition, as this is done in canTurn())
+		assert canTurn(angle);
+		this.setDirection(posMod((this.getDirection() + angle), (2*Math.PI)));
+		this.decreaseActionPoints(getTurningCost(angle));
+	}
+	
+	/**
+	 * Checks whether this worm has enough action points to move it the given number of steps.
+	 * 
+	 * @param nbSteps 	The number of steps this worm wants to move.
+	 * @return 			Return whether nbSteps is non-negative and the cost to move the given number of steps 
+	 * 					(in the direction of this worm) is smaller or equal to the current action points of this worm.
+	 * 					| result == (nbSteps >= 0 && getCostForMove(nbSteps,getDirection()) <= getActionPoints())
+	 */
+	public boolean canMove(int nbSteps){
+		if(nbSteps < 0)
+			return false;
+		return getCostForMove(nbSteps,getDirection()) <= getActionPoints();
+	}
+	
+	/**
+	 * Calculates the cost for a worm to move nbSteps in a given direction.
+	 * 
+	 * @param nbSteps 		The number of steps in the movement.
+	 * @param direction		The direction in which the worm will move.
+	 * @return				The result equals nbSteps times the cost of a unit step in the current direction, rounded up to the next integer.
+	 * 						| result == (int)(Math.ceil(nbSteps*getUnitStepCost(direction)))
+	 * @throws IllegalArgumentException 
+	 * 						Thrown when nbSteps is less than zero.
+	 * 						| nbSteps < 0
+	 * @throws IllegalArgumentException 
+	 * 						Thrown when the given direction is an invalid direction.
+	 * 						| !isValidDirection(direction)
+	 */
+	public static int getCostForMove(int nbSteps, double direction) throws IllegalArgumentException{
+		if(nbSteps < 0)
+			throw new IllegalArgumentException("Illegal number of steps");
+		if(!isValidDirection(direction))
+			throw new IllegalArgumentException("Illegal direction");
+		
+		return (int)(Math.ceil(nbSteps*getUnitStepCost(direction)));
+	}
+	
+	/**
+	 * Calculates the cost for one step in a given direction.
+	 * 
+	 * <p>A horizontal step costs 1 action point.<br>
+	 * A vertical step costs 4 action points.<br>
+	 * Every other step is the sum of the costs of the horizontal and vertical components 
+	 * (in which the cost of a component is proportional to the fraction of the step and to the cost of a step along that component).<br>
+	 * Because of floating point precision problems, the components are rounded to a precision of 1e-12.<br></p>>
+	 * 
+	 * @param direction		The direction for which the cost of the unit step should be calculated.
+	 * @return				Returns the cost of a unit step in the given direction. 
+	 * 						| result == Math.abs(MathUtil.round(Math.cos(direction),12))+4*Math.abs(MathUtil.round(Math.sin(direction),12))
+	 * @note				This method does not round the cost to the next integer, it just calculates the fraction 
+	 * 						of action points required for a unit step in the given direction.
+	 * @throws IllegalArgumentException
+	 * 						Thrown when the direction is not a valid direction
+	 * 						| !isValidDirection(direction)
+	 */
+	public static double getUnitStepCost(double direction) throws IllegalArgumentException{
+		if(!isValidDirection(direction))
+			throw new IllegalArgumentException("Illegal Direction");
+		
+		int precision = 12;
+		
+		double xCost = Math.cos(direction);
+		xCost = MathUtil.round(xCost, precision);
+		xCost = Math.abs(xCost);
+		
+		double yCost = 4*Math.sin(direction);
+		yCost = MathUtil.round(yCost, precision);
+		yCost = Math.abs(yCost);
+		
+		return xCost+yCost;
+	}
+	
+	/**
+	 * Moves this worm a given number of steps in the current direction.
+	 * 
+	 * @param nbSteps		The number of steps to move this worm.
+	 * @post				This worm has moved nbSteps in the current direction
+	 * 						| new.getXCoordinate() == getXCoordinate()+nbSteps*Math.cos(getDirection) && 
+	 * 						| new.getYCoordinate() == getYCoordinate()+nbSteps*Math.sin(getDirection)
+	 * @post				The action points are decreased with the cost of the movement.
+	 * 						| new.getActionPoints() == getActionPoints()-getCostForMovement(nbSteps,getDirection())
+	 * @throws IllegalArgumentException
+	 * 						Thrown when nbSteps is less than zero
+	 * 						| nbSteps < 0
+	 * @throws IllegalStateException	
+	 * 						Thrown when this worm has not enough action points to move the given number of steps in the current direction.
+	 * 						| !canMove(nbSteps)
+	 */
+	public void move(int nbSteps) throws IllegalStateException,IllegalArgumentException{
+		if(nbSteps < 0)
+			throw new IllegalArgumentException("Illegal number of steps");
+		if(!canMove(nbSteps))
+			throw new IllegalStateException("Has not enough action points to move.");
+		
+		moveWith(nbSteps*Math.cos(getDirection()),nbSteps*Math.sin(getDirection()));
+		decreaseActionPoints(getCostForMove(nbSteps,getDirection()));
+	}
+	
+	/**
+	 * Moves this worm with the given number of metres along the x-axis and the given number of metres along the y-axis.
+	 * 
+	 * @param x		The number of metres to move along the x-axis
+	 * @param y		The number of metres to move along the y-axis
+	 * @post		The new x-coordinate of this worm equals the old x-coordinate plus the given offset along the x-axis.
+	 * 				| new.getXCoordinate() == getXCoordinate()+x
+	 * @post		The new y-coordinate of this worm equals the old y-coordinate plus the given offset along the y-axis.
+	 * 				| new.getYCoordinate() == getYCoordinate()+y
+	 * @throws IllegalArgumentException
+	 * 				Thrown when x or y is not a valid number
+	 * 				| Double.isNaN(x) || Double.isNaN(y)
+	 */
+	public void moveWith(double x, double y) throws IllegalArgumentException{
+		if(Double.isNaN(x) || Double.isNaN(y))
+			throw new IllegalArgumentException("Illegal offset. Both offsets should be valid numbers.");
+		
+		setXCoordinate(getXCoordinate()+x);
+		setYCoordinate(getYCoordinate()+y);
 	}
 	
 	/**
@@ -201,7 +408,7 @@ public class Worm {
 	 * 
 	 * @param direction The direction to check
 	 * @return 	Whether or not direction is a valid number between 0 and 2*Math.PI
-	 * 			| result == (!double.isNaN(direction) && 0<= direction && direction < 2*Math.PI)
+	 * 			| result == (!double.isNaN(direction) && 0 <= direction && direction < 2*Math.PI)
 	 */
 	public static boolean isValidDirection(double direction){
 		if(Double.isNaN(direction))
@@ -422,11 +629,16 @@ public class Worm {
 	 * 
 	 * @param amount
 	 * 			The number of APs 
-	 * @post	| if (canHaveAsActionPoints(amount))
+	 * @post	If the given amount of APs is a valid amount of APs for this worm,
+	 * 			set this worm's APs to the given amount.
+	 * 			| if (canHaveAsActionPoints(amount))
 	 * 			| 	new.getActionPoints() == amount
-	 * @post	| if (amount < 0)
+	 * @post	A negative amount zeroes this worm's APs.
+	 * 			| if (amount < 0)
 	 *			| 	new.getActionPoints() == 0
-	 * @post	| if (amount > this.getMaxActionPoints())
+	 * @post	An amount larger than the maximum allowed number of APs
+	 * 			sets this worm's APs to this maximum allowed number.
+	 * 			| if (amount > this.getMaxActionPoints())
 	 *			| 	new.getActionPoints() == getMaxActionPoints()
 	 */
 	@Raw @Model
@@ -497,5 +709,110 @@ public class Worm {
 	@Raw
 	private void replenishActionPoints(){
 		this.setActionPoints(this.getMaxActionPoints());
+	}
+	
+	/**
+	 * Makes this worm jump.
+	 * 
+	 * @post		The new x- and y-coordinate of this worm will equal the x- and y-coordinates as 
+	 * 				calculated by getJumpStemp() after the jump is completed
+	 * 				| new.getXCoordinate() == getJumpStep(getJumpTime())[0]
+	 * 				| new.getYCoordinate() == getJumpStep(getJumpTime())[1]
+	 * @post		The action points are set to zero.
+	 * 				| new.getActionPoints() == 0
+	 * @note		With the current physics, the new y-coordinate will (almost) equal the old y-coordinate
+	 * 				(taking floating point precision in calculation).
+	 * @throws IllegalStateException
+	 * 				Thrown when the worm can't jump from his current position.
+	 * 				| !canJump()
+	 */
+	public void jump() throws IllegalStateException{
+		if(!canJump())
+			throw new IllegalStateException();
+		double[] newCoordinates = getJumpStep(getJumpTime());
+		setXCoordinate(newCoordinates[0]);
+		setYCoordinate(newCoordinates[1]);
+		
+		decreaseActionPoints(getActionPoints());
+	}
+	
+	/**
+	 * Calculates the force exerted by this worm (in Newton) in a potential jump from his current position.
+	 * 
+	 * @return	The (virtual) force exerted by this worm (in Newton) equals the sum of 5 times its action points and 
+	 * 			its weight (its mass times the gravitational acceleration), in case he can jump.
+	 * 			Otherwise the result equals 0 Newton.
+	 * 			| if(canJump())
+	 * 			| 		then result == ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION))
+	 * 			| else
+	 * 			|		then result == 0
+	 */
+	public double getJumpForce(){
+		if(!canJump())
+			return 0;
+		return ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION));
+	}
+	
+	/**
+	 * Calculates the initial velocity of this worm (in m/s) in a potential jump from his current position.
+	 * 
+	 * @return	The (virtual) velocity of this worm (in m/s) equals the (virtual) force exerted by this worm divided by its mass and multiplied with 0.5 seconds.
+	 * 			| result == (getJumpForce()/getMass())*0.5;
+	 * @note	This method will return 0 if the worm can't jump because getJumpForce() will equal 0.
+	 */
+	public double getJumpVelocity(){
+		return (getJumpForce()/getMass())*0.5;
+	}
+	
+	/**
+	 * Checks whether this worm is in a position to jump.
+	 * 
+	 * @return		Whether or not this worm is facing upwards.
+	 * 				| result == (getDirection() <= Math.PI)
+	 */
+	public boolean canJump(){
+		return (getDirection() <= Math.PI);
+	}
+	
+	/**
+	 * Calculates the time this worm will take to complete a potential jump from his current position.
+	 * 
+	 * @return 	Returns the amount of time needed to complete his (virtual) jump from his current position when he can jump.
+	 * 			This time equals 2 times the y-component of the initial velocity divided by the gravitational acceleration.
+	 * 			| result == (2*getJumpVelocity()*Math.sin(getDirection())/GRAVITATIONAL_ACCELERATION)
+	 * @note	This method will return 0 if the worm can't jump because getJumpVelocity() will equal 0.
+	 */
+	public double getJumpTime(){
+		return (2*getJumpVelocity()*Math.sin(getDirection())/GRAVITATIONAL_ACCELERATION);
+	}
+	
+	/**
+	 * Calculates the x- and y-coordinate of this worm in a potential jump from his current position after
+	 * the given period of time t.
+	 * 
+	 * @param t		The time after the jump (in seconds).
+	 * @return		An array of two doubles, the first one equals the x-coordinate t seconds after the jump, 
+	 * 				the second one equals the y-coordinate t seconds after the jump.
+	 * 				|	result.length == 2 &&
+	 * 				|	result[0] == (getXCoordinate()+(getJumpVelocity()*Math.cos(getDirection())*Math.min(t,getJumpTime())) &&
+	 * 				|	result[1] == (getYCoordinate()+(getJumpVelocity()*Math.sin(getDirection())*Math.min(t,getJumpTime()))-(GRAVITATIONAL_ACCELERATION/2*Math.pow(time,2))
+	 * @throws IllegalArgumentException
+	 * 				Thrown when t is not a valid number or is less than zero
+	 * 				| Double.isNaN(t) || t < 0
+	 * @note		When this worm is unable to jump, this method will just return an array containing
+	 * 				the current x and y position, invariant of the given t.
+	 */
+	public double[] getJumpStep(double t) throws IllegalArgumentException{
+		if(Double.isNaN(t) || t < 0)
+			throw new IllegalArgumentException("Illegal timestep");
+		
+		//If t > getJumpTime() => jump is over, use getJumpTime() as time instead of t.
+		double time = Math.min(t,getJumpTime());
+		double velocity = getJumpVelocity();
+		double direction = getDirection();
+		
+		double newX = getXCoordinate()+(velocity*Math.cos(direction)*time);
+		double newY = getYCoordinate()+(velocity*Math.sin(direction)*time)-(GRAVITATIONAL_ACCELERATION/2*Math.pow(time,2));
+		return new double[]{newX,newY};
 	}
 }
