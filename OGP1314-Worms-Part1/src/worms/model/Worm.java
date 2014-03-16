@@ -165,6 +165,8 @@ public class Worm {
 	 * 
 	 * @param angle
 	 * 			The angle, in radians, to make this worm turn over.
+	 * @pre 	The given angle is a valid angle to turn over.
+ 	 * 			| isValidTurningAngle(angle)
 	 * @pre		The worm is able to turn over the given angle.
 	 * 			| canTurn(angle)
 	 * @post	This worm has turned over the given angle.
@@ -173,6 +175,7 @@ public class Worm {
 	 * 			| new.getActionPoints() == getActionPoints() - getTurningCost(angle)
 	 */
 	public void turn(double angle){
+		// (We do not assert the first precondition, as this is done in canTurn())
 		assert canTurn(angle);
 		this.setDirection(posMod((this.getDirection() + angle), (2*Math.PI)));
 		this.decreaseActionPoints(getTurningCost(angle));
