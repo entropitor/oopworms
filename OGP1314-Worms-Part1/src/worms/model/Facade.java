@@ -12,14 +12,16 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean canMove(Worm worm, int nbSteps) {
-		// TODO Auto-generated method stub
-		return false;
+		return worm.canMove(nbSteps);
 	}
 
 	@Override
-	public void move(Worm worm, int nbSteps) {
-		// TODO Auto-generated method stub
-
+	public void move(Worm worm, int nbSteps) throws ModelException{
+		try{
+			worm.move(nbSteps);
+		}catch(IllegalStateException | IllegalArgumentException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
@@ -33,7 +35,7 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void jump(Worm worm) {
+	public void jump(Worm worm) throws ModelException{
 		try{
 			worm.jump();
 		}catch(IllegalStateException e){
@@ -47,8 +49,12 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public double[] getJumpStep(Worm worm, double t) {
-		return worm.getJumpStep(t);
+	public double[] getJumpStep(Worm worm, double t) throws ModelException{
+		try{
+			return worm.getJumpStep(t);
+		}catch(IllegalArgumentException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
@@ -63,7 +69,6 @@ public class Facade implements IFacade {
 
 	@Override
 	public double getOrientation(Worm worm) {
-		// TODO Auto-generated method stub
 		return worm.getDirection();
 	}
 
@@ -94,14 +99,16 @@ public class Facade implements IFacade {
 
 	@Override
 	public String getName(Worm worm) {
-		// TODO Auto-generated method stub
-		return null;
+		return worm.getName();
 	}
 
 	@Override
-	public void rename(Worm worm, String newName) {
-		// TODO Auto-generated method stub
-
+	public void rename(Worm worm, String newName) throws ModelException{
+		try{
+			worm.setName(newName);
+		}catch(IllegalArgumentException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
