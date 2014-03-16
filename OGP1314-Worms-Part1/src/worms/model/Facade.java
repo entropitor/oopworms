@@ -4,10 +4,14 @@ public class Facade implements IFacade {
 
 	@Override
 	public Worm createWorm(double x, double y, double direction, double radius,
-			String name) {
-		//TODO catch IllegalArgumentExceptions and throw ModelExceptions.
-		//TODO check assertions or throw ModelExceptions.
-		return new Worm(x,y,direction,radius,name);
+			String name) throws ModelException{
+		if(!Worm.isValidDirection(direction))
+			throw new ModelException("Not a valid direction");
+		try{
+			return new Worm(x,y,direction,radius,name);
+		}catch(IllegalArgumentException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
