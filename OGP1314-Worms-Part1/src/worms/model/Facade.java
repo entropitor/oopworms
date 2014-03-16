@@ -24,14 +24,12 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean canTurn(Worm worm, double angle) {
-		// TODO Auto-generated method stub
-		return false;
+		return worm.canTurn(angle);
 	}
 
 	@Override
 	public void turn(Worm worm, double angle) {
-		// TODO Auto-generated method stub
-
+		worm.turn(angle);
 	}
 
 	@Override

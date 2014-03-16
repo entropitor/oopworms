@@ -2,6 +2,7 @@ package worms.model;
 
 import static org.junit.Assert.*;
 import static worms.util.AssertUtil.*;
+import static worms.util.Util.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +11,7 @@ public class WormTest {
 	private Worm willy;
 	private static Worm donald;
 	private Worm skippy,eiffelTower;
+	private Worm left,diagonal;
 	private static final double PRECISION = 1e-6;
 
 	@Before
@@ -19,6 +21,8 @@ public class WormTest {
 		donald = new Worm(0,     0,     3,     5, "D'Onald Duck");
 		skippy = new Worm(2.72, -3.14, 2, 1.5, "Skippy The Bush Kangaroo");
 		eiffelTower = new Worm(48.51, 2.21, 3.4, 21851, "The Eiffel Tower");
+		left = new Worm(0, 0, Math.PI, 1, "Left");
+		diagonal = new Worm(2, -3, Math.PI/4, 1, "Diagonal");
 	}
 	
 	@Test
@@ -54,6 +58,209 @@ public class WormTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructor_IllegalRadius() throws Exception{
 		new Worm(-8.45, 9.16, Math.PI/2, 0, "Bar");
+	}
+	
+	@Test
+	public void testIsValidTurningAngle_TrueCases(){
+		assertTrue(Worm.isValidTurningAngle(1.321));
+		assertTrue(Worm.isValidTurningAngle(0));
+		assertTrue(Worm.isValidTurningAngle(Math.PI-1E-3));
+		assertTrue(Worm.isValidTurningAngle(-Math.PI));
+	}
+	
+	@Test
+	public void testIsValidTurningAngle_NonInclusiveUpperBound(){
+		assertFalse(Worm.isValidTurningAngle(Math.PI));
+	}
+	
+	@Test
+	public void testIsValidTurningAngle_NaN(){
+		assertFalse(Worm.isValidTurningAngle(Double.NaN));
+	}
+	
+	@Test
+	public void testIsValidTurningAngle_TooPositive(){
+		assertFalse(Worm.isValidTurningAngle(1964));
+		assertFalse(Worm.isValidTurningAngle(Math.PI+1e-2));
+	}
+	
+	@Test
+	public void testIsValidTurningAngle_TooNegative(){
+		assertFalse(Worm.isValidTurningAngle(-Math.PI-1e-2));
+	}
+	
+	@Test
+	public void testGetTurningCost(){
+		assertEquals(Worm.getTurningCost(0), 0);
+		assertEquals(Worm.getTurningCost(1), 10);
+		assertEquals(Worm.getTurningCost(-1.321), 13);
+		assertEquals(Worm.getTurningCost(Math.PI-1E-3), 30);
+		assertEquals(Worm.getTurningCost(-Math.PI), 30);
+	}
+	
+	@Test
+	public void testCanTurn(){
+		Worm fatboy = new Worm(0, 0, 0, 20, "Big radius so lots 'o APs");
+		assertTrue(fatboy.canTurn(-Math.PI));
+		
+//		Minimum radius is 0.25 atm., so no testing in this way.
+//		Worm slim = new Worm(0, 0, 0, 0.1889, "Radius so APs is thirty");
+//		assertTrue(slim.canTurn(Math.PI));
+//		
+//		Worm nope = new Worm(0, 0, 0, 0.1000, "Radius too small so not enough APs");
+//		assertFalse(nope.canTurn(Math.PI));
+		
+		Worm slim = new Worm(0, 0, 0, 0.25, "Slim shady");
+		assertEquals(slim.getActionPoints(), 70);
+		assertTrue(slim.canTurn(-Math.PI));
+		
+		slim.turn(-Math.PI);
+		assertEquals(slim.getActionPoints(), 40);
+		assertTrue(slim.canTurn(-Math.PI));
+		
+		slim.turn(-Math.PI/3);
+		assertEquals(slim.getActionPoints(), 30);
+		assertTrue(slim.canTurn(-Math.PI));
+		
+		slim.turn(-Math.PI/30);
+		assertEquals(slim.getActionPoints(), 29);
+		assertFalse(slim.canTurn(-Math.PI));
+	}
+	
+	@Test
+	public void testTurn(){
+		assertFuzzyEquals(willy.getDirection(), 1.321);
+		assertEquals(willy.getActionPoints(), 183466713);
+		
+		willy.turn(1);
+		assertFuzzyEquals(willy.getDirection(), 2.321);
+		assertEquals(willy.getActionPoints(), 183466713-10);
+		
+		willy.turn(-1);
+		assertFuzzyEquals(willy.getDirection(), 1.321);
+		assertEquals(willy.getActionPoints(), 183466713-10-10);
+		
+		willy.turn(-1.321);
+		assertTrue(fuzzyEquals(willy.getDirection(), 0));
+		assertEquals(willy.getActionPoints(), 183466713-10-10-13);
+		
+		willy.turn(-Math.PI);
+		assertFuzzyEquals(willy.getDirection(), Math.PI);
+		assertEquals(willy.getActionPoints(), 183466713-10-10-13-30);
+	}
+	
+	public void testCanMove_TrueCase(){
+		assertTrue(left.canMove(1));
+	}
+	
+	@Test
+	public void testCanMove_NegativeNbStepsCase(){
+		assertFalse(left.canMove(-1));
+	}
+	
+	@Test
+	public void testCanMove_FalseCase(){
+		assertFalse(left.canMove(4500));
+	}
+	
+	@Test
+	public void testGetCostForMove_RightDirection(){
+		assertEquals(Worm.getCostForMove(2, 0),2);
+	}
+	
+	@Test
+	public void testGetCostForMove_LeftDirection(){
+		assertEquals(Worm.getCostForMove(2, Math.PI),2);
+	}
+	
+	@Test
+	public void testGetCostForMove_UpDirection(){
+		assertEquals(Worm.getCostForMove(2, Math.PI/2),8);
+	}
+	
+	@Test
+	public void testGetCostForMove_DownDirection(){
+		assertEquals(Worm.getCostForMove(2, 3*Math.PI/2),8);
+	}
+	
+	@Test
+	public void testGetCostForMove_RandomDirection(){
+		assertEquals(Worm.getCostForMove(4, 2),17);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testGetCostForMove_NegativeNbSteps() throws Exception{
+		Worm.getCostForMove(-1, 0);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testGetCostForMove_IllegalDirection() throws Exception{
+		Worm.getCostForMove(1, 7);
+	}
+	
+	@Test
+	public void testGetUnitStepCost_RightDirection(){
+		assertFuzzyEquals(Worm.getUnitStepCost(0),1);
+	}
+	
+	@Test
+	public void testGetUnitStepCost_LeftDirection(){
+		assertFuzzyEquals(Worm.getUnitStepCost(Math.PI),1);
+	}
+	
+	@Test
+	public void testGetUnitStepCost_UpDirection(){
+		assertFuzzyEquals(Worm.getUnitStepCost(Math.PI/2),4);
+	}
+	
+	@Test
+	public void testGetUnitStepCost_DownDirection(){
+		assertFuzzyEquals(Worm.getUnitStepCost(3*Math.PI/2),4);
+	}
+	
+	@Test
+	public void testGetUnitStepCost_RandomDirection(){
+		assertFuzzyEquals(Worm.getUnitStepCost(2),4.05333654);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testGetUnitStepCost_IllegalDirection() throws Exception{
+		Worm.getUnitStepCost(7);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testMove_NegativeNbSteps() throws Exception{
+		willy.move(-2);
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void testMove_TooLargeNbSteps() throws Exception{
+		left.move(4500);
+	}
+	
+	@Test
+	public void testMove_NormalCase(){
+		diagonal.move(3);
+		assertFuzzyEquals(diagonal.getXCoordinate(),4.1213203,PRECISION);
+		assertFuzzyEquals(diagonal.getYCoordinate(),-0.8786796,PRECISION);
+		assertEquals(diagonal.getActionPoints(),diagonal.getMaxActionPoints()-11);
+	}
+	
+	@Test
+	public void testMoveWith_NormalCase(){
+		diagonal.moveWith(-2.14, 6.14);
+		assertFuzzyEquals(diagonal.getXCoordinate(),-0.14);
+		assertFuzzyEquals(diagonal.getYCoordinate(),3.14);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testMoveWith_IllegalXOffsetCase() throws Exception{
+		diagonal.moveWith(Double.NaN,3);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testMoveWith_IllegalYOffsetCase() throws Exception{
+		diagonal.moveWith(-10, Double.NaN);
 	}
 	
 	@Test
