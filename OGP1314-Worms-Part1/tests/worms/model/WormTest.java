@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 import static worms.util.AssertUtil.*;
 import static worms.util.Util.*;
 
+import static java.lang.Math.*;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -31,8 +33,8 @@ public class WormTest {
 		willy  = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
 		skippy = new Worm(2.72, -3.14, 2, 1.5, "Skippy The Bush Kangaroo");
 		eiffelTower = new Worm(48.51, 2.21, 3.4, 21851, "The Eiffel Tower");
-		left = new Worm(0, 0, Math.PI, 1, "Left");
-		diagonal = new Worm(2, -3, Math.PI/4, 1, "Diagonal");
+		left = new Worm(0, 0, PI, 1, "Left");
+		diagonal = new Worm(2, -3, PI/4, 1, "Diagonal");
 	}
 	
 	@BeforeClass
@@ -64,11 +66,11 @@ public class WormTest {
 	@Test
 	public void testConstructor_LegalCase(){
 		//			     	   x       y    dir.       r   name
-		Worm worm = new Worm(-8.45, 9.16, Math.PI/2, 2.14, "Bar");
+		Worm worm = new Worm(-8.45, 9.16, PI/2, 2.14, "Bar");
 
 		assertFuzzyEquals(worm.getXCoordinate(), -8.45, PRECISION);
 		assertFuzzyEquals(worm.getYCoordinate(), 9.16, PRECISION);
-		assertFuzzyEquals(worm.getDirection(), Math.PI/2, PRECISION);
+		assertFuzzyEquals(worm.getDirection(), PI/2, PRECISION);
 		assertEquals(worm.getName(), "Bar");
 		assertFuzzyEquals(worm.getRadius(), 2.14, PRECISION);
 		assertFuzzyEquals(worm.getMass(), 43596.78321768277701414403, PRECISION);
@@ -78,35 +80,35 @@ public class WormTest {
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructor_IllegalXPosition() throws Exception{
-		new Worm(Double.NaN, 9.16, Math.PI/2, 2.14, "Bar");
+		new Worm(Double.NaN, 9.16, PI/2, 2.14, "Bar");
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructor_IllegalYPosition() throws Exception{
-		new Worm(-8.45, Double.NaN, Math.PI/2, 2.14, "Bar");
+		new Worm(-8.45, Double.NaN, PI/2, 2.14, "Bar");
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructor_IllegalName() throws Exception{
-		new Worm(-8.45, Double.NaN, Math.PI/2, 2.14, "Foo	Bar");
+		new Worm(-8.45, Double.NaN, PI/2, 2.14, "Foo	Bar");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructor_IllegalRadius() throws Exception{
-		new Worm(-8.45, 9.16, Math.PI/2, 0, "Bar");
+		new Worm(-8.45, 9.16, PI/2, 0, "Bar");
 	}
 	
 	@Test
 	public void testIsValidTurningAngle_TrueCases(){
 		assertTrue(Worm.isValidTurningAngle(1.321));
 		assertTrue(Worm.isValidTurningAngle(0));
-		assertTrue(Worm.isValidTurningAngle(Math.PI-1E-3));
-		assertTrue(Worm.isValidTurningAngle(-Math.PI));
+		assertTrue(Worm.isValidTurningAngle(PI-1E-3));
+		assertTrue(Worm.isValidTurningAngle(-PI));
 	}
 	
 	@Test
 	public void testIsValidTurningAngle_NonInclusiveUpperBound(){
-		assertFalse(Worm.isValidTurningAngle(Math.PI));
+		assertFalse(Worm.isValidTurningAngle(PI));
 	}
 	
 	@Test
@@ -117,12 +119,12 @@ public class WormTest {
 	@Test
 	public void testIsValidTurningAngle_TooPositive(){
 		assertFalse(Worm.isValidTurningAngle(1964));
-		assertFalse(Worm.isValidTurningAngle(Math.PI+1e-2));
+		assertFalse(Worm.isValidTurningAngle(PI+1e-2));
 	}
 	
 	@Test
 	public void testIsValidTurningAngle_TooNegative(){
-		assertFalse(Worm.isValidTurningAngle(-Math.PI-1e-2));
+		assertFalse(Worm.isValidTurningAngle(-PI-1e-2));
 	}
 	
 	@Test
@@ -130,37 +132,37 @@ public class WormTest {
 		assertEquals(Worm.getTurningCost(0), 0);
 		assertEquals(Worm.getTurningCost(1), 10);
 		assertEquals(Worm.getTurningCost(-1.321), 13);
-		assertEquals(Worm.getTurningCost(Math.PI-1E-3), 30);
-		assertEquals(Worm.getTurningCost(-Math.PI), 30);
+		assertEquals(Worm.getTurningCost(PI-1E-3), 30);
+		assertEquals(Worm.getTurningCost(-PI), 30);
 	}
 	
 	@Test
 	public void testCanTurn(){
 		Worm fatboy = new Worm(0, 0, 0, 20, "Big radius so lots 'o APs");
-		assertTrue(fatboy.canTurn(-Math.PI));
+		assertTrue(fatboy.canTurn(-PI));
 		
 //		Minimum radius is 0.25 atm., so no testing in this way.
 //		Worm slim = new Worm(0, 0, 0, 0.1889, "Radius so APs is thirty");
-//		assertTrue(slim.canTurn(Math.PI));
+//		assertTrue(slim.canTurn(PI));
 //		
 //		Worm nope = new Worm(0, 0, 0, 0.1000, "Radius too small so not enough APs");
-//		assertFalse(nope.canTurn(Math.PI));
+//		assertFalse(nope.canTurn(PI));
 		
 		Worm slim = new Worm(0, 0, 0, 0.25, "Slim shady");
 		assertEquals(slim.getActionPoints(), 70);
-		assertTrue(slim.canTurn(-Math.PI));
+		assertTrue(slim.canTurn(-PI));
 		
-		slim.turn(-Math.PI);
+		slim.turn(-PI);
 		assertEquals(slim.getActionPoints(), 40);
-		assertTrue(slim.canTurn(-Math.PI));
+		assertTrue(slim.canTurn(-PI));
 		
-		slim.turn(-Math.PI/3);
+		slim.turn(-PI/3);
 		assertEquals(slim.getActionPoints(), 30);
-		assertTrue(slim.canTurn(-Math.PI));
+		assertTrue(slim.canTurn(-PI));
 		
-		slim.turn(-Math.PI/30);
+		slim.turn(-PI/30);
 		assertEquals(slim.getActionPoints(), 29);
-		assertFalse(slim.canTurn(-Math.PI));
+		assertFalse(slim.canTurn(-PI));
 	}
 	
 	@Test
@@ -180,8 +182,8 @@ public class WormTest {
 		assertTrue(fuzzyEquals(willy.getDirection(), 0));
 		assertEquals(willy.getActionPoints(), 183466713-10-10-13);
 		
-		willy.turn(-Math.PI);
-		assertFuzzyEquals(willy.getDirection(), Math.PI);
+		willy.turn(-PI);
+		assertFuzzyEquals(willy.getDirection(), PI);
 		assertEquals(willy.getActionPoints(), 183466713-10-10-13-30);
 	}
 	
@@ -206,17 +208,17 @@ public class WormTest {
 	
 	@Test
 	public void testGetCostForMove_LeftDirection(){
-		assertEquals(Worm.getCostForMove(2, Math.PI),2);
+		assertEquals(Worm.getCostForMove(2, PI),2);
 	}
 	
 	@Test
 	public void testGetCostForMove_UpDirection(){
-		assertEquals(Worm.getCostForMove(2, Math.PI/2),8);
+		assertEquals(Worm.getCostForMove(2, PI/2),8);
 	}
 	
 	@Test
 	public void testGetCostForMove_DownDirection(){
-		assertEquals(Worm.getCostForMove(2, 3*Math.PI/2),8);
+		assertEquals(Worm.getCostForMove(2, 3*PI/2),8);
 	}
 	
 	@Test
@@ -241,17 +243,17 @@ public class WormTest {
 	
 	@Test
 	public void testGetUnitStepCost_LeftDirection(){
-		assertFuzzyEquals(Worm.getUnitStepCost(Math.PI),1);
+		assertFuzzyEquals(Worm.getUnitStepCost(PI),1);
 	}
 	
 	@Test
 	public void testGetUnitStepCost_UpDirection(){
-		assertFuzzyEquals(Worm.getUnitStepCost(Math.PI/2),4);
+		assertFuzzyEquals(Worm.getUnitStepCost(PI/2),4);
 	}
 	
 	@Test
 	public void testGetUnitStepCost_DownDirection(){
-		assertFuzzyEquals(Worm.getUnitStepCost(3*Math.PI/2),4);
+		assertFuzzyEquals(Worm.getUnitStepCost(3*PI/2),4);
 	}
 	
 	@Test
@@ -364,8 +366,8 @@ public class WormTest {
 	@Test
 	public void testIsValidDirection_TrueCases(){
 		assertTrue(Worm.isValidDirection(0));
-		assertTrue(Worm.isValidDirection(Math.PI*2-0.001));
-		assertTrue(Worm.isValidDirection(Math.PI));
+		assertTrue(Worm.isValidDirection(PI*2-0.001));
+		assertTrue(Worm.isValidDirection(PI));
 		assertTrue(Worm.isValidDirection(2.14));
 	}
 	
@@ -381,13 +383,13 @@ public class WormTest {
 	
 	@Test
 	public void testIsValidDirection_TooBig(){
-		assertFalse(Worm.isValidDirection(5*Math.PI/2));
+		assertFalse(Worm.isValidDirection(5*PI/2));
 	}
 	
 	@Test
 	public void testSetDirection_LegalCase() throws Exception{
-		setDirection.invoke(willy,Math.PI);
-		assertFuzzyEquals(willy.getDirection(),Math.PI,PRECISION);
+		setDirection.invoke(willy,PI);
+		assertFuzzyEquals(willy.getDirection(),PI,PRECISION);
 	}
 	
 	@Test
