@@ -17,7 +17,6 @@ public class WormTest {
 	private Worm willy;
 	private Worm skippy,eiffelTower;
 	private Worm left,diagonal;
-	private static final double PRECISION = 1e-6;
 	
 	private static Method setXCoordinate;
 	private static Method setYCoordinate;
@@ -68,12 +67,12 @@ public class WormTest {
 		//			     	   x       y    dir.       r   name
 		Worm worm = new Worm(-8.45, 9.16, PI/2, 2.14, "Bar");
 
-		assertFuzzyEquals(worm.getXCoordinate(), -8.45, PRECISION);
-		assertFuzzyEquals(worm.getYCoordinate(), 9.16, PRECISION);
-		assertFuzzyEquals(worm.getDirection(), PI/2, PRECISION);
+		assertFuzzyEquals(worm.getXCoordinate(), -8.45);
+		assertFuzzyEquals(worm.getYCoordinate(), 9.16);
+		assertFuzzyEquals(worm.getDirection(), PI/2);
 		assertEquals(worm.getName(), "Bar");
-		assertFuzzyEquals(worm.getRadius(), 2.14, PRECISION);
-		assertFuzzyEquals(worm.getMass(), 43596.78321768277701414403, PRECISION);
+		assertFuzzyEquals(worm.getRadius(), 2.14);
+		assertFuzzyEquals(worm.getMass(), 43596.78321768277701414403);
 		assertEquals(worm.getMaxActionPoints(), 43597);
 		assertEquals(worm.getActionPoints(), 43597);
 	}
@@ -279,8 +278,8 @@ public class WormTest {
 	@Test
 	public void testMove_NormalCase(){
 		diagonal.move(3);
-		assertFuzzyEquals(diagonal.getXCoordinate(),4.1213203,PRECISION);
-		assertFuzzyEquals(diagonal.getYCoordinate(),-0.8786796,PRECISION);
+		assertFuzzyEquals(diagonal.getXCoordinate(),4.1213203);
+		assertFuzzyEquals(diagonal.getYCoordinate(),-0.8786796);
 		assertEquals(diagonal.getActionPoints(),diagonal.getMaxActionPoints()-11);
 	}
 	
@@ -324,7 +323,7 @@ public class WormTest {
 	@Test
 	public void testSetXCoordinate_LegalCase() throws Exception{
 		setXCoordinate.invoke(willy, 10);
-		assertFuzzyEquals(willy.getXCoordinate(),10,PRECISION);
+		assertFuzzyEquals(willy.getXCoordinate(),10);
 	}
 	
 	@Test
@@ -345,7 +344,7 @@ public class WormTest {
 	@Test
 	public void testSetYCoordinate_LegalCase() throws Exception{
 		setYCoordinate.invoke(willy, 10);
-		assertFuzzyEquals(willy.getYCoordinate(),10,PRECISION);
+		assertFuzzyEquals(willy.getYCoordinate(),10);
 	}
 	
 	@Test
@@ -389,7 +388,7 @@ public class WormTest {
 	@Test
 	public void testSetDirection_LegalCase() throws Exception{
 		setDirection.invoke(willy,PI);
-		assertFuzzyEquals(willy.getDirection(),PI,PRECISION);
+		assertFuzzyEquals(willy.getDirection(),PI);
 	}
 	
 	@Test
@@ -495,7 +494,7 @@ public class WormTest {
 	@Test
 	public void testSetRadius_TrueCase(){
 		willy.setRadius(97);
-		assertFuzzyEquals(97, willy.getRadius(), PRECISION);
+		assertFuzzyEquals(97, willy.getRadius());
 	}
 	
 	@Test
@@ -526,7 +525,7 @@ public class WormTest {
 	
 	@Test
 	public void testGetMass(){
-		assertFuzzyEquals(183466713.419263797, willy.getMass(), PRECISION);
+		assertFuzzyEquals(183466713.419263797, willy.getMass());
 	}
 	
 	@Test
@@ -604,8 +603,8 @@ public class WormTest {
 
 	public void testJump_CanJumpCase(){
 		skippy.jump();
-		assertFuzzyEquals(skippy.getXCoordinate(), -1.5098204, PRECISION);
-		assertFuzzyEquals(skippy.getYCoordinate(), -3.14, PRECISION);
+		assertFuzzyEquals(skippy.getXCoordinate(), -1.5098204);
+		assertFuzzyEquals(skippy.getYCoordinate(), -3.14);
 		assertEquals(skippy.getActionPoints(), 0);
 	}
 	
@@ -616,22 +615,22 @@ public class WormTest {
 	
 	@Test
 	public void testGetJumpForce_CanJumpCase(){
-		assertFuzzyEquals(skippy.getJumpForce(), 222303.8195708, PRECISION);
+		assertFuzzyEquals(skippy.getJumpForce(), 222303.8195708);
 	}
 	
 	@Test
 	public void testGetJumpForce_CanNotJumpCase(){
-		assertFuzzyEquals(eiffelTower.getJumpForce(), 0, PRECISION);
+		assertFuzzyEquals(eiffelTower.getJumpForce(), 0);
 	}
 	
 	@Test
 	public void testGetJumpVelocity_CanJumpCase(){
-		assertFuzzyEquals(skippy.getJumpVelocity(), 7.4033797, PRECISION);
+		assertFuzzyEquals(skippy.getJumpVelocity(), 7.4033797);
 	}
 	
 	@Test
 	public void testGetJumpVelocity_CanNotJumpCase(){
-		assertFuzzyEquals(eiffelTower.getJumpVelocity(), 0, PRECISION);
+		assertFuzzyEquals(eiffelTower.getJumpVelocity(), 0);
 	}
 	
 	@Test
@@ -646,20 +645,20 @@ public class WormTest {
 	
 	@Test
 	public void testGetJumpTime_CanJumpCase(){
-		assertFuzzyEquals(skippy.getJumpTime(), 1.3729202, PRECISION);
+		assertFuzzyEquals(skippy.getJumpTime(), 1.3729202);
 	}
 	
 	@Test
 	public void testGetJumpTime_CanNotJumpCase(){
-		assertFuzzyEquals(eiffelTower.getJumpTime(), 0, PRECISION);
+		assertFuzzyEquals(eiffelTower.getJumpTime(), 0);
 	}
 	
 	@Test
 	public void testGetJumpStep_MidAirCase(){
 		double[] jumpstep = skippy.getJumpStep(1);
 		assertEquals(jumpstep.length, 2);
-		assertFuzzyEquals(jumpstep[0], -0.36089306, PRECISION);
-		assertFuzzyEquals(jumpstep[1], -1.3114509, PRECISION);
+		assertFuzzyEquals(jumpstep[0], -0.36089306);
+		assertFuzzyEquals(jumpstep[1], -1.3114509);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
@@ -676,23 +675,23 @@ public class WormTest {
 	public void testGetJumpStep_AfterJumpCase(){
 		double[] jumpstep = skippy.getJumpStep(5);
 		assertEquals(jumpstep.length, 2);
-		assertFuzzyEquals(jumpstep[0], -1.5098204, PRECISION);
-		assertFuzzyEquals(jumpstep[1], -3.14, PRECISION);
+		assertFuzzyEquals(jumpstep[0], -1.5098204);
+		assertFuzzyEquals(jumpstep[1], -3.14);
 	}
 	
 	@Test
 	public void testGetJumpStep_BeforeJumpCase(){
 		double[] jumpstep = skippy.getJumpStep(0);
 		assertEquals(jumpstep.length, 2);
-		assertFuzzyEquals(jumpstep[0], 2.72, PRECISION);
-		assertFuzzyEquals(jumpstep[1], -3.14, PRECISION);
+		assertFuzzyEquals(jumpstep[0], 2.72);
+		assertFuzzyEquals(jumpstep[1], -3.14);
 	}
 	
 	@Test
 	public void testGetJumpStep_CanNotJumpCase(){
 		double[] jumpstep = eiffelTower.getJumpStep(1);
 		assertEquals(jumpstep.length, 2);
-		assertFuzzyEquals(jumpstep[0], 48.51, PRECISION);
-		assertFuzzyEquals(jumpstep[1], 2.21, PRECISION);
+		assertFuzzyEquals(jumpstep[0], 48.51);
+		assertFuzzyEquals(jumpstep[1], 2.21);
 	}
 }

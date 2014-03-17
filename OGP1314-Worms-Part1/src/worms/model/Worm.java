@@ -156,7 +156,7 @@ public class Worm {
 	 * 			| isValidTurningAngle(angle)
 	 * @return	Whether or not this worm has enough action points (APs) left
 	 * 			to perform a turn over the given angle.
-	 * 			| result == getActionPoints() >= getTurningCost(angle)
+	 * 			| result == (getActionPoints() >= getTurningCost(angle))
 	 */
 	public boolean canTurn(double angle){
 		// assert isValidTurningAngle(angle);
@@ -175,7 +175,7 @@ public class Worm {
 	 * @pre		The worm is able to turn over the given angle.
 	 * 			| canTurn(angle)
 	 * @post	This worm has turned over the given angle.
-	 * 			| new.getDirection() == posMod((getDirection() + angle), (2*PI))
+	 * 			| fuzzyEquals(new.getDirection(), posMod((getDirection() + angle), (2*PI)))
 	 * @post	The action points of this worm decreased appropriately.
 	 * 			| new.getActionPoints() == getActionPoints() - getTurningCost(angle)
 	 */
@@ -234,7 +234,7 @@ public class Worm {
 	 * 
 	 * @param direction		The direction for which the cost of the unit step should be calculated.
 	 * @return				Returns the cost of a unit step in the given direction. 
-	 * 						| result == abs(MathUtil.round(cos(direction),12))+4*abs(MathUtil.round(sin(direction),12))
+	 * 						| fuzzyEquals(result,abs(MathUtil.round(cos(direction),12))+4*abs(MathUtil.round(sin(direction),12)))
 	 * @note				This method does not round the cost to the next integer, it just calculates the fraction 
 	 * 						of action points required for a unit step in the given direction.
 	 * @throws IllegalArgumentException
@@ -263,8 +263,8 @@ public class Worm {
 	 * 
 	 * @param nbSteps		The number of steps to move this worm.
 	 * @post				This worm has moved nbSteps in the current direction
-	 * 						| new.getXCoordinate() == getXCoordinate()+nbSteps*cos(getDirection) && 
-	 * 						| new.getYCoordinate() == getYCoordinate()+nbSteps*sin(getDirection)
+	 * 						| fuzzyEquals(new.getXCoordinate(), getXCoordinate()+nbSteps*cos(getDirection)) &&
+	 * 						| fuzzyEquals(new.getYCoordinate(), getYCoordinate()+nbSteps*sin(getDirection))
 	 * @post				The action points are decreased with the cost of the movement.
 	 * 						| new.getActionPoints() == getActionPoints()-getCostForMovement(nbSteps,getDirection())
 	 * @throws IllegalArgumentException
@@ -290,9 +290,9 @@ public class Worm {
 	 * @param x		The number of metres to move along the x-axis
 	 * @param y		The number of metres to move along the y-axis
 	 * @post		The new x-coordinate of this worm equals the old x-coordinate plus the given offset along the x-axis.
-	 * 				| new.getXCoordinate() == getXCoordinate()+x
+	 * 				| fuzzyEquals(new.getXCoordinate(), getXCoordinate()+x)
 	 * @post		The new y-coordinate of this worm equals the old y-coordinate plus the given offset along the y-axis.
-	 * 				| new.getYCoordinate() == getYCoordinate()+y
+	 * 				| fuzzyEquals(new.getYCoordinate(), getYCoordinate()+y)
 	 * @throws IllegalArgumentException
 	 * 				Thrown when x or y is not a valid number
 	 * 				| Double.isNaN(x) || Double.isNaN(y)
@@ -581,7 +581,7 @@ public class Worm {
 	 * 			assuming the worm has a spherical body with a 
 	 * 			homogeneous density of Worm.DENSITY:
 	 * 			m = ρ*4/3*π*r³
-	 * 			| result == Worm.DENSITY*4.0/3*PI*pow(this.getRadius(), 3)
+	 * 			| fuzzyEquals(result,Worm.DENSITY*4.0/3*PI*pow(this.getRadius(), 3))
 	 */
 	public double getMass(){
 		return Worm.DENSITY*4.0/3*PI*pow(this.getRadius(), 3);
@@ -743,7 +743,7 @@ public class Worm {
 	 * 			its weight (its mass times the gravitational acceleration), in case he can jump.
 	 * 			Otherwise the result equals 0 Newton.
 	 * 			| if(canJump())
-	 * 			| 		then result == ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION))
+	 * 			| 		then fuzzyEquals(result, ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION)))
 	 * 			| else
 	 * 			|		then result == 0
 	 */
@@ -757,7 +757,7 @@ public class Worm {
 	 * Calculates the initial velocity of this worm (in m/s) in a potential jump from his current position.
 	 * 
 	 * @return	The (virtual) velocity of this worm (in m/s) equals the (virtual) force exerted by this worm divided by its mass and multiplied with 0.5 seconds.
-	 * 			| result == (getJumpForce()/getMass())*0.5;
+	 * 			| fuzzyEquals(result, (getJumpForce()/getMass())*0.5);
 	 * @note	This method will return 0 if the worm can't jump because getJumpForce() will equal 0.
 	 */
 	public double getJumpVelocity(){
@@ -779,7 +779,7 @@ public class Worm {
 	 * 
 	 * @return 	Returns the amount of time needed to complete his (virtual) jump from his current position when he can jump.
 	 * 			This time equals 2 times the y-component of the initial velocity divided by the gravitational acceleration.
-	 * 			| result == (2*getJumpVelocity()*sin(getDirection())/GRAVITATIONAL_ACCELERATION)
+	 * 			| fuzzyEquals(result, (2*getJumpVelocity()*sin(getDirection())/GRAVITATIONAL_ACCELERATION))
 	 * @note	This method will return 0 if the worm can't jump because getJumpVelocity() will equal 0.
 	 */
 	public double getJumpTime(){
@@ -794,8 +794,8 @@ public class Worm {
 	 * @return		An array of two doubles, the first one equals the x-coordinate t seconds after the jump, 
 	 * 				the second one equals the y-coordinate t seconds after the jump.
 	 * 				|	result.length == 2 &&
-	 * 				|	result[0] == (getXCoordinate()+(getJumpVelocity()*cos(getDirection())*min(t,getJumpTime())) &&
-	 * 				|	result[1] == (getYCoordinate()+(getJumpVelocity()*sin(getDirection())*min(t,getJumpTime()))-(GRAVITATIONAL_ACCELERATION/2*pow(time,2))
+	 * 				|	fuzzyEqulas(result[0], (getXCoordinate()+(getJumpVelocity()*cos(getDirection())*min(t,getJumpTime()))) &&
+	 * 				|	fuzzyEquals(result[1], (getYCoordinate()+(getJumpVelocity()*sin(getDirection())*min(t,getJumpTime()))-(GRAVITATIONAL_ACCELERATION/2*pow(time,2)))
 	 * @throws IllegalArgumentException
 	 * 				Thrown when t is not a valid number or is less than zero
 	 * 				| Double.isNaN(t) || t < 0
