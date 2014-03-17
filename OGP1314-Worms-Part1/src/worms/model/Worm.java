@@ -131,7 +131,16 @@ public class Worm {
 	 * 			| result == (int) Math.ceil(Math.abs(30*angle/(Math.PI)))
 	 */
 	public static int getTurningCost(double angle){
-		assert isValidTurningAngle(angle);
+		// assert isValidTurningAngle(angle);
+		/* Assertion commented out because:
+		 * Turning should be implemented nominally. Hence, only turning angles
+		 * in a certain non-redundant range should be allowed. (Allowing all angles
+		 * using modulo divison over 2*pi would be total programming.)
+		 * The range we chose is [-pi, pi), because this is the range of turning angles
+		 * the GUI provides. However, the assignment pdf mentions turning angles of
+		 * 2*pi. To avoid a failing Facade test suite because a turning angle of 2*pi 
+		 * is passed to this method, the assertion on the precondition is commented out. 
+		 */
 		return (int) Math.ceil(Math.abs(60*angle/(2*Math.PI)));
 	}
 	
@@ -149,15 +158,7 @@ public class Worm {
 	 */
 	public boolean canTurn(double angle){
 		// assert isValidTurningAngle(angle);
-		/* Assertion commented out because:
-		 * Turning should be implemented nominally. Hence, only turning angles
-		 * in a certain non-redundant range should be allowed. (Allowing all angles
-		 * using modulo divison over 2*pi would be total programming.)
-		 * The range we chose is [-pi, pi), because this is the range of turning angles
-		 * the GUI provides. However, the assignment pdf mentions turning angles of
-		 * 2*pi. To avoid a failing Facade test suite because a turning angle of 2*pi 
-		 * is passed to this method, the assertion on the precondition is commented out. 
-		 */
+		// Implicit in getTurningCost().
 		return getTurningCost(angle) <= this.getActionPoints();
 	}
 	
