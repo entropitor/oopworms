@@ -29,13 +29,20 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public boolean canTurn(Worm worm, double angle) {
-		return worm.canTurn(angle);
+	public boolean canTurn(Worm worm, double angle) throws ModelException {
+//		if (worm.isValidTurningAngle(angle))
+			return worm.canTurn(angle);
+//		else
+//			throw new ModelException("The given angle is not a valid angle to turn a Worm over.");
+			// Check on precondition commented out: see canTurn() for the reason why.
 	}
 
 	@Override
-	public void turn(Worm worm, double angle) {
-		worm.turn(angle);
+	public void turn(Worm worm, double angle) throws ModelException {
+		if (worm.canTurn(angle))
+			worm.turn(angle);
+		else
+			throw new ModelException("The worm can not turn over the given angle.");
 	}
 
 	@Override
@@ -82,8 +89,12 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void setRadius(Worm worm, double newRadius) {
-		worm.setRadius(newRadius);
+	public void setRadius(Worm worm, double newRadius) throws ModelException {
+		try{
+			worm.setRadius(newRadius);
+		}catch(IllegalArgumentException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
