@@ -5,6 +5,8 @@ import be.kuleuven.cs.som.annotate.*;
 import static worms.util.Util.*;
 import static worms.util.ModuloUtil.posMod;
 
+import static java.lang.Math.*;
+
 /**
  * A class of worms with position, direction, radius and a name.
  * 
@@ -108,13 +110,13 @@ public class Worm {
 	 * @param angle
 	 * 			The turning angle (in radians) to check.
 	 * @return	Whether or not the given angle is in the range [-pi, pi)
-	 * 			| result == fuzzyGreaterThanOrEqualTo(angle, -Math.PI)
-	 *			|			&& Double.compare(angle, Math.PI) < 0;
+	 * 			| result == fuzzyGreaterThanOrEqualTo(angle, -PI)
+	 *			|			&& Double.compare(angle, PI) < 0;
 	 * @note	(NaN check is implicit in "worms.util.Util.fuzzy[..]") 
 	 */
 	public static boolean isValidTurningAngle(double angle){
-		return fuzzyGreaterThanOrEqualTo(angle, -Math.PI)
-				&& Double.compare(angle, Math.PI) < 0;
+		return fuzzyGreaterThanOrEqualTo(angle, -PI)
+				&& Double.compare(angle, PI) < 0;
 	}
 	
 	/**
@@ -128,7 +130,7 @@ public class Worm {
 	 * @return	The cost of a turn over the given angle, directly
 	 * 			proportional with the given angle - where a 180° turn
 	 *			costs 30 APs - rounded up to the nearest integer.
-	 * 			| result == (int) Math.ceil(Math.abs(30*angle/(Math.PI)))
+	 * 			| result == (int) ceil(abs(30*angle/(PI)))
 	 */
 	public static int getTurningCost(double angle){
 		// assert isValidTurningAngle(angle);
@@ -141,7 +143,7 @@ public class Worm {
 		 * 2*pi. To avoid a failing Facade test suite because a turning angle of 2*pi 
 		 * is passed to this method, the assertion on the precondition is commented out. 
 		 */
-		return (int) Math.ceil(Math.abs(60*angle/(2*Math.PI)));
+		return (int) ceil(abs(60*angle/(2*PI)));
 	}
 	
 	/**
@@ -173,14 +175,14 @@ public class Worm {
 	 * @pre		The worm is able to turn over the given angle.
 	 * 			| canTurn(angle)
 	 * @post	This worm has turned over the given angle.
-	 * 			| fuzzyEquals(new.getDirection(), posMod((getDirection() + angle), (2*Math.PI)))
+	 * 			| fuzzyEquals(new.getDirection(), posMod((getDirection() + angle), (2*PI)))
 	 * @post	The action points of this worm decreased appropriately.
 	 * 			| new.getActionPoints() == getActionPoints() - getTurningCost(angle)
 	 */
 	public void turn(double angle){
 		// (We do not assert the first precondition, as this is done in canTurn())
 		assert canTurn(angle);
-		this.setDirection(posMod((this.getDirection() + angle), (2*Math.PI)));
+		this.setDirection(posMod((this.getDirection() + angle), (2*PI)));
 		this.decreaseActionPoints(getTurningCost(angle));
 	}
 	
@@ -204,7 +206,7 @@ public class Worm {
 	 * @param nbSteps 		The number of steps in the movement.
 	 * @param direction		The direction in which the worm will move.
 	 * @return				The result equals nbSteps times the cost of a unit step in the current direction, rounded up to the next integer.
-	 * 						| result == (int)(Math.ceil(nbSteps*getUnitStepCost(direction)))
+	 * 						| result == (int)(ceil(nbSteps*getUnitStepCost(direction)))
 	 * @throws IllegalArgumentException 
 	 * 						Thrown when nbSteps is less than zero.
 	 * 						| nbSteps < 0
@@ -218,7 +220,7 @@ public class Worm {
 		if(!isValidDirection(direction))
 			throw new IllegalArgumentException("Illegal direction");
 		
-		return (int)(Math.ceil(nbSteps*getUnitStepCost(direction)));
+		return (int)(ceil(nbSteps*getUnitStepCost(direction)));
 	}
 	
 	/**
@@ -232,7 +234,7 @@ public class Worm {
 	 * 
 	 * @param direction		The direction for which the cost of the unit step should be calculated.
 	 * @return				Returns the cost of a unit step in the given direction. 
-	 * 						| fuzzyEquals(result,Math.abs(MathUtil.round(Math.cos(direction),12))+4*Math.abs(MathUtil.round(Math.sin(direction),12)))
+	 * 						| fuzzyEquals(result,abs(MathUtil.round(cos(direction),12))+4*abs(MathUtil.round(sin(direction),12)))
 	 * @note				This method does not round the cost to the next integer, it just calculates the fraction 
 	 * 						of action points required for a unit step in the given direction.
 	 * @throws IllegalArgumentException
@@ -245,13 +247,13 @@ public class Worm {
 		
 		int precision = 12;
 		
-		double xCost = Math.cos(direction);
+		double xCost = cos(direction);
 		xCost = MathUtil.round(xCost, precision);
-		xCost = Math.abs(xCost);
+		xCost = abs(xCost);
 		
-		double yCost = 4*Math.sin(direction);
+		double yCost = 4*sin(direction);
 		yCost = MathUtil.round(yCost, precision);
-		yCost = Math.abs(yCost);
+		yCost = abs(yCost);
 		
 		return xCost+yCost;
 	}
@@ -261,8 +263,8 @@ public class Worm {
 	 * 
 	 * @param nbSteps		The number of steps to move this worm.
 	 * @post				This worm has moved nbSteps in the current direction
-	 * 						| fuzzyEquals(new.getXCoordinate(), getXCoordinate()+nbSteps*Math.cos(getDirection)) &&
-	 * 						| fuzzyEquals(new.getYCoordinate(), getYCoordinate()+nbSteps*Math.sin(getDirection))
+	 * 						| fuzzyEquals(new.getXCoordinate(), getXCoordinate()+nbSteps*cos(getDirection)) &&
+	 * 						| fuzzyEquals(new.getYCoordinate(), getYCoordinate()+nbSteps*sin(getDirection))
 	 * @post				The action points are decreased with the cost of the movement.
 	 * 						| new.getActionPoints() == getActionPoints()-getCostForMovement(nbSteps,getDirection())
 	 * @throws IllegalArgumentException
@@ -278,7 +280,7 @@ public class Worm {
 		if(!canMove(nbSteps))
 			throw new IllegalStateException("Has not enough action points to move.");
 		
-		moveWith(nbSteps*Math.cos(getDirection()),nbSteps*Math.sin(getDirection()));
+		moveWith(nbSteps*cos(getDirection()),nbSteps*sin(getDirection()));
 		decreaseActionPoints(getCostForMove(nbSteps,getDirection()));
 	}
 	
@@ -405,13 +407,13 @@ public class Worm {
 	 * Checks whether the given direction is a valid direction.
 	 * 
 	 * @param direction The direction to check
-	 * @return 	Whether or not direction is a valid number between 0 and 2*Math.PI
-	 * 			| result == (!double.isNaN(direction) && 0 <= direction && direction < 2*Math.PI)
+	 * @return 	Whether or not direction is a valid number between 0 and 2*PI
+	 * 			| result == (!double.isNaN(direction) && 0 <= direction && direction < 2*PI)
 	 */
 	public static boolean isValidDirection(double direction){
 		if(Double.isNaN(direction))
 			return false;
-		return 0 <= direction && direction < 2*Math.PI;
+		return 0 <= direction && direction < 2*PI;
 	}
 	
 	/**
@@ -554,7 +556,7 @@ public class Worm {
 	 * 			| new.getRadius() == radius
 	 * @post	If the given radius is smaller than the current radius so that the current action points 
 	 * 			are no longer smaller than the (new) maximum of action points, the new current action points will equal the new maximum of action points.
-	 * 			| if((int) Math.round(Worm.DENSITY*4.0/3*Math.PI*Math.pow(radius, 3)) <= this.getActionPoints())
+	 * 			| if(new.getMaxActionPoints() <= this.getActionPoints())
 	 * 			|		then new.getActionPoints() == new.getMaxActionPoints()
 	 * @throws	IllegalArgumentException
 	 * 			The given radius is not a valid radius for this worm.
@@ -579,10 +581,10 @@ public class Worm {
 	 * 			assuming the worm has a spherical body with a 
 	 * 			homogeneous density of Worm.DENSITY:
 	 * 			m = ρ*4/3*π*r³
-	 * 			| fuzzyEquals(result,Worm.DENSITY*4.0/3*Math.PI*Math.pow(this.getRadius(), 3))
+	 * 			| fuzzyEquals(result,Worm.DENSITY*4.0/3*PI*pow(this.getRadius(), 3))
 	 */
 	public double getMass(){
-		return Worm.DENSITY*4.0/3*Math.PI*Math.pow(this.getRadius(), 3);
+		return Worm.DENSITY*4.0/3*PI*pow(this.getRadius(), 3);
 	}
 	
 	/**
@@ -598,10 +600,10 @@ public class Worm {
 	 * 
 	 * @return	The maximum number of this worm, equal to its mass
 	 * 			rounded to the nearest integer.
-	 * 			| result == (int) Math.round(getMass());
+	 * 			| result == (int) round(getMass());
 	 */
 	public int getMaxActionPoints(){
-		return (int) Math.round(this.getMass());
+		return (int) round(this.getMass());
 	}
 	
 	 /**
@@ -766,10 +768,10 @@ public class Worm {
 	 * Checks whether this worm is in a position to jump.
 	 * 
 	 * @return		Whether or not this worm is facing upwards.
-	 * 				| result == (getDirection() <= Math.PI)
+	 * 				| result == (getDirection() <= PI)
 	 */
 	public boolean canJump(){
-		return (getDirection() <= Math.PI);
+		return (getDirection() <= PI);
 	}
 	
 	/**
@@ -777,11 +779,11 @@ public class Worm {
 	 * 
 	 * @return 	Returns the amount of time needed to complete his (virtual) jump from his current position when he can jump.
 	 * 			This time equals 2 times the y-component of the initial velocity divided by the gravitational acceleration.
-	 * 			| fuzzyEquals(result, (2*getJumpVelocity()*Math.sin(getDirection())/GRAVITATIONAL_ACCELERATION))
+	 * 			| fuzzyEquals(result, (2*getJumpVelocity()*sin(getDirection())/GRAVITATIONAL_ACCELERATION))
 	 * @note	This method will return 0 if the worm can't jump because getJumpVelocity() will equal 0.
 	 */
 	public double getJumpTime(){
-		return (2*getJumpVelocity()*Math.sin(getDirection())/GRAVITATIONAL_ACCELERATION);
+		return (2*getJumpVelocity()*sin(getDirection())/GRAVITATIONAL_ACCELERATION);
 	}
 	
 	/**
@@ -792,8 +794,8 @@ public class Worm {
 	 * @return		An array of two doubles, the first one equals the x-coordinate t seconds after the jump, 
 	 * 				the second one equals the y-coordinate t seconds after the jump.
 	 * 				|	result.length == 2 &&
-	 * 				|	fuzzyEqulas(result[0], (getXCoordinate()+(getJumpVelocity()*Math.cos(getDirection())*Math.min(t,getJumpTime()))) &&
-	 * 				|	fuzzyEquals(result[1], (getYCoordinate()+(getJumpVelocity()*Math.sin(getDirection())*Math.min(t,getJumpTime()))-(GRAVITATIONAL_ACCELERATION/2*Math.pow(time,2)))
+	 * 				|	fuzzyEqulas(result[0], (getXCoordinate()+(getJumpVelocity()*cos(getDirection())*min(t,getJumpTime()))) &&
+	 * 				|	fuzzyEquals(result[1], (getYCoordinate()+(getJumpVelocity()*sin(getDirection())*min(t,getJumpTime()))-(GRAVITATIONAL_ACCELERATION/2*pow(time,2)))
 	 * @throws IllegalArgumentException
 	 * 				Thrown when t is not a valid number or is less than zero
 	 * 				| Double.isNaN(t) || t < 0
@@ -805,12 +807,12 @@ public class Worm {
 			throw new IllegalArgumentException("Illegal timestep");
 		
 		//If t > getJumpTime() => jump is over, use getJumpTime() as time instead of t.
-		double time = Math.min(t,getJumpTime());
+		double time = min(t,getJumpTime());
 		double velocity = getJumpVelocity();
 		double direction = getDirection();
 		
-		double newX = getXCoordinate()+(velocity*Math.cos(direction)*time);
-		double newY = getYCoordinate()+(velocity*Math.sin(direction)*time)-(GRAVITATIONAL_ACCELERATION/2*Math.pow(time,2));
+		double newX = getXCoordinate()+(velocity*cos(direction)*time);
+		double newY = getYCoordinate()+(velocity*sin(direction)*time)-(GRAVITATIONAL_ACCELERATION/2*pow(time,2));
 		return new double[]{newX,newY};
 	}
 }
