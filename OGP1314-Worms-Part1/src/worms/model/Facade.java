@@ -32,7 +32,7 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void turn(Worm worm, double angle) {
+	public void turn(Worm worm, double angle) throws ModelException {
 		if (worm.canTurn(angle))
 			worm.turn(angle);
 		else
@@ -80,7 +80,7 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void setRadius(Worm worm, double newRadius) {
+	public void setRadius(Worm worm, double newRadius) throws ModelException {
 		try{
 			worm.setRadius(newRadius);
 		}catch(IllegalArgumentException e){
