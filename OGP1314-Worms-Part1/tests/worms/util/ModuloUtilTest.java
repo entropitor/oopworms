@@ -1,6 +1,5 @@
 package worms.util;
 
-import static org.junit.Assert.*;
 import static worms.util.AssertUtil.*;
 import static worms.util.ModuloUtil.posMod;
 
