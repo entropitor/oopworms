@@ -72,10 +72,7 @@ public class Worm {
 	 * 			| !canHaveAsRadius(radius)
 	 */
 	@Raw
-	public Worm(double x, double y, double direction, double radius, String name) throws IllegalArgumentException{
-		//TODO complete.
-		//TODO complete documentation. (throwables, pre-condities, ...)
-		
+	public Worm(double x, double y, double direction, double radius, String name) throws IllegalArgumentException{		
 		//Next check is implicit in setXPosition() and setYPosition()
 		//if(!isValidPosition(x,y))
 		//		throw new IllegalArgumentException("Illegal Position");
