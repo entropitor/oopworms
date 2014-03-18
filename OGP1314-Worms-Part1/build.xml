@@ -15,6 +15,7 @@
     <property name="report.dir"  value="${build.dir}/testreport"/>
 
     <property name="lib.dir"     value="lib"/>
+    <property name="resources.dir" value="resources"/>
 
     <property name="main-class"  value="worms.Worms"/>
 
@@ -42,6 +43,7 @@
         <mkdir dir="${jar.dir}"/>
         <jar destfile="${jar.file}">
             <fileset dir="${classes.dir}"/>
+            <fileset dir="${resources.dir}"/>
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
@@ -85,6 +87,7 @@
             <fileset dir="${src.own.dir}"/>
             <fileset dir="${src.given.dir}"/>
             <fileset dir="${test.dir}"/>
+            <fileset dir="${resources.dir}"/>
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>

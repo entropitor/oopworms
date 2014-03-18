@@ -81,7 +81,7 @@ public class ImageSprite extends Sprite {
 
 	protected BufferedImage loadImage(String filename) {
 		try {
-			return ImageIO.read(new File(filename));
+			return ImageIO.read(this.getClass().getResource("/"+filename));
 		} catch (IOException e) {
 			throw new RuntimeException(
 					"Could not read file '" + filename + "'", e);
