@@ -30,11 +30,11 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean canTurn(Worm worm, double angle) throws ModelException {
+// 		Check on precondition is commented out: see Worm.getTurningCost() for the reason why.
 //		if (worm.isValidTurningAngle(angle))
 			return worm.canTurn(angle);
 //		else
 //			throw new ModelException("The given angle is not a valid angle to turn a Worm over.");
-			// Check on precondition commented out: see canTurn() for the reason why.
 	}
 
 	@Override
