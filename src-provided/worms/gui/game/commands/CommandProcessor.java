@@ -1,6 +1,7 @@
 package worms.gui.game.commands;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class CommandProcessor {
@@ -26,11 +27,18 @@ public class CommandProcessor {
 		}
 		if (executingCommand != null) {
 			executingCommand.update(timeDelta);
-			while (executingCommand != null
-					&& executingCommand.isFinished()) {
+			while (executingCommand != null && executingCommand.isTerminated()) {
 				startNextCommand();
 			}
 		}
+	}
+
+	public List<Command> getCommandStack() {
+		List<Command> result = new LinkedList<Command>(commandQueue);
+		if (executingCommand != null) {
+			result.add(0, executingCommand);
+		}
+		return result;
 	}
 
 }

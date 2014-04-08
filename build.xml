@@ -12,7 +12,9 @@
     <property name="jar.file"    value="${jar.dir}/${ant.project.name}.jar"/>
     <property name="submitjar.file" value="${jar.dir}/${ant.project.name}_with_src.jar"/>
 
-    <property name="test.dir"   value="tests"/>
+    <property name="test.own.dir"   value="tests-private"/>
+    <property name="test.given.dir" value="tests"/>
+    <property name="test.dir" value="${test.given.dir};${test.own.dir}"/>
     <property name="report.dir"  value="${build.dir}/testreport"/>
 
     <property name="lib.dir"     value="lib"/>
@@ -71,7 +73,8 @@
             <formatter type="xml"/>
 
             <batchtest fork="yes" todir="${report.dir}">
-                <fileset dir="${test.dir}"/>
+                <fileset dir="${test.given.dir}"/>
+                <fileset dir="${test.own.dir}"/>
             </batchtest>
         </junit>
     </target>
@@ -89,7 +92,8 @@
             <fileset dir="${classes.dir}"/>
             <fileset dir="${src.own.dir}"/>
             <fileset dir="${src.given.dir}"/>
-            <fileset dir="${test.dir}"/>
+            <fileset dir="${test.own.dir}"/>
+            <fileset dir="${test.given.dir}"/>
             <fileset dir="${resources.dir}"/>
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>

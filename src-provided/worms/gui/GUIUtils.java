@@ -1,20 +1,14 @@
 package worms.gui;
 
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 import worms.util.Util;
 
 public class GUIUtils {
-
-	public static double meterToPixels(double m) {
-		return m * GUIConstants.WORLD_SCALE;
-	}
-
-	public static double pixelToMeter(double p) {
-		return p / GUIConstants.WORLD_SCALE;
-	}
 
 	public static Ellipse2D.Double circleAt(double centerX, double centerY,
 			double r) {
@@ -49,5 +43,13 @@ public class GUIUtils {
 		double dx = x1 - x2;
 		double dy = y1 - y2;
 		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	public static Image scaleTo(BufferedImage image, int screenWidth,
+			int screenHeight, int hints) {
+		double ratio = Math.min((double) screenHeight / image.getHeight(),
+				(double) screenWidth / image.getWidth());
+		return image.getScaledInstance((int) (ratio * image.getWidth()),
+				(int) (ratio * image.getHeight()), hints);
 	}
 }

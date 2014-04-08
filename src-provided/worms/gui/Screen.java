@@ -5,80 +5,39 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 
 import javax.swing.JPanel;
 
+import worms.gui.messages.Message;
+import worms.gui.messages.MessageDisplay;
+import worms.gui.messages.MessagePainter;
+import worms.gui.messages.MessageType;
+
 public abstract class Screen {
 
-	protected class InputMode implements KeyListener, MouseListener,
-			MouseMotionListener {
-
-		public void paintOverlay(Graphics2D g) {
-		}
-
-		@Override
-		public void keyPressed(KeyEvent e) {
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-		}
-
-		@Override
-		public void keyTyped(KeyEvent e) {
-		}
-
-		@Override
-		public void mouseClicked(MouseEvent e) {
-
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent e) {
-
-		}
-
-		@Override
-		public void mouseExited(MouseEvent e) {
-
-		}
-
-		@Override
-		public void mousePressed(MouseEvent e) {
-
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e) {
-
-		}
-
-		@Override
-		public void mouseDragged(MouseEvent e) {
-		}
-
-		@Override
-		public void mouseMoved(MouseEvent e) {
-		}
-	}
+	private MessageDisplay messageDisplay = new MessageDisplay();
 
 	private final WormsGUI gui;
 	private final Component contents;
+	private final MessagePainter messagePainter;
 
 	protected Screen(WormsGUI gui) {
 		this.gui = gui;
+		
 		this.contents = createContents();
 		contents.setFocusable(true);
 		contents.setFocusTraversalKeysEnabled(false);
+		
+		this.messagePainter = createMessagePainter();
+		
 		switchInputMode(createDefaultInputMode());
 	}
 
-	public Component getPanel() {
+	protected MessagePainter createMessagePainter() {
+		return new MessagePainter(this);
+	}
+
+	public Component getContents() {
 		return contents;
 	}
 
@@ -94,6 +53,8 @@ public abstract class Screen {
 
 				Screen.this.paintScreen(graphics);
 
+				Screen.this.paintMessage(graphics);
+
 				getCurrentInputMode().paintOverlay(graphics);
 			}
 		};
@@ -105,15 +66,15 @@ public abstract class Screen {
 		return gui;
 	}
 
-	protected abstract InputMode createDefaultInputMode();
+	protected abstract InputMode<? extends Screen> createDefaultInputMode();
 
-	private InputMode currentInputMode;
+	private InputMode<? extends Screen> currentInputMode;
 
-	protected InputMode getCurrentInputMode() {
+	public InputMode<? extends Screen> getCurrentInputMode() {
 		return currentInputMode;
 	}
 
-	protected void switchInputMode(InputMode newMode) {
+	public <ST extends Screen> void switchInputMode(InputMode<ST> newMode) {
 		if (currentInputMode != null) {
 			contents.removeKeyListener(currentInputMode);
 			contents.removeMouseListener(currentInputMode);
@@ -130,39 +91,36 @@ public abstract class Screen {
 	protected void paintScreen(Graphics2D g) {
 	}
 
-	public final void startScreen() {
-		getPanel().requestFocusInWindow();
-		screenStarted();
+	protected void paintMessage(Graphics2D g) {
+		Message message = messageDisplay.getMessage();
+		if (message != null && messagePainter != null) {
+			messagePainter.paintMessage(g, message);
+		}
 	}
-	
-	protected abstract void screenStarted();
+
+	public void addMessage(String message, MessageType type) {
+		messageDisplay.addMessage(message, type);
+		getContents().repaint();
+	}
+
+	public void screenStarted() {
+	}
 
 	public int getScreenHeight() {
-		return getPanel().getHeight();
+		return getContents().getHeight();
 	}
 
 	public int getScreenWidth() {
-		return getPanel().getWidth();
+		return getContents().getWidth();
 	}
 
 	public void repaint() {
-		getPanel().repaint();
+		getContents().repaint();
 	}
 
-	public double getScreenX(double x) {
-		return getScreenWidth() / 2.0 + GUIUtils.meterToPixels(x);
+	public void screenStopped() {
+		switchInputMode(null);
 	}
 
-	public double getLogicalX(double screenX) {
-		return GUIUtils.pixelToMeter(screenX - getScreenWidth() / 2.0);
-	}
-
-	public double getScreenY(double y) {
-		return getScreenHeight() / 2.0 - GUIUtils.meterToPixels(y);
-	}
-
-	public double getLogicalY(double screenY) {
-		return GUIUtils.pixelToMeter(getScreenHeight() / 2.0 - screenY);
-	}
 
 }

@@ -1,7 +1,7 @@
 package worms.gui.game.commands;
 
 import worms.gui.game.PlayGameScreen;
-import worms.gui.game.sprites.WormSprite;
+import worms.gui.messages.MessageType;
 import worms.model.IFacade;
 import worms.model.Worm;
 
@@ -16,19 +16,18 @@ public class Turn extends InstantaneousCommand {
 	}
 
 	@Override
-	protected boolean canExecute() {
+	protected boolean canStart() {
 		return getFacade().canTurn(worm, angle);
 	}
-	
+
 	@Override
-	protected void executionCancelled() {
-		getScreen().addMessage("This worm cannot perform that turn :(");
+	protected void afterExecutionCancelled() {
+		getScreen().addMessage("This worm cannot perform that turn :(",
+				MessageType.ERROR);
 	}
-	
+
 	@Override
 	protected void doStartExecution() {
 		getFacade().turn(worm, angle);
-		WormSprite sprite = getScreen().getWormSprite(worm);
-		sprite.setDirection(getFacade().getOrientation(worm));
 	}
 }

@@ -31,12 +31,16 @@ public class WormsGUI {
 
 	public void switchToScreen(Screen newScreen) {
 		if (currentScreen != null) {
-			screenPanel.remove(currentScreen.getPanel());
+			currentScreen.screenStopped();
+			screenPanel.remove(currentScreen.getContents());
 		}
-		screenPanel.add(newScreen.getPanel(), BorderLayout.CENTER);
-		screenPanel.validate();
-		currentScreen = newScreen;
-		newScreen.startScreen();
+		currentScreen = newScreen;			
+		if (newScreen != null) {
+			screenPanel.add(newScreen.getContents(), BorderLayout.CENTER);
+			screenPanel.validate();
+			setFocusToCurrentScreen();
+			newScreen.screenStarted();
+		}
 	}
 
 	public void start() {
@@ -70,18 +74,29 @@ public class WormsGUI {
 		this.window = new JFrame("Worms");
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowGainedFocus(WindowEvent e) {
+				setFocusToCurrentScreen();
+			}
+
+			@Override
+			public void windowActivated(WindowEvent e) {
+				setFocusToCurrentScreen();
+			}
+
+			@Override
 			public void windowClosing(WindowEvent e) {
 				exit();
 			};
 		});
+		window.setFocusable(false);
 		window.setFocusTraversalKeysEnabled(false);
 
 		this.screenPanel = new JPanel();
 		screenPanel.setLayout(new BorderLayout());
 		screenPanel.setBackground(Color.WHITE);
+		screenPanel.setFocusable(false);
 		window.getContentPane().add(screenPanel);
-
-		window.setFocusable(false);
 
 		GraphicsDevice device = env.getDefaultScreenDevice();
 		if (device.isFullScreenSupported() && !options.disableFullScreen) {
@@ -118,9 +133,15 @@ public class WormsGUI {
 	public int getWidth() {
 		return currentScreen.getScreenWidth();
 	}
-	
+
 	public int getHeight() {
 		return currentScreen.getScreenHeight();
+	}
+
+	private void setFocusToCurrentScreen() {
+		if (currentScreen != null) {
+			currentScreen.getContents().requestFocusInWindow();
+		}
 	}
 
 }

@@ -6,15 +6,12 @@ import worms.model.IFacade;
 import worms.model.ModelException;
 import worms.model.Worm;
 
-public class Rename extends InstantaneousCommand {
-	private final String newName;
+public class SelectNextWeapon extends InstantaneousCommand {
 	private final Worm worm;
 
-	public Rename(IFacade facade, Worm worm, String newName,
-			PlayGameScreen screen) {
+	public SelectNextWeapon(IFacade facade, Worm worm, PlayGameScreen screen) {
 		super(facade, screen);
 		this.worm = worm;
-		this.newName = newName;
 	}
 
 	@Override
@@ -25,10 +22,10 @@ public class Rename extends InstantaneousCommand {
 	@Override
 	protected void doStartExecution() {
 		try {
-			getFacade().rename(worm, newName);
+			getFacade().selectNextWeapon(worm);
 		} catch (ModelException e) {
-			// an invalid name
-			getScreen().addMessage("Invalid name: " + newName, MessageType.ERROR);
+			getScreen().addMessage("Cannot select next weapon :(",
+					MessageType.ERROR);
 		}
 	}
 }

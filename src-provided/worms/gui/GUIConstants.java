@@ -15,22 +15,17 @@ public final class GUIConstants {
 	/**
 	 * Framerate at which to re-draw the screen, in frames per (real) second
 	 */
-	public static final int FRAMERATE = 30; // fps
+	public static final int FRAMERATE = 15; // fps
 
 	/**
 	 * Time (in worm-seconds) that elapses in 1 real second
 	 */
-	public static final double TIME_SCALE = 2;
-
-	/**
-	 * Scale at which the game is drawn to the screen (in pixels per worm-meter)
-	 */
-	public static double WORLD_SCALE = 45;
+	public static final double TIME_SCALE = 0.7;
 
 	/**
 	 * Minimal angle to turn when pressing the 'turn' key a single time
 	 */
-	public static final double MIN_TURN_ANGLE = Math.PI / 60.0;
+	public static final double MIN_TURN_ANGLE = Math.PI / 120.0;
 
 	/**
 	 * Angle that is turned per (real) second while keeping the 'turn' keys
@@ -39,24 +34,24 @@ public final class GUIConstants {
 	public static final double ANGLE_TURNED_PER_SECOND = Math.PI;
 
 	/**
-	 * Number of steps to take when pressing the 'move' key a single time
-	 */
-	public static final int DEFAULT_NB_STEPS = 1;
-
-	/**
 	 * Duration of the move animation for a single step (in worm-seconds)
 	 */
-	public static final double MOVE_DURATION = 1;
-
-	/**
-	 * Fraction by which to expand or shrink a worm's radius when resizing
-	 */
-	public static final double RESIZE_FACTOR = 0.1;
+	public static final double MOVE_DURATION = 0.1;
 
 	/**
 	 * Time to display messages on the screen (in real seconds)
 	 */
-	public static final double MESSAGE_DISPLAY_TIME = 1.0;
+	public static final double MESSAGE_DISPLAY_TIME = 1.5;
+
+	/**
+	 * Default velocity with which worms fall down (in worm-meter per worm-seconds) 
+	 */
+	public static final double FALL_VELOCITY = 5.0;
+	
+	/**
+	 * Time step to use when calculating jump positions
+	 */
+	public static final double JUMP_TIME_STEP = 1e-4;
 
 	/* disable instantiations */
 	private GUIConstants() {

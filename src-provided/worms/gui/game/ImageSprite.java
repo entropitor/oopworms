@@ -1,4 +1,4 @@
-package worms.gui.game.sprites;
+package worms.gui.game;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class ImageSprite extends Sprite {
+public abstract class ImageSprite<T> extends Sprite<T> {
 
 	// original image, at original scale
 	private final BufferedImage originalImage;
@@ -22,10 +22,11 @@ public class ImageSprite extends Sprite {
 
 	private double scale;
 
-	public ImageSprite(String filename) {
+	protected ImageSprite(PlayGameScreen screen, String filename) {
+		super(screen);
+		this.scale = 1.0;
 		this.originalImage = loadImage(filename);
 		this.scaledImage = originalImage;
-		this.scale = 1.0;
 	}
 
 	@Override
@@ -46,12 +47,16 @@ public class ImageSprite extends Sprite {
 		return originalImage.getHeight();
 	}
 
-	public void setScale(double scale) {
-		this.scale = scale;
-		if (scale != 1.0) {
+	public void setScale(double newScale) {
+		if (newScale == this.scale) {
+			return;
+		}
+		
+		this.scale = newScale;
+		if (newScale != 1.0) {
 			this.scaledImage = toBufferedImage(originalImage.getScaledInstance(
-					(int) (scale * originalImage.getWidth()),
-					(int) (scale * originalImage.getHeight()),
+					(int) (newScale * originalImage.getWidth()),
+					(int) (newScale * originalImage.getHeight()),
 					Image.SCALE_SMOOTH));
 		} else {
 			this.scaledImage = originalImage;
@@ -81,7 +86,7 @@ public class ImageSprite extends Sprite {
 
 	protected BufferedImage loadImage(String filename) {
 		try {
-			return ImageIO.read(this.getClass().getResource("/"+filename));
+			return ImageIO.read(new File(filename));
 		} catch (IOException e) {
 			throw new RuntimeException(
 					"Could not read file '" + filename + "'", e);
@@ -114,7 +119,7 @@ public class ImageSprite extends Sprite {
 		BufferedImage result = new BufferedImage(img.getWidth(null),
 				img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
-		Graphics2D resultGraphics = result.createGraphics();
+		Graphics2D resultGraphics = result.createGraphics(); 
 		resultGraphics.drawImage(img, 0, 0, null);
 		resultGraphics.dispose();
 

@@ -2,6 +2,7 @@ package worms.gui.game.commands;
 
 import worms.gui.game.PlayGameScreen;
 import worms.model.IFacade;
+import worms.model.World;
 
 public abstract class Command {
 
@@ -25,44 +26,109 @@ public abstract class Command {
 		return facade;
 	}
 
+	protected World getWorld() {
+		return getScreen().getWorld();
+	}
+
 	public final void startExecution() {
-		if (canExecute()) {
+		if (canStart()) {
 			doStartExecution();
 			started = true;
+			afterExecutionStarted();
 		} else {
-			cancelled = true;
-			executionCancelled();
+			cancelExecution();
 		}
+	}
+
+	protected final void cancelExecution() {
+		cancelled = true;
+		afterExecutionCancelled();
 	}
 
 	public final void update(double dt) {
-		elapsedTime += dt;
-		if (!isFinished()) {
+		if (!isTerminated()) {
+			elapsedTime += dt;
 			doUpdate(dt);
+			if (cancelled) {
+				afterExecutionCancelled();
+			} else if (isTerminated()) {
+				afterExecutionCompleted();
+				getScreen().updateSprites();
+				if (getFacade().isGameFinished(getWorld())) {
+					getScreen().gameFinished();
+				}
+			}
 		}
 	}
 
+	/**
+	 * Returns the total time that has elapsed while executing this command
+	 */
 	public double getElapsedTime() {
 		return elapsedTime;
 	}
 
-	public boolean isStarted() {
+	/**
+	 * Returns whether or not this command has been started
+	 */
+	public boolean hasBeenStarted() {
 		return started;
 	}
 
-	public final boolean isFinished() {
-		return cancelled || (isStarted() && isDoneExecuting());
+	/**
+	 * Returns whether or not the execution of this command is terminated,
+	 * either by cancellation or by successful completion.
+	 */
+	public final boolean isTerminated() {
+		return cancelled || (hasBeenStarted() && isExecutionCompleted());
 	}
 
-	protected abstract boolean isDoneExecuting();
+	/**
+	 * Returns whether or not the execution of the command has been completed successfully.
+	 */
+	protected abstract boolean isExecutionCompleted();
 
-	protected abstract boolean canExecute();
+	/**
+	 * Returns whether or not the execution of the command can start
+	 */
+	protected abstract boolean canStart();
 
+	/**
+	 * Start executing the command
+	 */
 	protected abstract void doStartExecution();
-	
-	protected void executionCancelled() {
-		
+
+	/**
+	 * Called when the execution of the command has been completed successfully.
+	 */
+	protected void afterExecutionCompleted() {
 	}
 
+	/**
+	 * Called when the execution of the command has been cancelled.
+	 */
+	protected void afterExecutionCancelled() {
+	}
+
+	/**
+	 * Called when the execution of the command has been started.
+	 */
+	protected void afterExecutionStarted() {
+	}
+
+	/**
+	 * Update the execution of the command by the given time interval
+	 *  
+	 * @param dt
+	 */
 	protected abstract void doUpdate(double dt);
+
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName()
+				+ " ("
+				+ (hasBeenStarted() ? "elapsed: "
+						+ String.format("%.2f", getElapsedTime()) + "s)"
+						: "queued)");
+	}
 }

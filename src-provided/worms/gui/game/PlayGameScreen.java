@@ -1,13 +1,11 @@
 package worms.gui.game;
 
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -16,268 +14,36 @@ import javax.swing.Timer;
 import worms.gui.GUIConstants;
 import worms.gui.GUIUtils;
 import worms.gui.GameState;
+import worms.gui.InputMode;
+import worms.gui.Level;
 import worms.gui.Screen;
 import worms.gui.WormsGUI;
 import worms.gui.game.commands.Jump;
 import worms.gui.game.commands.Move;
 import worms.gui.game.commands.Rename;
-import worms.gui.game.commands.Resize;
+import worms.gui.game.commands.SelectNextWeapon;
+import worms.gui.game.commands.SelectNextWorm;
+import worms.gui.game.commands.Shoot;
 import worms.gui.game.commands.Turn;
-import worms.gui.game.sprites.Sprite;
+import worms.gui.game.modes.DefaultInputMode;
+import worms.gui.game.modes.EnteringNameMode;
+import worms.gui.game.modes.GameOverMode;
+import worms.gui.game.modes.SetupInputMode;
+import worms.gui.game.sprites.FoodSprite;
 import worms.gui.game.sprites.WormSprite;
+import worms.gui.messages.MessageType;
+import worms.model.Food;
 import worms.model.IFacade;
+import worms.model.ModelException;
+import worms.model.World;
 import worms.model.Worm;
 
 public class PlayGameScreen extends Screen {
 
-	private class DefaultInputMode extends InputMode {
-
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			Point point = e.getPoint();
-			for (WormSprite sprite : getSpritesOfType(WormSprite.class)) {
-				Worm worm = sprite.getWorm();
-				double[] xy = sprite.getCenterLocation();
-				double radius = GUIUtils.meterToPixels(getFacade().getRadius(
-						worm));
-				if (GUIUtils.distance(xy[0], xy[1], point.getX(), point.getY()) <= radius) {
-					getGameState().selectWorm(worm);
-					return;
-				}
-			}
-		}
-
-		@Override
-		public void mouseDragged(MouseEvent e) {
-			switchInputMode(new TurningMode());
-			getCurrentInputMode().mouseDragged(e);
-		}
-
-		@Override
-		public void keyPressed(KeyEvent e) {
-			switch (e.getKeyCode()) {
-			case KeyEvent.VK_LEFT:
-			case KeyEvent.VK_RIGHT:
-				switchInputMode(new TurningMode());
-				getCurrentInputMode().keyPressed(e);
-				break;
-			case KeyEvent.VK_UP:
-				move(GUIConstants.DEFAULT_NB_STEPS);
-				break;
-			}
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-			switch (e.getKeyCode()) {
-			case KeyEvent.VK_ESCAPE:
-				getGUI().exit();
-				break;
-			case KeyEvent.VK_TAB:
-				getGameState().selectNextWorm();
-				break;
-			case KeyEvent.VK_J:
-				jump();
-				break;
-			case KeyEvent.VK_N:
-				switchInputMode(new EnteringNameMode());
-				break;
-			case KeyEvent.VK_PLUS:
-			case KeyEvent.VK_ADD:
-				resizeWorm(true);
-				break;
-			case KeyEvent.VK_MINUS:
-			case KeyEvent.VK_SUBTRACT:
-				resizeWorm(false);
-				break;
-			default:
-				// System.out.println("Unhandled key: " + e);
-			}
-		}
-
-	}
-
-	private class EnteringNameMode extends InputMode {
-		private String enteredName = "";
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-				changeName(enteredName);
-				switchInputMode(new DefaultInputMode());
-			} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-				switchInputMode(new DefaultInputMode());
-			}
-		}
-
-		@Override
-		public void keyTyped(KeyEvent e) {
-			if (e.getKeyChar() == '\b') {
-				enteredName = enteredName.substring(0,
-						Math.max(0, enteredName.length() - 1));
-			} else if (!Character.isISOControl(e.getKeyChar())
-					&& e.getKeyChar() != KeyEvent.CHAR_UNDEFINED) {
-				enteredName += e.getKeyChar();
-			}
-			repaint();
-		}
-
-		@Override
-		public void paintOverlay(Graphics2D g) {
-			super.paintOverlay(g);
-			painter.paintNameEntry(g, enteredName);
-		}
-
-	}
-
-	private class TurningMode extends InputMode {
-		private double angle = 0;
-
-		private long pressedSince = 0; // 0 if not turning
-		private boolean clockwise;
-
-		private void startTurning(boolean clockwise) {
-			if (!isTurning()) {
-				pressedSince = System.currentTimeMillis();
-				this.clockwise = clockwise;
-			}
-		}
-
-		private void stopTurning() {
-			angle = getCurrentAngle();
-			pressedSince = 0;
-		}
-
-		private boolean isTurning() {
-			return pressedSince != 0;
-		}
-
-		@Override
-		public void mouseDragged(MouseEvent e) {
-			double[] wormXY = getWormSprite(getSelectedWorm())
-					.getCenterLocation();
-			double currentOrientation = getFacade().getOrientation(
-					getSelectedWorm());
-			this.angle = Math.PI
-					- currentOrientation
-					+ Math.atan2((e.getY() - wormXY[1]), (wormXY[0] - e.getX()));
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			finishTurn();
-		}
-
-		private void finishTurn() {
-			if (angle != 0) {
-				turn(angle);
-				switchInputMode(new DefaultInputMode());
-			}
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-			switch (e.getKeyCode()) {
-			case KeyEvent.VK_ESCAPE:
-				switchInputMode(new DefaultInputMode());
-				break;
-			case KeyEvent.VK_ENTER:
-				finishTurn();
-				break;
-			case KeyEvent.VK_LEFT: // no-break
-			case KeyEvent.VK_RIGHT:
-				stopTurning();
-				break;
-			}
-		}
-
-		private double getCurrentAngle() {
-			double delta = 0;
-			if (isTurning()) {
-				long now = System.currentTimeMillis();
-				delta = Math.max(GUIConstants.MIN_TURN_ANGLE,
-						(now - pressedSince) / 1000.0
-								* GUIConstants.ANGLE_TURNED_PER_SECOND);
-				if (clockwise) {
-					delta = -delta;
-				}
-				return GUIUtils.restrictAngle(angle + delta, -Math.PI);
-			} else {
-				return angle;
-			}
-		}
-
-		@Override
-		public void keyPressed(KeyEvent e) {
-			switch (e.getKeyCode()) {
-			case KeyEvent.VK_RIGHT:
-				startTurning(true);
-				break;
-			case KeyEvent.VK_LEFT:
-				startTurning(false);
-				break;
-			}
-		}
-
-		@Override
-		public void paintOverlay(Graphics2D g) {
-			super.paintOverlay(g);
-			painter.drawTurnAngleIndicator(g, getWormSprite(getSelectedWorm()),
-					getCurrentAngle());
-		}
-	}
-
-	private final PlayGameScreenPainter painter;
+	final PlayGameScreenPainter painter;
 	private final GameState gameState;
 
-	private final Set<Sprite> sprites = new HashSet<Sprite>();
-
-	private static class MessageDisplay {
-		private LinkedList<String> messages = new LinkedList<String>();
-		private long currentMessageDisplayedSince;
-
-		public MessageDisplay() {
-		}
-
-		public void addMessage(String message) {
-			if (messages.isEmpty() || !messages.getLast().equals(message))
-				this.messages.add(message);
-		}
-
-		private boolean isDisplayingMessage() {
-			return currentMessageDisplayedSince > 0;
-		}
-
-		private double currentDisplayTime() {
-			return (System.currentTimeMillis() - currentMessageDisplayedSince) / 1000.0;
-		}
-
-		private String currentMessage() {
-			return messages.peek();
-		}
-
-		private void gotoNextMessage() {
-			if (!messages.isEmpty()) {
-				currentMessageDisplayedSince = System.currentTimeMillis();
-			} else {
-				currentMessageDisplayedSince = 0;
-			}
-		}
-
-		public String getMessage() {
-			if (isDisplayingMessage()) {
-				if (currentDisplayTime() >= GUIConstants.MESSAGE_DISPLAY_TIME) {
-					messages.remove();
-					gotoNextMessage();
-				}
-			} else {
-				gotoNextMessage();
-			}
-			return currentMessage();
-		}
-	}
-
-	private MessageDisplay messageDisplay = new MessageDisplay();
+	private final Set<Sprite<?>> sprites = new HashSet<Sprite<?>>();
 
 	public PlayGameScreen(WormsGUI gui, GameState state) {
 		super(gui);
@@ -285,30 +51,31 @@ public class PlayGameScreen extends Screen {
 		this.painter = createPainter();
 	}
 
-	protected InputMode createDefaultInputMode() {
-		return new DefaultInputMode();
+	@Override
+	protected InputMode<PlayGameScreen> createDefaultInputMode() {
+		return new SetupInputMode(this, null);
 	}
 
 	@Override
-	protected void screenStarted() {
-		createSprites();
+	public void screenStarted() {
 		runGameLoop();
 	}
 
-	private void runGameLoop() {
-		final AtomicLong lastUpdateTimestamp = new AtomicLong();
+	final AtomicLong lastUpdateTimestamp = new AtomicLong();
 
-		final Timer timer = new Timer(1000 / GUIConstants.FRAMERATE,
-				new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						long now = System.currentTimeMillis();
-						long delta = now - lastUpdateTimestamp.getAndSet(now);
-						double dt = delta / 1000.0 * GUIConstants.TIME_SCALE;
-						gameState.evolve(dt);
-						repaint();
-					}
-				});
+	final Timer timer = new Timer(1000 / GUIConstants.FRAMERATE,
+			new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					long now = System.currentTimeMillis();
+					long delta = now - lastUpdateTimestamp.getAndSet(now);
+					double dt = delta / 1000.0 * GUIConstants.TIME_SCALE;
+					gameState.evolve(dt);
+					repaint();
+				}
+			});
+
+	private void runGameLoop() {
 		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
@@ -322,28 +89,85 @@ public class PlayGameScreen extends Screen {
 		timer.start();
 	}
 
-	public void createSprites() {
-		for (Worm worm : getGameState().getWorms()) {
-			WormSprite sprite = createWormSprite(worm);
-			sprites.add(sprite);
+	public void gameFinished() {
+		addMessage(
+				"Game over! The winner is "
+						+ getFacade().getWinner(getWorld())
+						+ "\n\nPress 'R' to start another game, or 'ESC' to quit.",
+				MessageType.NORMAL);
+		timer.stop();
+		switchInputMode(new GameOverMode(this, getCurrentInputMode()));
+	}
+
+	public void updateSprites() {
+		removeInactiveSprites();
+		addNewSprites();
+		for (Sprite<?> sprite : sprites) {
+			sprite.update();
 		}
 	}
 
-	private WormSprite createWormSprite(Worm worm) {
+	protected void removeInactiveSprites() {
+		for (Sprite<?> sprite : new ArrayList<Sprite<?>>(sprites)) {
+			if (!sprite.isObjectAlive()) {
+				removeSprite(sprite);
+			}
+		}
+	}
+
+	protected void addNewSprites() {
+		addNewWormSprites();
+		addNewFoodSprites();
+	}
+
+	private void addNewWormSprites() {
+		Collection<Worm> worms = getFacade().getWorms(getWorld());
+		if (worms != null) {
+			for (Worm worm : worms) {
+				WormSprite sprite = getWormSprite(worm);
+				if (sprite == null) {
+					createWormSprite(worm);
+				}
+			}
+		}
+	}
+
+	private void addNewFoodSprites() {
+		Collection<Food> foods = getFacade().getFood(getWorld());
+		if (foods != null) {
+			for (Food food : foods) {
+				FoodSprite sprite = getSpriteOfTypeFor(FoodSprite.class, food);
+				if (sprite == null) {
+					createFoodSprite(food);
+				}
+			}
+		}
+	}
+
+	private void createFoodSprite(Food food) {
+		FoodSprite sprite = new FoodSprite(this, food);
+		double x = getScreenX(getFacade().getX(food));
+		double y = getScreenY(getFacade().getY(food));
+		sprite.setRadius(getFacade().getRadius(food));
+		sprite.setCenterLocation(x, y);
+		addSprite(sprite);
+	}
+
+	private void createWormSprite(Worm worm) {
 		double x = getScreenX(getFacade().getX(worm));
 		double y = getScreenY(getFacade().getY(worm));
-		WormSprite sprite = new WormSprite(worm);
+		WormSprite sprite = new WormSprite(this, worm);
 		sprite.setCenterLocation(x, y);
 		sprite.setDirection(getFacade().getOrientation(worm));
 		sprite.setRadius(getFacade().getRadius(worm));
-		return sprite;
+		addSprite(sprite);
 	}
 
 	public GameState getGameState() {
 		return gameState;
 	}
 
-	protected IFacade getFacade() {
+	public IFacade getFacade() {
 		return getGameState().getFacade();
 	}
 
@@ -351,9 +175,9 @@ public class PlayGameScreen extends Screen {
 		return new PlayGameScreenPainter(this);
 	}
 
-	public <T extends Sprite> Set<T> getSpritesOfType(Class<T> type) {
+	public <T extends Sprite<?>> Set<T> getSpritesOfType(Class<T> type) {
 		Set<T> result = new HashSet<T>();
-		for (Sprite sprite : sprites) {
+		for (Sprite<?> sprite : sprites) {
 			if (type.isInstance(sprite)) {
 				result.add(type.cast(sprite));
 			}
@@ -361,21 +185,51 @@ public class PlayGameScreen extends Screen {
 		return result;
 	}
 
-	public WormSprite getWormSprite(Worm worm) {
-		for (WormSprite sprite : getSpritesOfType(WormSprite.class)) {
-			if (worm != null && worm.equals(sprite.getWorm())) {
+	public <ObjectType, SpriteType extends Sprite<ObjectType>> SpriteType getSpriteOfTypeFor(
+			Class<SpriteType> type, ObjectType object) {
+		if (object == null) {
+			return null;
+		}
+		for (SpriteType sprite : getSpritesOfType(type)) {
+			if (object.equals(sprite.getObject())) {
 				return sprite;
 			}
 		}
 		return null;
 	}
 
-	public void move(int nbSteps) {
+	public WormSprite getWormSprite(Worm worm) {
+		return getSpriteOfTypeFor(WormSprite.class, worm);
+	}
+
+	public void selectNextWeapon() {
 		Worm worm = getSelectedWorm();
 
 		if (worm != null) {
 			getGameState().enqueueCommand(
-					new Move(getFacade(), worm, nbSteps, this));
+					new SelectNextWeapon(getFacade(), worm, this));
+		}
+	}
+
+	public void shoot(int propulsion) {
+		Worm worm = getSelectedWorm();
+
+		if (worm != null) {
+			String weapon = getFacade().getSelectedWeapon(worm);
+			if (weapon != null) {
+				getGameState().enqueueCommand(
+						new Shoot(getFacade(), worm, propulsion, this));
+			} else {
+				addMessage("No weapon selected", MessageType.ERROR);
+			}
+		}
+	}
+
+	public void move() {
+		Worm worm = getSelectedWorm();
+
+		if (worm != null) {
+			getGameState().enqueueCommand(new Move(getFacade(), worm, this));
 		}
 	}
 
@@ -406,32 +260,13 @@ public class PlayGameScreen extends Screen {
 		}
 	}
 
-	public void resizeWorm(boolean makeLarger) {
-		Worm worm = getSelectedWorm();
-
-		if (worm != null) {
-			double factor = 1.0 + (makeLarger ? GUIConstants.RESIZE_FACTOR
-					: -GUIConstants.RESIZE_FACTOR);
-			getGameState().enqueueCommand(
-					new Resize(getFacade(), worm, factor, this));
-		}
-	}
-
-	private Worm getSelectedWorm() {
-		return getGameState().getSelectedWorm();
+	public Worm getSelectedWorm() {
+		return getFacade().getCurrentWorm(getWorld());
 	}
 
 	@Override
 	protected void paintScreen(Graphics2D g) {
 		painter.paint(g);
-		String message = messageDisplay.getMessage();
-		if (message != null) {
-			painter.paintMessage(g, message);
-		}
-	}
-
-	public void addMessage(String message) {
-		messageDisplay.addMessage(message);
 	}
 
 	public static PlayGameScreen create(WormsGUI gui, GameState gameState,
@@ -447,5 +282,200 @@ public class PlayGameScreen extends Screen {
 			};
 		}
 	}
+
+	protected Level getLevel() {
+		return getGameState().getLevel();
+	}
+
+	public World getWorld() {
+		return getGameState().getWorld();
+	}
+
+	public void addSprite(Sprite<?> sprite) {
+		sprites.add(sprite);
+	}
+
+	public void removeSprite(Sprite<?> sprite) {
+		sprites.remove(sprite);
+	}
+
+	/**
+	 * Aspect ratio of the screen
+	 */
+	private double getScreenAspectRatio() {
+		return (double) getScreenWidth() / getScreenHeight();
+	}
+
+	/**
+	 * Width of the world when displayed (in pixels)
+	 */
+	private double getWorldDisplayWidth() {
+		if (getLevel().getMapAspectRatio() >= getScreenAspectRatio()) {
+			return getScreenWidth();
+		} else {
+			return getScreenHeight() * getLevel().getMapAspectRatio();
+		}
+	}
+
+	/**
+	 * Height of the world when displayed (in pixels)
+	 */
+	private double getWorldDisplayHeight() {
+		if (getLevel().getMapAspectRatio() <= getScreenAspectRatio()) {
+			return getScreenHeight();
+		} else {
+			return getScreenWidth() / getLevel().getMapAspectRatio();
+		}
+	}
+
+	/**
+	 * Scale of the displayed world (in worm-meter per pixel)
+	 */
+	private double getDisplayScale() {
+		return getLevel().getWorldWidth() / getWorldDisplayWidth();
+	}
+
+	/**
+	 * Distance in the world (worm-meter) to distance on the screen (pixels)
+	 */
+	public double worldToScreenDistance(double ds) {
+		return ds / getDisplayScale();
+	}
+
+	/**
+	 * Distance on the screen (pixels) to distance in the world (worm-meter)
+	 */
+	public double screenToWorldDistance(double ds) {
+		return ds * getDisplayScale();
+	}
+
+	/**
+	 * World x coordinate to screen x coordinate
+	 */
+	public double getScreenX(double x) {
+		double offset = (getScreenWidth() - getWorldDisplayWidth()) / 2.0;
+		return offset + worldToScreenDistance(x);
+	}
+
+	/**
+	 * Screen x coordinate to world x coordinate
+	 */
+	public double getLogicalX(double screenX) {
+		double offset = (getScreenWidth() - getWorldDisplayWidth()) / 2.0;
+		return screenToWorldDistance(screenX - offset);
+	}
+
+	/**
+	 * World y coordinate to screen y coordinate
+	 */
+	public double getScreenY(double y) {
+		double offset = (getScreenHeight() - getWorldDisplayHeight()) / 2.0;
+		return offset + getWorldDisplayHeight() - worldToScreenDistance(y);
+	}
+
+	/**
+	 * Screen y coordinate to world y coordinate
+	 */
+	public double getLogicalY(double screenY) {
+		double offset = (getScreenHeight() - getWorldDisplayHeight()) / 2.0;
+		return screenToWorldDistance(-screenY + offset
+				+ getWorldDisplayHeight());
+	}
+
+	public void paintTextEntry(Graphics2D g, String message, String enteredName) {
+		painter.paintTextEntry(g, message, enteredName);
+	}
+
+	public void drawTurnAngleIndicator(Graphics2D g, WormSprite wormSprite,
+			double currentAngle) {
+		painter.drawTurnAngleIndicator(g, wormSprite, currentAngle);
+	}
+
+	public <T, S extends Sprite<T>> void removeSpriteFor(Class<S> type, T object) {
+		S sprite = getSpriteOfTypeFor(type, object);
+		sprites.remove(sprite);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public InputMode<PlayGameScreen> getCurrentInputMode() {
+		return (InputMode<PlayGameScreen>) super.getCurrentInputMode();
+	}
+
+	public void addEmptyTeam() {
+		switchInputMode(new EnteringNameMode("Enter team name: ", this,
+				getCurrentInputMode(), new EnteringNameMode.Callback() {
+					@Override
+					public void onNameEntered(String newName) {
+						try {
+							getFacade().addEmptyTeam(getWorld(), newName);
+							addMessage("Team " + newName + " created.",
+									MessageType.NORMAL);
+						} catch (ModelException e) {
+							addMessage("Could not create team " + newName
+									+ ": " + e.getMessage(), MessageType.ERROR);
+						}
+					}
+				}));
+	}
+
+	public void addWorm() {
+		getFacade().addNewWorm(getWorld());
+		updateSprites();
+	}
+
+	public void addFood() {
+		getFacade().addNewFood(getWorld());
+		updateSprites();
+	}
+
+	public void startGame() {
+		getFacade().startGame(getWorld());
+		switchInputMode(new DefaultInputMode(this, getCurrentInputMode()));
+		if (getFacade().isGameFinished(getWorld())) {
+			gameFinished();
+		}
+	}
+
+	public void renameWorm() {
+		switchInputMode(new EnteringNameMode("Enter new name for worm: ", this,
+				getCurrentInputMode(), new EnteringNameMode.Callback() {
+					@Override
+					public void onNameEntered(String newName) {
+						changeName(newName);
+					}
+				}));
+	}
+
+	public void showInstructions(Graphics2D g, String string) {
+		painter.paintInstructions(g, string);
+	}
+
+	public WormSprite getSelectedWormSprite() {
+		return getWormSprite(getSelectedWorm());
+	}
+
+	public void paintShootingInfoForSelectedWorm(Graphics2D g,
+			double propulsionFraction) {
+		WormSprite sprite = getSelectedWormSprite();
+		if (sprite != null) {
+			painter.drawShootingInfo(g, sprite, propulsionFraction);
+		}
+	}
+
+	public void selectNextWorm() {
+		getGameState().enqueueCommand(new SelectNextWorm(getFacade(), this));
+	}
+
+	public void startNextTurn() {
+		getFacade().startNextTurn(getWorld());
+	}
+
+	public void selectWorm(Worm worm) {
+		while (getSelectedWorm() != worm) {
+			selectNextWorm();
+		}
+	}
+
 
 }

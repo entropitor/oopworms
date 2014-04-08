@@ -9,8 +9,14 @@ public abstract class InstantaneousCommand extends Command {
 	}
 
 	@Override
-	protected final boolean isDoneExecuting() {
+	protected final boolean isExecutionCompleted() {
 		return true;
+	}
+	
+	@Override
+	protected void afterExecutionStarted() {
+		afterExecutionCompleted();
+		getScreen().updateSprites();
 	}
 
 	@Override
