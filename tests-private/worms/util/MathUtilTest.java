@@ -3,7 +3,6 @@ import static worms.util.AssertUtil.*;
 
 import org.junit.Test;
 
-
 public class MathUtilTest {
 
 	@Test

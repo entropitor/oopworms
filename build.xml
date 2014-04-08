@@ -20,7 +20,6 @@
     <property name="lib.dir"     value="lib"/>
     <property name="taglet.package" value="be.kuleuven.cs.som.taglet"/>
     <property name="taglet.jar" value="${lib.dir}/AnnotationsDoclets.jar"/>
-    <property name="resources.dir" value="resources"/>
 
     <property name="main-class"  value="worms.Worms"/>
 
@@ -48,7 +47,6 @@
         <mkdir dir="${jar.dir}"/>
         <jar destfile="${jar.file}">
             <fileset dir="${classes.dir}"/>
-            <fileset dir="${resources.dir}"/>
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
@@ -94,7 +92,6 @@
             <fileset dir="${src.given.dir}"/>
             <fileset dir="${test.own.dir}"/>
             <fileset dir="${test.given.dir}"/>
-            <fileset dir="${resources.dir}"/>
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
