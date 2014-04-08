@@ -49,49 +49,19 @@ public class Worm {
 	 * 			The radius of the new worm (in metres)
 	 * @param name
 	 * 			The name of the new worm
-	 * @pre		The given direction is a valid direction.
-	 * 			| isValidDirection(direction)
-	 * @post 	The x-coordinate of the position of the new worm equals the given x-coordinate.
-	 * 			| new.getXCoordinate() == x
-	 * @post 	The y-coordinate of the position of the new worm equals the given y-coordinate.
-	 * 			| new.getYCoordinate() == y
-	 * @post	The direction of the new worm equals the given direction.
-	 * 			| new.getDirection() == direction
-	 * @post	The name of the new worm equals the given name
-	 * 			| new.getName() == name
-	 * @post	The radius of the new worm equals the given radius.
-	 * 			| new.getRadius() == radius
-	 * @post	The new worm has all its action points.
-	 *			| new.getActionPoints() == new.getMaxActionPoints()
-	 * @throws IllegalArgumentException 
-	 * 			When the given position is not a valid position.
-	 * 			| !isValidPosition(x,y)
-	 * @throws IllegalArgumentException
-	 * 			When the given name is not a valid name.
-	 * 			| !isValidName(name)
-	 * @throws IllegalArgumentException 
-	 * 			When the given radius is not a valid radius.
-	 * 			| !canHaveAsRadius(radius)
+	 * @effect	Set the x- and y-coordinate
+	 * 			| setXCoordinate(x); setYCoordinate(y);
+	 * @effect	Set the direction to the given direction
+	 * 			| setDirection(direction);
+	 * @effect	Set the name to the given name
+	 * 			| setName(name);
+	 * @effect	Set the radius to the given radius
+	 * 			| setRadius(radius);
+	 * @effect	Replenish the action points to their maximum.
+	 * 			| replenishActionPoints();
 	 */
 	@Raw
 	public Worm(double x, double y, double direction, double radius, String name) throws IllegalArgumentException{		
-		//Next check is implicit in setXPosition() and setYPosition()
-		//if(!isValidPosition(x,y))
-		//		throw new IllegalArgumentException("Illegal Position");
-
-		//Implicit in setDirection:
-		//assert isValidDirection(direction);
-		
-
-		//Implicit in setName:
-		//if(!isValidName(name))
-		//		throw new IllegalArgumentException("Illegal Name");
-
-		//Implicit in setRadius:
-		//if(!canHaveAsRadius(radius))
-		//		throw new IllegalArgumentException("Illegal radius");
-
-
 		setXCoordinate(x);
 		setYCoordinate(y);
 
@@ -348,7 +318,7 @@ public class Worm {
 	 * 			The given position is not a valid x-coordinate.
 	 * 			| !isValidXCoordinate(x)
 	 */
-	@Raw
+	@Raw @Model
 	private void setXCoordinate(double x) throws IllegalArgumentException{
 		if (!isValidXCoordinate(x))
 			throw new IllegalArgumentException("The given x-coordinate is not a valid x-coordinate.");
@@ -387,7 +357,7 @@ public class Worm {
 	 * 			The given position is not a valid y-coordinate.
 	 * 			| !isValidYCoordinate(y)
 	 */
-	@Raw
+	@Raw @Model
 	private void setYCoordinate(double y) throws IllegalArgumentException{
 		if (!isValidYCoordinate(y))
 			throw new IllegalArgumentException("The given y-coordinate is not a valid y-coordinate.");
@@ -426,7 +396,7 @@ public class Worm {
 	 * @post 	The new direction of this worm equals the given direction.
 	 * 			| new.getDirection() == direction
 	 */
-	@Raw
+	@Raw @Model
 	private void setDirection(double direction){
 		assert isValidDirection(direction);
 		this.direction = direction;
@@ -710,7 +680,7 @@ public class Worm {
 	 * @effect	Sets this worm's APs to the maximum allowed number.
 	 *			| setActionPoints(getMaxActionPoints())		
 	 */
-	@Raw
+	@Raw @Model
 	private void replenishActionPoints(){
 		this.setActionPoints(this.getMaxActionPoints());
 	}
