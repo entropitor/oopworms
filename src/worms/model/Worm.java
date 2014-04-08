@@ -603,11 +603,17 @@ public class Worm {
 	 * Returns the maximum number of action points this worm can have.
 	 * 
 	 * @return	The maximum number of this worm, equal to its mass
-	 * 			rounded to the nearest integer.
-	 * 			| result == (int) round(getMass());
+	 * 			rounded to the nearest integer. 
+	 * 			When the rounded mass is bigger than Integer.MAX_VALUE, 
+	 * 			this method returns Integer.MAX_VALUE.
+	 * 			| if( round(getMass()) > Integer.MAX_VALUE) then result == Integer.MAX_VALUE
+	 * 			| else result == (int) round(getMass());
 	 */
 	public int getMaxActionPoints(){
-		return (int) round(this.getMass());
+		long maxAP = round(this.getMass());
+		if(maxAP > Integer.MAX_VALUE)
+			return Integer.MAX_VALUE;
+		return (int) maxAP;
 	}
 	
 	 /**

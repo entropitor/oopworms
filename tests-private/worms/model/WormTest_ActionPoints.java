@@ -40,8 +40,14 @@ public class WormTest_ActionPoints {
 	}
 	
 	@Test
-	public void testGetMaxActionPoints(){
+	public void testGetMaxActionPoints_SimpleCase(){
 		assertEquals(183466713, willy.getMaxActionPoints());
+	}
+	
+	@Test
+	public void testGetMaxActionPoints_IntegerOverflow(){
+		willy.setRadius(79);
+		assertEquals(Integer.MAX_VALUE, willy.getMaxActionPoints());
 	}
 	
 	@Test
