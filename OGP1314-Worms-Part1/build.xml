@@ -5,6 +5,7 @@
     <property name="src.given.dir"  value="src-provided"/>
     <property name="src.dir"     value="${src.given.dir};${src.own.dir}"/>
 
+    <property name="docs.dir"    value="doc"/>
     <property name="build.dir"   value="build"/>
     <property name="classes.dir" value="${build.dir}/classes"/>
     <property name="jar.dir"     value="${build.dir}/jar"/>
@@ -15,6 +16,8 @@
     <property name="report.dir"  value="${build.dir}/testreport"/>
 
     <property name="lib.dir"     value="lib"/>
+    <property name="taglet.package" value="be.kuleuven.cs.som.taglet"/>
+    <property name="taglet.jar" value="${lib.dir}/AnnotationsDoclets.jar"/>
     <property name="resources.dir" value="resources"/>
 
     <property name="main-class"  value="worms.Worms"/>
@@ -92,6 +95,20 @@
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
         </jar>
+    </target>
+
+    <target name="docs" depends="compile">
+        <javadoc packagenames="src" sourcepath="${src.dir}" destdir="${docs.dir}" charset="${encoding}" encoding="${encoding}" docencoding="${encoding}"  classpath="${taglet.jar};${lib.dir}/test/junit.jar">
+            <taglet name="${taglet.package}.EffectTaglet" path="${taglet.jar}"/>
+            <taglet name="${taglet.package}.InvarTaglet" path="${taglet.jar}"/>
+            <taglet name="${taglet.package}.NoteTaglet" path="${taglet.jar}"/>
+            <taglet name="${taglet.package}.PostTaglet" path="${taglet.jar}"/>
+            <taglet name="${taglet.package}.PreTaglet" path="${taglet.jar}"/>
+            <taglet name="${taglet.package}.ReturnTaglet" path="${taglet.jar}"/>
+            <taglet name="${taglet.package}.ThrowsTaglet" path="${taglet.jar}"/>
+            <fileset dir="${src.own.dir}"/>
+            <fileset dir="${src.given.dir}"/>
+        </javadoc>
     </target>
 
     <target name="main" depends="clean,compile,jar,run"/>
