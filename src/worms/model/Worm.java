@@ -109,14 +109,14 @@ public class Worm {
 	 * 
 	 * @param angle
 	 * 			The turning angle (in radians) to check.
-	 * @return	Whether or not the given angle is in the range [-pi, pi)
-	 * 			| result == fuzzyGreaterThanOrEqualTo(angle, -PI)
-	 *			|			&& Double.compare(angle, PI) < 0;
+	 * @return	Whether or not the given angle is in the range [-2*pi, 2*pi]
+	 * 			| result == fuzzyGreaterThanOrEqualTo(angle, -2*PI)
+	 *			|			&& fuzzyLessThanOrEqualTo(angle, 2*PI);
 	 * @note	(NaN check is implicit in "worms.util.Util.fuzzy[..]") 
 	 */
 	public static boolean isValidTurningAngle(double angle){
-		return fuzzyGreaterThanOrEqualTo(angle, -PI)
-				&& Double.compare(angle, PI) < 0;
+		return fuzzyGreaterThanOrEqualTo(angle, -2*PI)
+				&& fuzzyLessThanOrEqualTo(angle, 2*PI);
 	}
 	
 	/**
@@ -133,16 +133,7 @@ public class Worm {
 	 * 			| result == (int) ceil(abs(30*angle/(PI)))
 	 */
 	public static int getTurningCost(double angle){
-		// assert isValidTurningAngle(angle);
-		/* Assertion commented out because:
-		 * Turning should be implemented nominally. Hence, only turning angles
-		 * in a certain non-redundant range should be allowed. (Allowing all angles
-		 * using modulo divison over 2*pi would be total programming.)
-		 * The range we chose is [-pi, pi), because this is the range of turning angles
-		 * the GUI provides. However, the assignment pdf mentions turning angles of
-		 * 2*pi. To avoid a failing Facade test suite because a turning angle of 2*pi 
-		 * is passed to this method, the assertion on the precondition is commented out. 
-		 */
+		assert isValidTurningAngle(angle);
 		return (int) ceil(abs(60*angle/(2*PI)));
 	}
 	
@@ -159,8 +150,8 @@ public class Worm {
 	 * 			| result == (getActionPoints() >= getTurningCost(angle))
 	 */
 	public boolean canTurn(double angle){
-		// assert isValidTurningAngle(angle);
 		// Implicit in getTurningCost().
+		// assert isValidTurningAngle(angle);
 		return getTurningCost(angle) <= this.getActionPoints();
 	}
 	
