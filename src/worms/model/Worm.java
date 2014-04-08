@@ -15,7 +15,7 @@ import static java.lang.Math.*;
  * @version 1.0
  *
  * @invar 	The position of the worm is a valid position. 
- * 		 	| isValidPosition(getXCoordinate(),getYCoordinate())
+ * 		 	| Position.isValidPosition(getPosition())
  * @invar	The direction of the worm is a valid direction.
  * 			| isValidDirection(getDirection())
  * @invar	The name of the worm is a valid name.
@@ -92,8 +92,7 @@ public class Worm {
 		//		throw new IllegalArgumentException("Illegal radius");
 
 
-		setXCoordinate(x);
-		setYCoordinate(y);
+		setPosition(new Position(x,y));
 
 		setDirection(direction);
 		
@@ -289,111 +288,57 @@ public class Worm {
 	 * 
 	 * @param x		The number of metres to move along the x-axis
 	 * @param y		The number of metres to move along the y-axis
-	 * @post		The new x-coordinate of this worm equals the old x-coordinate plus the given offset along the x-axis.
-	 * 				| fuzzyEquals(new.getXCoordinate(), getXCoordinate()+x)
-	 * @post		The new y-coordinate of this worm equals the old y-coordinate plus the given offset along the y-axis.
-	 * 				| fuzzyEquals(new.getYCoordinate(), getYCoordinate()+y)
+	 * @effect		Move to the position with an offset of (x,y) metres
+	 * 				setPosition(getPosition().offset(x,y))
 	 * @throws IllegalArgumentException
 	 * 				Thrown when x or y is not a valid number
 	 * 				| Double.isNaN(x) || Double.isNaN(y)
 	 */
 	public void moveWith(double x, double y) throws IllegalArgumentException{
-		if(Double.isNaN(x) || Double.isNaN(y))
-			throw new IllegalArgumentException("Illegal offset. Both offsets should be valid numbers.");
-		
-		setXCoordinate(getXCoordinate()+x);
-		setYCoordinate(getYCoordinate()+y);
-	}
-	
-	/**
-	 * Checks whether a position (with x- and y-coordinates) is a valid position.
-	 * 
-	 * @param x The x-coordinate of the location to check.
-	 * @param y The y-coordinate of the location to check.
-	 * @effect 	Check whether the x-coordinate and y-coordinate are both valid.
-	 * 			| isValidXCoordinate(x) && isValidYCoordinate(y)
-	 */
-	public static boolean isValidPosition(double x, double y){
-		return isValidXCoordinate(x) && isValidYCoordinate(y);
+		setPosition(getPosition().offset(x,y));
 	}
 	
 	/**
 	 * Returns the x-coordinate of the current location of this worm (in metres).
 	 */
-	@Basic @Raw
-	public double getXCoordinate(){
-		return this.xCoordinate;
-	}
-	
-	/**
-	 * Checks whether the given x-coordinate is a valid x-coordinate.
-	 * 
-	 * @param x
-	 * 			The x-coordinate to check.
-	 * @return 	Whether or not x is a valid number.
-	 * 			| result == !Double.isNan(x)
-	 */
-	public static boolean isValidXCoordinate(double x){
-		return !Double.isNaN(x);
-	}
-	
-	/**
-	 * Sets the x-coordinate of the location of this worm.
-	 * 
-	 * @param x 
-	 * 			The new x-coordinate of this worm (in metres).
-	 * @post	The x-coordinate of this worm equals the given x-coordinate
-	 * 		 	| new.getXCoordinate() == x
-	 * @throws IllegalArgumentException 
-	 * 			The given position is not a valid x-coordinate.
-	 * 			| !isValidXCoordinate(x)
-	 */
 	@Raw
-	private void setXCoordinate(double x) throws IllegalArgumentException{
-		if (!isValidXCoordinate(x))
-			throw new IllegalArgumentException("The given x-coordinate is not a valid x-coordinate.");
-		this.xCoordinate = x;
+	public double getXCoordinate(){
+		return getPosition().getX();
 	}
-	private double xCoordinate;
 	
 	/**
 	 * Returns the y-coordinate of the current location of this worm (in metres).
 	 */
-	@Basic @Raw
+	@Raw
 	public double getYCoordinate(){
-		return this.yCoordinate;
+		return getPosition().getY();
 	}
 	
 	/**
-	 * Checks whether the given y-coordinate is a valid y-coordinate.
+	 * Sets the position for this worm.
 	 * 
-	 * @param y
-	 * 			The y-coordinate to check.
-	 * @return 	Whether or not y is a valid number.
-	 * 			| !Double.isNan(y)
-	 */
-	public static boolean isValidYCoordinate(double y){
-		return !Double.isNaN(y);
-	}
-	
-	/**
-	 * Sets the y-coordinate of the location of this worm.
-	 * 
-	 * @param y
-	 * 			The new y-coordinate of the location of this worm (in metres).
-	 * @post	The y-coordinate of this worm equals the given y-coordinate
-	 * 		 	| new.getYCoordinate() == y
+	 * @param position	The new position to set.
+	 * @post	The new position equals the given position.
+	 * 			| new.getPosition() == position
 	 * @throws IllegalArgumentException
-	 * 			The given position is not a valid y-coordinate.
-	 * 			| !isValidYCoordinate(y)
+	 * 			Thrown when the given position isn't a valid position.
+	 * 			| !Position.isValidPosition(position)
 	 */
 	@Raw
-	private void setYCoordinate(double y) throws IllegalArgumentException{
-		if (!isValidYCoordinate(y))
-			throw new IllegalArgumentException("The given y-coordinate is not a valid y-coordinate.");
-		this.yCoordinate = y;
+	private void setPosition(Position position) throws IllegalArgumentException{
+		if(!Position.isValidPosition(position))
+			throw new IllegalArgumentException();
+		this.position = position;
 	}
-	private double yCoordinate;
+	
+	/**
+	 * Returns the position of this worm.
+	 */
+	@Raw @Basic
+	public Position getPosition(){
+		return position;
+	}
+	private Position position;
 	
 	/**
 	 * Returns the direction of this worm (in radians).
@@ -734,8 +679,7 @@ public class Worm {
 		if(!canJump())
 			throw new IllegalStateException();
 		double[] newCoordinates = getJumpStep(getJumpTime());
-		setXCoordinate(newCoordinates[0]);
-		setYCoordinate(newCoordinates[1]);
+		setPosition(new Position(newCoordinates[0],newCoordinates[1]));
 		
 		decreaseActionPoints(getActionPoints());
 	}
