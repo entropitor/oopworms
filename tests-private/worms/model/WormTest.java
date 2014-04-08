@@ -398,17 +398,14 @@ public class WormTest {
 		assertTrue(Worm.isValidCharacterForName('\"'));
 		assertTrue(Worm.isValidCharacterForName('X'));
 		assertTrue(Worm.isValidCharacterForName('d'));
+		assertTrue(Worm.isValidCharacterForName('3'));
+		assertTrue(Worm.isValidCharacterForName('9'));
 	}
 	
 	@Test
 	public void testIsValidCharacterForName_Symbols(){
 		assertFalse(Worm.isValidCharacterForName('$'));
 		assertFalse(Worm.isValidCharacterForName('~'));
-	}
-	
-	@Test
-	public void testIsValidCharacterForName_Numbers(){
-		assertFalse(Worm.isValidCharacterForName('3'));
 	}
 	
 	@Test
@@ -424,7 +421,7 @@ public class WormTest {
 	
 	@Test
 	public void testIsValidName_TrueCase(){
-		assertTrue(Worm.isValidName("James o'Har\"a"));
+		assertTrue(Worm.isValidName("James o'Har\"a 007"));
 	}
 	
 	@Test

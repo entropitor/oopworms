@@ -465,12 +465,12 @@ public class Worm {
 	/**
 	 * Checks whether or not the given character is a valid character to be used in a name for a worm.
 	 * 
-	 * <p>In the current version, the valid characters consist of (latin) letters (both uppercase and lowercase), quotes (both single and double) and spaces.
-	 * In short the list looks like this: [A-Za-z'" ].
+	 * <p>The valid characters consist of (latin) letters (both uppercase and lowercase), quotes (both single and double), spaces and numbers.
+	 * In short the list looks like this: [A-Za-z'" 0-9].
 	 * 
 	 * @param c The character to check.
-	 * @return	Whether or not the character is a (latin) letter, quote or space.
-	 * 			| result == (c == 32 || c == 34 || c == 39 || (65 <= c && c <= 90) || (97 <= c && c <= 122))
+	 * @return	Whether or not the character is a (latin) letter, quote, space or number.
+	 * 			| result == (c == 32 || c == 34 || c == 39 || (65 <= c && c <= 90) || (97 <= c && c <= 122) || 48 <= c && c <= 57)
 	 */
 	public static boolean isValidCharacterForName(char c){
 		//Space is allowed.
@@ -485,6 +485,10 @@ public class Worm {
 			return true;
 		//Lowercase characters are allowed.
 		if(97 <= c && c <= 122)
+			return true;
+		
+		//Numbers are allowed.
+		if(48 <= c && c <= 57)
 			return true;
 		
 		//All the rest isn't allowed (at the moment).
