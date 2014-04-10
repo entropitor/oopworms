@@ -28,11 +28,6 @@ public class WormTest_Turn {
 	}
 	
 	@Test
-	public void testIsValidTurningAngle_NonInclusiveUpperBound(){
-		assertFalse(Worm.isValidTurningAngle(PI));
-	}
-	
-	@Test
 	public void testIsValidTurningAngle_NaN(){
 		assertFalse(Worm.isValidTurningAngle(Double.NaN));
 	}
@@ -40,12 +35,12 @@ public class WormTest_Turn {
 	@Test
 	public void testIsValidTurningAngle_TooPositive(){
 		assertFalse(Worm.isValidTurningAngle(1964));
-		assertFalse(Worm.isValidTurningAngle(PI+1e-2));
+		assertFalse(Worm.isValidTurningAngle(2*PI+1e-2));
 	}
 	
 	@Test
 	public void testIsValidTurningAngle_TooNegative(){
-		assertFalse(Worm.isValidTurningAngle(-PI-1e-2));
+		assertFalse(Worm.isValidTurningAngle(-2*PI-1e-2));
 	}
 	
 	@Test
@@ -55,6 +50,7 @@ public class WormTest_Turn {
 		assertEquals(Worm.getTurningCost(-1.321), 13);
 		assertEquals(Worm.getTurningCost(PI-1E-3), 30);
 		assertEquals(Worm.getTurningCost(-PI), 30);
+		assertEquals(Worm.getTurningCost(-2*PI), 60);
 	}
 	
 	@Test
@@ -106,5 +102,9 @@ public class WormTest_Turn {
 		willy.turn(-PI);
 		assertFuzzyEquals(willy.getDirection(), PI);
 		assertEquals(willy.getActionPoints(), 183466713-10-10-13-30);
+		
+		willy.turn(-2*PI);
+		assertFuzzyEquals(willy.getDirection(), PI);
+		assertEquals(willy.getActionPoints(), 183466713-10-10-13-30-60);
 	}
 }
