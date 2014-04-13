@@ -294,14 +294,6 @@ public class Worm {
 	
 	/**
 	 * Returns the position of this worm.
-	 * 
-	 * @param y
-	 * 			The new y-coordinate of the location of this worm (in metres).
-	 * @post	The y-coordinate of this worm equals the given y-coordinate
-	 * 		 	| new.getYCoordinate() == y
-	 * @throws IllegalArgumentException
-	 * 			The given position is not a valid y-coordinate.
-	 * 			| !isValidYCoordinate(y)
 	 */
 	@Raw @Basic
 	public Position getPosition(){
