@@ -1,43 +1,29 @@
 package worms.model;
 
-import worms.util.MathUtil;
-import be.kuleuven.cs.som.annotate.*;
-import static worms.util.Util.*;
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
+import static java.lang.Math.ceil;
+import static java.lang.Math.cos;
+import static java.lang.Math.pow;
+import static java.lang.Math.round;
+import static java.lang.Math.sin;
 import static worms.util.ModuloUtil.posMod;
-
-import static java.lang.Math.*;
+import static worms.util.Util.fuzzyGreaterThanOrEqualTo;
+import static worms.util.Util.fuzzyLessThanOrEqualTo;
+import worms.util.MathUtil;
+import be.kuleuven.cs.som.annotate.Basic;
+import be.kuleuven.cs.som.annotate.Model;
+import be.kuleuven.cs.som.annotate.Raw;
 
 /**
- * A class of worms with position, direction, radius and a name.
- * 
- * @author Jens Claes
- * @author Tomas Fiers
- * @version 1.0
- *
- * @invar 	The position of the worm is a valid position. 
- * 		 	| Position.isValidPosition(getPosition())
- * @invar	The direction of the worm is a valid direction.
- * 			| isValidDirection(getDirection())
- * @invar	The name of the worm is a valid name.
- * 			| isValidName(getName())
- * @invar	The radius of the worm is a valid radius for this worm.
- * 			| canHaveAsRadius(getRadius())
- * @invar	The amount of action points is a valid amount of action points for this worm.
- * 			| canHaveAsActionPoints(getActionPoints())
+ * A class of massive entities with a name and action points,
+ * that can move, eat and fire weapons, amongst others.
  */
-public class Worm {
+public class Worm extends MassiveEntity {
 
 	/**
-	 * The constant density of a worm, in kg/m³.
-	 */
-	public static final int DENSITY = 1062;
-	/**
-	 * The gravitational acceleration on earth, in m/s².
-	 */
-	public static final double GRAVITATIONAL_ACCELERATION = 9.80665;
-	
-	/**
-	 * Creates a new worm that is positioned at the given location, looks in the given direction, has the given radius and the given name.
+	 * Creates a new worm that is positioned at the given location, faces the given direction, 
+	 * has the given radius and the given name.
 	 * 
 	 * @param x
 	 * 			The x-coordinate of the position of the new worm (in metres)
@@ -63,13 +49,9 @@ public class Worm {
 	@Raw
 	public Worm(double x, double y, double direction, double radius, String name) throws IllegalArgumentException{
 		setPosition(new Position(x,y));
-
 		setDirection(direction);
-		
 		setName(name);
-
 		setRadius(radius);
-
 		replenishActionPoints();
 	}
 	
@@ -190,7 +172,7 @@ public class Worm {
 	 * A vertical step costs 4 action points.<br>
 	 * Every other step is the sum of the costs of the horizontal and vertical components 
 	 * (in which the cost of a component is proportional to the fraction of the step and to the cost of a step along that component).<br>
-	 * Because of floating point precision problems, the components are rounded to a precision of 1e-12.<br></p>>
+	 * Because of floating point precision problems, the components are rounded to a precision of 1e-12.<br></p>
 	 * 
 	 * @param direction		The direction for which the cost of the unit step should be calculated.
 	 * @return				Returns the cost of a unit step in the given direction. 
@@ -258,86 +240,6 @@ public class Worm {
 	public void moveWith(double x, double y) throws IllegalArgumentException{
 		setPosition(getPosition().offset(x,y));
 	}
-	
-	/**
-	 * Returns the x-coordinate of the current location of this worm (in metres).
-	 */
-	@Raw
-	public double getXCoordinate(){
-		return getPosition().getX();
-	}
-	
-	/**
-	 * Returns the y-coordinate of the current location of this worm (in metres).
-	 */
-	@Raw
-	public double getYCoordinate(){
-		return getPosition().getY();
-	}
-	
-	/**
-	 * Sets the position for this worm.
-	 * 
-	 * @param position	The new position to set.
-	 * @post	The new position equals the given position.
-	 * 			| new.getPosition() == position
-	 * @throws IllegalArgumentException
-	 * 			Thrown when the given position isn't a valid position.
-	 * 			| !Position.isValidPosition(position)
-	 */
-	@Raw
-	private void setPosition(Position position) throws IllegalArgumentException{
-		if(!Position.isValidPosition(position))
-			throw new IllegalArgumentException();
-		this.position = position;
-	}
-	
-	/**
-	 * Returns the position of this worm.
-	 */
-	@Raw @Basic
-	public Position getPosition(){
-		return position;
-	}
-	private Position position;
-	
-	/**
-	 * Returns the direction of this worm (in radians).
-	 */
-	@Basic @Raw
-	public double getDirection(){
-		return direction;
-	}
-	
-	/**
-	 * Checks whether the given direction is a valid direction.
-	 * 
-	 * @param direction The direction to check
-	 * @return 	Whether or not direction is a valid number between 0 and 2*PI
-	 * 			| result == (!double.isNaN(direction) && 0 <= direction && direction < 2*PI)
-	 */
-	public static boolean isValidDirection(double direction){
-		if(Double.isNaN(direction))
-			return false;
-		return 0 <= direction && direction < 2*PI;
-	}
-	
-	/**
-	 * Sets the direction of this worm to the given direction.
-	 * 
-	 * @param direction
-	 * 			The new direction of the worm (in radians).
-	 * @pre 	The given direction is a valid direction.
-	 * 			| isValidDirection(direction)
-	 * @post 	The new direction of this worm equals the given direction.
-	 * 			| new.getDirection() == direction
-	 */
-	@Raw @Model
-	private void setDirection(double direction){
-		assert isValidDirection(direction);
-		this.direction = direction;
-	}
-	private double direction;
 	
 	/**
 	 * Returns the name of this worm.
@@ -418,12 +320,34 @@ public class Worm {
 		this.name = name;
 	}
 	private String name;
+	
+	/**
+	 * @see worms.model.MassiveEntity#getDensity()
+	 */
+	@Override
+	protected int getDensity() {
+		return 1062;
+	}
 
 	/**
-	 * Returns the radius of this worm (in metres).
+	 * @see worms.model.MassiveEntity#getMass()
+	 * 
+	 * @return	The mass of this worm (in kilograms),
+	 * 			assuming the worm has a spherical body with a 
+	 * 			homogeneous density of Worm.DENSITY:
+	 * 			m = ρ*4/3*π*r³
+	 * 			| fuzzyEquals(result, this.getDensity()*4.0/3*PI*pow(this.getRadius(), 3))
 	 */
-	@Basic @Raw
-	public double getRadius(){
+	@Override
+	public double getMass(){
+		return this.getDensity()*4.0/3*PI*pow(this.getRadius(), 3);
+	}
+
+	/**
+	 * @see worms.model.Entity#getRadius()
+	 */
+	@Override
+	public double getRadius() {
 		return this.radius;
 	}
 	
@@ -483,20 +407,7 @@ public class Worm {
 		this.setActionPoints(this.getActionPoints());
 	}
 	private double radius;
-	
-	/**
-	 * Returns the mass of this worm.
-	 * 
-	 * @return	The mass of this worm (in kilograms),
-	 * 			assuming the worm has a spherical body with a 
-	 * 			homogeneous density of Worm.DENSITY:
-	 * 			m = ρ*4/3*π*r³
-	 * 			| fuzzyEquals(result,Worm.DENSITY*4.0/3*PI*pow(this.getRadius(), 3))
-	 */
-	public double getMass(){
-		return Worm.DENSITY*4.0/3*PI*pow(this.getRadius(), 3);
-	}
-	
+		
 	/**
 	 * Returns the current number of action points of this worm.
 	 */
@@ -539,34 +450,6 @@ public class Worm {
 		return (0 <= amount 
 				&& amount <= this.getMaxActionPoints());
 	}
-	
-	/**
-	 * Sets this worm's action points (APs) to the given amount.
-	 * 
-	 * @param amount
-	 * 			The number of APs 
-	 * @post	If the given amount of APs is a valid amount of APs for this worm,
-	 * 			set this worm's APs to the given amount.
-	 * 			| if (canHaveAsActionPoints(amount))
-	 * 			| 	new.getActionPoints() == amount
-	 * @post	A negative amount zeroes this worm's APs.
-	 * 			| if (amount < 0)
-	 *			| 	new.getActionPoints() == 0
-	 * @post	An amount larger than the maximum allowed number of APs
-	 * 			sets this worm's APs to this maximum allowed number.
-	 * 			| if (amount > this.getMaxActionPoints())
-	 *			| 	new.getActionPoints() == getMaxActionPoints()
-	 */
-	@Raw @Model
-	private void setActionPoints(int amount){
-		if (this.canHaveAsActionPoints(amount))
-			this.actionPoints = amount;
-		if (amount < 0)
-			this.actionPoints = 0;
-		if (amount > this.getMaxActionPoints())
-			this.actionPoints = this.getMaxActionPoints();
-	}
-	private int actionPoints;
 	
 	/**
 	 * Subtract a number of action points (APs) from this worm's APs. 
@@ -628,31 +511,52 @@ public class Worm {
 	}
 	
 	/**
-	 * Makes this worm jump.
+	 * Sets this worm's action points (APs) to the given amount.
 	 * 
-	 * @post		The new x- and y-coordinate of this worm will equal the x- and y-coordinates as 
-	 * 				calculated by getJumpStemp() after the jump is completed
-	 * 				| new.getXCoordinate() == getJumpStep(getJumpTime())[0]
-	 * 				| new.getYCoordinate() == getJumpStep(getJumpTime())[1]
+	 * @param amount
+	 * 			The number of APs 
+	 * @post	If the given amount of APs is a valid amount of APs for this worm,
+	 * 			set this worm's APs to the given amount.
+	 * 			| if (canHaveAsActionPoints(amount))
+	 * 			| 	new.getActionPoints() == amount
+	 * @post	A negative amount zeroes this worm's APs.
+	 * 			| if (amount < 0)
+	 *			| 	new.getActionPoints() == 0
+	 * @post	An amount larger than the maximum allowed number of APs
+	 * 			sets this worm's APs to this maximum allowed number.
+	 * 			| if (amount > this.getMaxActionPoints())
+	 *			| 	new.getActionPoints() == getMaxActionPoints()
+	 */
+	@Raw @Model
+	private void setActionPoints(int amount){
+		if (this.canHaveAsActionPoints(amount))
+			this.actionPoints = amount;
+		if (amount < 0)
+			this.actionPoints = 0;
+		if (amount > this.getMaxActionPoints())
+			this.actionPoints = this.getMaxActionPoints();
+	}
+	private int actionPoints;
+	
+	/**
+	 * @see worms.model.MassiveEntity#jump()
+	 * 
 	 * @post		The action points are set to zero.
 	 * 				| new.getActionPoints() == 0
-	 * @note		With the current physics, the new y-coordinate will (almost) equal the old y-coordinate
-	 * 				(taking floating point precision in calculation).
 	 * @throws IllegalStateException
 	 * 				Thrown when the worm can't jump from his current position.
 	 * 				| !canJump()
 	 */
+	@Override
 	public void jump() throws IllegalStateException{
 		if(!canJump())
 			throw new IllegalStateException();
-		double[] newCoordinates = getJumpStep(getJumpTime());
-		setPosition(new Position(newCoordinates[0],newCoordinates[1]));
-		
+		super.jump();
 		decreaseActionPoints(getActionPoints());
 	}
 	
 	/**
-	 * Calculates the force exerted by this worm (in Newton) in a potential jump from his current position.
+	 * @see worms.model.MassiveEntity#getJumpForce()
 	 * 
 	 * @return	The (virtual) force exerted by this worm (in Newton) equals the sum of 5 times its action points and 
 	 * 			its weight (its mass times the gravitational acceleration), in case he can jump.
@@ -669,17 +573,6 @@ public class Worm {
 	}
 	
 	/**
-	 * Calculates the initial velocity of this worm (in m/s) in a potential jump from his current position.
-	 * 
-	 * @return	The (virtual) velocity of this worm (in m/s) equals the (virtual) force exerted by this worm divided by its mass and multiplied with 0.5 seconds.
-	 * 			| fuzzyEquals(result, (getJumpForce()/getMass())*0.5);
-	 * @note	This method will return 0 if the worm can't jump because getJumpForce() will equal 0.
-	 */
-	public double getJumpVelocity(){
-		return (getJumpForce()/getMass())*0.5;
-	}
-	
-	/**
 	 * Checks whether this worm is in a position to jump.
 	 * 
 	 * @return		Whether or not this worm is facing upwards.
@@ -690,44 +583,13 @@ public class Worm {
 	}
 	
 	/**
-	 * Calculates the time this worm will take to complete a potential jump from his current position.
+	 * @see worms.model.MassiveEntity#getJumpStep()
 	 * 
-	 * @return 	Returns the amount of time needed to complete his (virtual) jump from his current position when he can jump.
-	 * 			This time equals 2 times the y-component of the initial velocity divided by the gravitational acceleration.
-	 * 			| fuzzyEquals(result, (2*getJumpVelocity()*sin(getDirection())/GRAVITATIONAL_ACCELERATION))
-	 * @note	This method will return 0 if the worm can't jump because getJumpVelocity() will equal 0.
-	 */
-	public double getJumpTime(){
-		return (2*getJumpVelocity()*sin(getDirection())/GRAVITATIONAL_ACCELERATION);
-	}
-	
-	/**
-	 * Calculates the x- and y-coordinate of this worm in a potential jump from his current position after
-	 * the given period of time t.
-	 * 
-	 * @param t		The time after the jump (in seconds).
-	 * @return		An array of two doubles, the first one equals the x-coordinate t seconds after the jump, 
-	 * 				the second one equals the y-coordinate t seconds after the jump.
-	 * 				|	result.length == 2 &&
-	 * 				|	fuzzyEqulas(result[0], (getXCoordinate()+(getJumpVelocity()*cos(getDirection())*min(t,getJumpTime()))) &&
-	 * 				|	fuzzyEquals(result[1], (getYCoordinate()+(getJumpVelocity()*sin(getDirection())*min(t,getJumpTime()))-(GRAVITATIONAL_ACCELERATION/2*pow(time,2)))
-	 * @throws IllegalArgumentException
-	 * 				Thrown when t is not a valid number or is less than zero
-	 * 				| Double.isNaN(t) || t < 0
-	 * @note		When this worm is unable to jump, this method will just return an array containing
+	 * @note		When this entity is unable to jump, this method will just return an array containing
 	 * 				the current x and y position, invariant of the given t.
 	 */
+	@Override
 	public double[] getJumpStep(double t) throws IllegalArgumentException{
-		if(Double.isNaN(t) || t < 0)
-			throw new IllegalArgumentException("Illegal timestep");
-		
-		//If t > getJumpTime() => jump is over, use getJumpTime() as time instead of t.
-		double time = min(t,getJumpTime());
-		double velocity = getJumpVelocity();
-		double direction = getDirection();
-		
-		double newX = getXCoordinate()+(velocity*cos(direction)*time);
-		double newY = getYCoordinate()+(velocity*sin(direction)*time)-(GRAVITATIONAL_ACCELERATION/2*pow(time,2));
-		return new double[]{newX,newY};
+		return super.getJumpStep(t);
 	}
 }

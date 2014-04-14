@@ -22,7 +22,7 @@ public class WormTest_Position {
 
 	@BeforeClass
 	public static void setupClass() throws NoSuchMethodException, SecurityException{		
-		setPosition = Worm.class.getDeclaredMethod("setPosition", Position.class);
+		setPosition = Entity.class.getDeclaredMethod("setPosition", Position.class);
 		setPosition.setAccessible(true);
 	}
 	

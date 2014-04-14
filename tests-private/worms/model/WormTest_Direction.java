@@ -25,7 +25,7 @@ public class WormTest_Direction {
 
 	@BeforeClass
 	public static void setupClass() throws NoSuchMethodException, SecurityException{		
-		setDirection = Worm.class.getDeclaredMethod("setDirection", double.class);
+		setDirection = MassiveEntity.class.getDeclaredMethod("setDirection", double.class);
 		setDirection.setAccessible(true);
 	}
 
