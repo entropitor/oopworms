@@ -73,10 +73,9 @@ public class WormTest_Jump {
 	
 	@Test
 	public void testGetJumpStep_MidAirCase(){
-		double[] jumpstep = skippy.getJumpStep(1);
-		assertEquals(jumpstep.length, 2);
-		assertFuzzyEquals(jumpstep[0], -0.36089306);
-		assertFuzzyEquals(jumpstep[1], -1.3114509);
+		Position jumpstep = skippy.getJumpStep(1);
+		assertFuzzyEquals(jumpstep.getX(), -0.36089306);
+		assertFuzzyEquals(jumpstep.getY(), -1.3114509);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
@@ -91,25 +90,22 @@ public class WormTest_Jump {
 	
 	@Test
 	public void testGetJumpStep_AfterJumpCase(){
-		double[] jumpstep = skippy.getJumpStep(5);
-		assertEquals(jumpstep.length, 2);
-		assertFuzzyEquals(jumpstep[0], -1.5098204);
-		assertFuzzyEquals(jumpstep[1], -3.14);
+		Position jumpstep = skippy.getJumpStep(5);
+		assertFuzzyEquals(jumpstep.getX(), -1.5098204);
+		assertFuzzyEquals(jumpstep.getY(), -3.14);
 	}
 	
 	@Test
 	public void testGetJumpStep_BeforeJumpCase(){
-		double[] jumpstep = skippy.getJumpStep(0);
-		assertEquals(jumpstep.length, 2);
-		assertFuzzyEquals(jumpstep[0], 2.72);
-		assertFuzzyEquals(jumpstep[1], -3.14);
+		Position jumpstep = skippy.getJumpStep(0);
+		assertFuzzyEquals(jumpstep.getX(), 2.72);
+		assertFuzzyEquals(jumpstep.getY(), -3.14);
 	}
 	
 	@Test
 	public void testGetJumpStep_CanNotJumpCase(){
-		double[] jumpstep = eiffelTower.getJumpStep(1);
-		assertEquals(jumpstep.length, 2);
-		assertFuzzyEquals(jumpstep[0], 48.51);
-		assertFuzzyEquals(jumpstep[1], 2.21);
+		Position jumpstep = eiffelTower.getJumpStep(1);
+		assertFuzzyEquals(jumpstep.getX(), 48.51);
+		assertFuzzyEquals(jumpstep.getY(), 2.21);
 	}
 }

@@ -4,7 +4,6 @@ import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 import static java.lang.Math.ceil;
 import static java.lang.Math.cos;
-import static java.lang.Math.pow;
 import static java.lang.Math.round;
 import static java.lang.Math.sin;
 import static worms.util.ModuloUtil.posMod;
@@ -12,12 +11,18 @@ import static worms.util.Util.fuzzyGreaterThanOrEqualTo;
 import static worms.util.Util.fuzzyLessThanOrEqualTo;
 import worms.util.MathUtil;
 import be.kuleuven.cs.som.annotate.Basic;
+import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Model;
 import be.kuleuven.cs.som.annotate.Raw;
 
 /**
  * A class of massive entities with a name and action points,
  * that can move, eat and fire weapons, amongst others.
+ * 
+ * @invar	The name of the worm is a valid name.
+ * 			| isValidName(getName())
+ * @invar	The amount of action points is a valid amount of action points for this worm.
+ * 			| canHaveAsActionPoints(getActionPoints())
  */
 public class Worm extends MassiveEntity {
 
@@ -322,63 +327,22 @@ public class Worm extends MassiveEntity {
 	private String name;
 	
 	/**
-	 * @see worms.model.MassiveEntity#getDensity()
+	 * @return	The worm has a density of 1062 kg/m³
+	 * 			| result == 1062
 	 */
-	@Override
+	@Override @Immutable @Raw @Basic
 	protected int getDensity() {
 		return 1062;
 	}
 
-	/**
-	 * @see worms.model.MassiveEntity#getMass()
-	 * 
-	 * @return	The mass of this worm (in kilograms),
-	 * 			assuming the worm has a spherical body with a 
-	 * 			homogeneous density of Worm.DENSITY:
-	 * 			m = ρ*4/3*π*r³
-	 * 			| fuzzyEquals(result, this.getDensity()*4.0/3*PI*pow(this.getRadius(), 3))
-	 */
-	@Override
-	public double getMass(){
-		return this.getDensity()*4.0/3*PI*pow(this.getRadius(), 3);
-	}
-
-	/**
-	 * @see worms.model.Entity#getRadius()
-	 */
-	@Override
+	@Override @Basic @Raw
 	public double getRadius() {
 		return this.radius;
 	}
 	
-	/**
-	 * Returns a lower bound on the radius of this worm.
-	 * 
-	 * @return A strictly positive lower bound on the radius of this worm.
-	 * 		   | result > 0
-	 */
-	@Raw
+	@Override @Raw
 	public double getRadiusLowerBound(){
 		return 0.25;
-	}
-	
-	/**
-	 * Checks whether the given radius is a valid radius for this worm.
-	 * 
-	 * @param radius
-	 * 			The radius to check.
-	 * @return	Whether or not radius is a valid number, finite 
-	 * 			and at least as big as the lower bound on radiuses 
-	 * 			of this worm.
-	 * 			| result == (!Double.isNaN(radius))
-	 *			|			&& (radius >= this.getRadiusLowerBound()) 
-     *			|			&& (radius < Double.POSITIVE_INFINITY)
-	 */
-	@Raw
-	public boolean canHaveAsRadius(double radius){
-		return  (!Double.isNaN(radius))
-				&& (radius >= this.getRadiusLowerBound()) 
-				&& (radius < Double.POSITIVE_INFINITY);
 	}
 	
 	/**
@@ -539,25 +503,16 @@ public class Worm extends MassiveEntity {
 	private int actionPoints;
 	
 	/**
-	 * @see worms.model.MassiveEntity#jump()
-	 * 
 	 * @post		The action points are set to zero.
 	 * 				| new.getActionPoints() == 0
-	 * @throws IllegalStateException
-	 * 				Thrown when the worm can't jump from his current position.
-	 * 				| !canJump()
 	 */
 	@Override
 	public void jump() throws IllegalStateException{
-		if(!canJump())
-			throw new IllegalStateException();
 		super.jump();
 		decreaseActionPoints(getActionPoints());
 	}
 	
 	/**
-	 * @see worms.model.MassiveEntity#getJumpForce()
-	 * 
 	 * @return	The (virtual) force exerted by this worm (in Newton) equals the sum of 5 times its action points and 
 	 * 			its weight (its mass times the gravitational acceleration), in case he can jump.
 	 * 			Otherwise the result equals 0 Newton.
@@ -566,6 +521,7 @@ public class Worm extends MassiveEntity {
 	 * 			| else
 	 * 			|		then result == 0
 	 */
+	@Override
 	public double getJumpForce(){
 		if(!canJump())
 			return 0;
@@ -573,23 +529,11 @@ public class Worm extends MassiveEntity {
 	}
 	
 	/**
-	 * Checks whether this worm is in a position to jump.
-	 * 
 	 * @return		Whether or not this worm is facing upwards.
 	 * 				| result == (getDirection() <= PI)
 	 */
+	@Override @Raw
 	public boolean canJump(){
 		return (getDirection() <= PI);
-	}
-	
-	/**
-	 * @see worms.model.MassiveEntity#getJumpStep()
-	 * 
-	 * @note		When this entity is unable to jump, this method will just return an array containing
-	 * 				the current x and y position, invariant of the given t.
-	 */
-	@Override
-	public double[] getJumpStep(double t) throws IllegalArgumentException{
-		return super.getJumpStep(t);
 	}
 }
