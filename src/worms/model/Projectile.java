@@ -1,49 +1,91 @@
 package worms.model;
 
-public class Projectile extends MassiveEntity {
-	//TODO implement these methods
+import static java.lang.Math.PI;
+import be.kuleuven.cs.som.annotate.Basic;
+import be.kuleuven.cs.som.annotate.Immutable;
+import be.kuleuven.cs.som.annotate.Model;
+import be.kuleuven.cs.som.annotate.Raw;
 
+/**
+ * A class of projectiles fired from Weapons, with a propulsionyield
+ * 
+ * @invar	| isValidPropulsionYield(getPropulsionYield())
+ */
+public abstract class Projectile extends MassiveEntity {
+	
 	/**
-	 * @see worms.model.MassiveEntity#getDensity()
+	 * Construct a new Projectile with a given propulsionyield.
+	 * 
+	 * @param propulsionYield
+	 * 			The propulsionyield for the new projectile.
+	 * @effect	| setPropulsionYield(propulsionYield)
 	 */
-	@Override
+	@Raw
+	public Projectile(int propulsionYield){
+		setPropulsionYield(propulsionYield);
+	}
+	
+	/**
+	 * Gets the propulsion yield for this projectile.
+	 */
+	@Basic @Raw
+	public int getPropulsionYield(){
+		return propulsionYield;
+	}
+	
+	/**
+	 * Checks whether the given propulsionYield is a valid propulsionYield
+	 * 
+	 * @return | result == (0 <= propulsionYield && propulsionYield <= 100)
+	 */
+	public boolean isValidPropulsionYield(int propulsionYield){
+		return 0 <= propulsionYield && propulsionYield <= 100;
+	}
+	
+	/**
+	 * Sets the propulsion yield for this projectile.
+	 * 
+	 * @param propulsionYield
+	 * 			The projectile to set
+	 * @post	| if(propulsionYield > 100) then new.getPropulsionYield() = 100
+	 * 			| else if (propulsionYield < 0) then new.getPropulsionYield() = 0
+	 * 			| else then new.getPropulsionYield() = propulsionYield
+	 */
+	@Raw @Model
+	private void setPropulsionYield(int propulsionYield){
+		if(propulsionYield > 100)
+			this.propulsionYield = 100;
+		else if(propulsionYield < 0)
+			this.propulsionYield = 0;
+		else 
+			this.propulsionYield = propulsionYield;
+	}
+	private int propulsionYield;
+	
+	
+	/**
+	 * @return	The projectile has a density of 7800 kg/m³
+	 * 			| result == 7800
+	 */
+	@Override @Immutable @Raw @Basic
 	protected int getDensity() {
 		return 7800;
 	}
-
-	/**
-	 * @see worms.model.MassiveEntity#getMass()
-	 * 
-	 * @return
-	 */
-	@Override
-	protected double getMass() {
-		// TODO Auto-generated method stub
-		//Given by the Weapon.
-		return 0;
+	
+	@Override @Raw
+	public abstract double getMass();
+	
+	@Override @Raw
+	public double getRadius(){
+		return Math.cbrt(getMass()/this.getDensity()/4.0*3/PI);
 	}
 
 	/**
-	 * @see worms.model.MassiveEntity#getJumpForce()
-	 * 
-	 * @return	
+	 * @return	Returns true.
+	 * 			| result == true
 	 */
-	@Override
-	protected double getJumpForce() {
-		// TODO Auto-generated method stub
-		//Given by the Weapon.
-		return 0;
-	}
-
-	/**
-	 * @see worms.model.Entity#getRadius()
-	 * 
-	 * @return	
-	 */
-	@Override
-	public double getRadius() {
-		// TODO Auto-generated method stub
-		//From mass
-		return 0;
+	@Override @Raw
+	public boolean canJump() {
+		return true;
 	}
 }
