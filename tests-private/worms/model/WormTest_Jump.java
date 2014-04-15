@@ -27,8 +27,15 @@ public class WormTest_Jump {
 	}
 	
 	@Test(expected=IllegalStateException.class)
-	public void testJump_CanNotJumpCase() throws Exception{
+	public void testJump_CanNotJumpFacingUpCase() throws Exception{
 		eiffelTower.jump();
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void testJump_CanNotJumpZeroAPsCase() throws Exception{
+		skippy.jump();
+		assertEquals(skippy.getActionPoints(), 0);
+		skippy.jump();
 	}
 	
 	@Test

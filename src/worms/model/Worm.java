@@ -529,11 +529,11 @@ public class Worm extends MassiveEntity {
 	}
 	
 	/**
-	 * @return		Whether or not this worm is facing upwards.
-	 * 				| result == (getDirection() <= PI)
+	 * @return		Whether or not this worm is facing upwards and has any action points left.
+	 * 				| result == (getDirection() <= PI) && (getActionPoints() > 0)
 	 */
 	@Override @Raw
 	public boolean canJump(){
-		return (getDirection() <= PI);
+		return (getDirection() <= PI) && (getActionPoints() > 0);
 	}
 }
