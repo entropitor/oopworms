@@ -2,6 +2,7 @@ package worms.model;
 
 import static org.junit.Assert.*;
 import static worms.util.AssertUtil.*;
+import static worms.util.ArrayUtil.*;
 
 import java.util.Random;
 
@@ -11,32 +12,47 @@ import org.junit.Test;
 public class WorldTest {
 	
 	World world;
+	boolean[][] passableMap;
 
 	@Before
 	public void setUp() throws Exception {
-		boolean[][] passableMap = {{true,true},{true,true}};
-		world = new World(300,500,passableMap,new Random());
+		passableMap = new boolean[][]{{true,true},{false,true},{true,true}};
+		world = new World(20,30,passableMap,new Random());
 	}
 	
 	@Test
 	public void testConstructor_LegalCase(){
-		boolean[][] passableMap = {{true,true},{true,true}};
-		World world = new World(300,500,passableMap,new Random());
+		World world = new World(20,30,passableMap,new Random());
 		
-		assertFuzzyEquals(300,world.getWidth());
-		assertFuzzyEquals(500,world.getHeight());
+		assertFuzzyEquals(20,world.getWidth());
+		assertFuzzyEquals(30,world.getHeight());
+		
+		assertArrayEquals(passableMap, world.getPassableMap());
+		assertTrue(deepEquals(passableMap, world.getPassableMap()));
+		
+		assertTrue(world.isPassablePosition(new Position(15,3)));
+		passableMap[2] = new boolean[]{true,false};
+		assertTrue("Check shallow clone",world.isPassablePosition(new Position(15,3)));
+		
+		assertTrue(world.isPassablePosition(new Position(15,3)));
+		passableMap[2][1] = false;
+		assertTrue("Check deep clone",world.isPassablePosition(new Position(15,3)));
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testConstructor_IllegalWidthCase() throws Exception{
-		boolean[][] passableMap = {{true,true},{true,true}};
 		new World(-300,500,passableMap,new Random());
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testConstructor_IllegalHeightCase() throws Exception{
-		boolean[][] passableMap = {{true,true},{true,true}};
 		new World(300,-500,passableMap,new Random());
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testConstructor_IllegalPassableMapCase() throws Exception{
+		passableMap = new boolean[][]{{true,true},{true}};
+		new World(300,500,passableMap,new Random());
 	}
 
 	@Test
@@ -87,5 +103,75 @@ public class WorldTest {
 	@Test
 	public void testIsValidHeight_NaNCase(){
 		assertFalse(World.isValidHeight(Double.NaN));
+	}
+	
+	@Test
+	public void testIsValidPassableMap_EmptyCase(){
+		passableMap = new boolean[][]{};
+		assertTrue(World.isValidPassableMap(passableMap));
+	}
+	
+	@Test
+	public void testIsInsideWorldBoundaries_TrueCase(){
+		assertTrue(world.isInsideWorldBoundaries(new Position(15,15)));
+	}
+	
+	@Test
+	public void testIsInsideWorldBoundaries_FalseCase(){
+		assertFalse(world.isInsideWorldBoundaries(new Position(30,15)));
+		assertFalse(world.isInsideWorldBoundaries(new Position(15,35)));
+		assertFalse(world.isInsideWorldBoundaries(new Position(-15,15)));
+		assertFalse(world.isInsideWorldBoundaries(new Position(15,-15)));
+	}
+	
+	@Test
+	public void testIsValidPassableMap_SingleRowCase(){
+		passableMap = new boolean[][]{{true,true}};
+		assertTrue(World.isValidPassableMap(passableMap));
+	}
+	
+	@Test
+	public void testIsValidPassableMap_NormalTrueCase(){
+		passableMap = new boolean[][]{{true,true,true},{true,false,true}};
+		assertTrue(World.isValidPassableMap(passableMap));
+	}
+	
+	@Test
+	public void testIsValidPassableMap_FalseCase(){
+		passableMap = new boolean[][]{{true,true},{true}};
+		assertFalse(World.isValidPassableMap(passableMap));
+	}
+	
+	@Test
+	public void testIsValidPassableMap_NullCase(){
+		assertFalse(World.isValidPassableMap(null));
+	}
+	
+	@Test
+	public void testIsPassablePosition_TrueCase(){
+		passableMap = new boolean[][]{{false,false},{false,false},{false,true}};
+		world = new World(20,300,passableMap,new Random());
+		assertTrue(world.isPassablePosition(new Position(15,30)));
+	}
+	
+	@Test
+	public void testIsPassablePosition_FalseCase(){
+		assertFalse(world.isPassablePosition(new Position(3,15)));
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testIsPassablePosition_IllegalCase() throws Exception{
+		world.isPassablePosition(new Position(100,100));
+	}
+	
+	@Test
+	public void testIsPassablePosition_NoLevelCase(){
+		passableMap = new boolean[][]{};
+		world = new World(20,30,passableMap,new Random());
+		assertTrue(world.isPassablePosition(new Position(3,15)));
+		
+		passableMap = new boolean[][]{{},{}};
+		world = new World(20,30,passableMap,new Random());
+		assertTrue(world.isPassablePosition(new Position(3,15)));
 	}
 }
