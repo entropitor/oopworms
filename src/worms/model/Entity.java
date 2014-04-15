@@ -97,6 +97,7 @@ public abstract class Entity {
 	 */
 	public boolean collidesWith(Entity entity){
 		//TODO implement
+		//TODO update @return-clause with formal statement.
 		return false;
 	}
 }

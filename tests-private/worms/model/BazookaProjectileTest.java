@@ -7,26 +7,26 @@ import org.junit.Test;
 
 public class BazookaProjectileTest {
 	
-	Projectile bazooka;
+	Projectile bazookaProjectile;
 
 	@Before
 	public void setUp() throws Exception {
-		bazooka = new BazookaProjectile(39);
+		bazookaProjectile = new BazookaProjectile(39);
 	}
 
 	@Test
 	public void testGetRadius() {
-		assertFuzzyEquals(bazooka.getRadius(),0.0209401);
+		assertFuzzyEquals(bazookaProjectile.getRadius(),0.0209401);
 	}
 
 	@Test
 	public void testGetJumpForce() {
-		assertFuzzyEquals(bazooka.getJumpForce(),5.230000);
+		assertFuzzyEquals(bazookaProjectile.getJumpForce(),5.230000);
 	}
 
 	@Test
 	public void testGetMass() {
-		assertFuzzyEquals(bazooka.getMass(),0.3);
+		assertFuzzyEquals(bazookaProjectile.getMass(),0.3);
 	}
 
 }
