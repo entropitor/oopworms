@@ -100,4 +100,25 @@ public abstract class Entity {
 		//TODO update @return-clause with formal statement.
 		return false;
 	}
+	
+	/**
+	 * Checks whether this entity is terminated.
+	 */
+	@Basic @Raw
+	public boolean isTerminated(){
+		return isTerminated;
+	}
+	
+	/**
+	 * Terminate this entity
+	 * @post	This entity is terminated
+	 * 			| new.isTerminated()
+	 */
+	public void terminate(){
+		if(!isTerminated()){
+			isTerminated = true;
+		}
+	}
+	
+	private boolean isTerminated = false;
 }
