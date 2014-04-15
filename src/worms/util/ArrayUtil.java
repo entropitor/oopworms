@@ -8,7 +8,7 @@ public class ArrayUtil {
 	 * @param src	The 2D-array to clone
 	 * @return		| deepEquals(result, src)
 	 * @return		| !src.equals(result)
-	 * @return		| for each rowNumber in 0..src.lenght-1:
+	 * @return		| for each int rowNumber in 0..src.lenght-1:
 	 * 				|	!src[rowNumber].equals(result[rowNumber])
 	 */
 	public static boolean[][] deepClone(boolean[][] src){
@@ -29,9 +29,9 @@ public class ArrayUtil {
 	 * @return			| if(src.length != dest.length)
 	 * 					|		result == false
 	 * @return			| if(
-	 * 					|		for each rowNumber in 0..src.length-1:
+	 * 					|		for each int rowNumber in 0..src.length-1:
 	 * 					|			src[rowNumber].length == dest[rowNumber].length
-	 * 					|			&& for each columNumber in 0..src[rowNumber].length-1
+	 * 					|			&& for each int columNumber in 0..src[rowNumber].length-1
 	 * 					|					src[rowNumber][columNumber] == dest[rowNumber][columnNumber]
 	 * 					| )
 	 * 					| then result == true

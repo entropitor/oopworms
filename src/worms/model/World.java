@@ -4,6 +4,9 @@ import java.util.Random;
 
 import worms.util.ArrayUtil;
 import static java.lang.Math.floor;
+import static java.lang.Math.ceil;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -110,49 +113,196 @@ public class World {
 	 * Checks if a position is inside the world boundaries.
 	 * 
 	 * @param pos	The position to check
+	 * @return		| if(pos == null) result == false
 	 * @return		| result == (0 <= pos.getX() && pos.getX() <= getWidth()
 	 * 				|			&& 0 <= pos.getY() && pos.getY() <= getHeight())
 	 */
 	@Raw
 	public boolean isInsideWorldBoundaries(Position pos){
+		if(pos == null)
+			return false;
 		return 0 <= pos.getX() && pos.getX() <= getWidth()
 				&& 0 <= pos.getY() && pos.getY() <= getHeight();
 	}
 	
 	/**
-	 * Checks if the given position is a position that is passable for entities.
+	 * Checks if a circlular position (with radius) is inside the world boundaries.
 	 * 
-	 * @param pos	The position to check
-	 * @return	| if(getPassableMap().length == 0 || getPassableMap()[0].length == 0)
-	 * 			|	result == true
-	 * @return	| let nbCellsWidth = getPassableMap()[0],
-	 * 			|     nbCellsHeight = getPassableMap().length,
-	 * 			|     row = (int) (nbCellsHeight - 1 - floor(pos.getY() / (getHeight()/nbCellsHeight))),
-	 * 			|     column = (int)floor(pos.getX() / (getWidth()/nbCellsWidth))
-	 * 			| in (result == getPassableMap()[row][column])
-	 * @throws IllegalArgumentException
-	 * 			|	!isInsideWorldBoundaries(pos)
+	 * @param pos		The position to check
+	 * @param radius	The radius of the circle.
+	 * @return			| if(pos == null) then result == false
+	 * @return			| if(Double.isNaN(radius)) then result == false
+	 * @return			| result == (isInsideWorldBoundaries(pos.offset(-radius, -radius)) && isInsideWorldBoundaries(pos.offset(radius,radius))
 	 */
-	public boolean isPassablePosition(Position pos) throws IllegalArgumentException{		
-		if(!isInsideWorldBoundaries(pos))
-			throw new IllegalArgumentException();
+	@Raw
+	public boolean isInsideWorldBoundaries(Position pos, double radius){
+		if(pos == null)
+			return false;
+		if(Double.isNaN(radius))
+			return false;
+		return isInsideWorldBoundaries(pos.offset(-radius, -radius))
+				&& isInsideWorldBoundaries(pos.offset(radius,radius));
+	}
 
+	/**
+	 * Checks whether the circle with center pos and radius radius is only covering passable terrain.
+	 * 
+	 * @param pos		The center of the circle.
+	 * @param radius	The radius of the circle.
+	 * @return			| if(pos == null || Double.isNaN(radius)) result == false
+	 * @return			| if(!isInsideWorldBoundaries(pos,radius)) result == false
+	 * @return			| if(nbCellRows() == 0 || nbCellColumns() == 0) result == true
+	 * @return			If there's an impassable position in the world that lies within the circle, than the result is false.
+	 * 					| for each Position other in World:
+	 * 					| 		if (other.squaredDistance(pos) < Math.pow(radius,2))
+	 * 					|			if (getPassableMap()[(int)floor(getCellRowCoordinate(other.getY()))][(int)floor(getCellColumnCoordinate(other.getX()))] == false)
+	 * 					|				result == true
+	 * @return			True in all other cases
+	 * 					| result == true
+	 */
+	public boolean isPassablePosition(Position pos, double radius){
+		/*
+		 * Strategy for this method:
+		 * 1) Find the horizontal grid lines (of the passableMap) that intersect with the circle
+		 * 2) For each line:
+		 * 3)		Find the 2 intersections between the horizontal line and the circle
+		 * 4)		Find the grid cells that lie within these boundaries between this line and the next
+		 * 5)		Check if any of them are impassable.
+		 */
+		if(pos == null)
+			return false;
+		if(Double.isNaN(radius))
+			return false;
+		
+		if(!isInsideWorldBoundaries(pos, radius))
+			return false;
+		
+		if(nbCellRows() == 0 || nbCellColumns() == 0)
+			 return true;
+		
 		boolean[][] map = getPassableMap();
 		
-		if(map.length == 0 || map[0].length == 0)
-			 return true;
-
-		int nbCellsWidth = map[0].length;
-		int nbCellsHeight = map.length;
-
-		double cellWidth = getWidth()/nbCellsWidth;
-		double cellHeight = getHeight()/nbCellsHeight;
+		int minRow = (int)floor(getCellRowCoordinate(pos.getY()+radius));
+		int maxRow = (int)ceil(getCellRowCoordinate(pos.getY()-radius));
 		
-		//double (-> long) -> int conversion shouldn't be a problem because we're not expecting
-		//levels with passableMaps that has 2 billion rows/columns.
-		int column = (int)floor(pos.getX() / cellWidth);
-		int row = (int) (nbCellsHeight - 1 - floor(pos.getY() / cellHeight));
-		return map[row][column];
+		double x0 = pos.getX();
+		double y0 = pos.getY();
+		
+		int minColumn,maxColumn;
+		double localRadius = 0, prevLocalRadius = 0;
+		for (int i = minRow; i < maxRow; i++) {
+			prevLocalRadius = localRadius;
+			if(i != minRow)
+				localRadius = Math.sqrt(Math.pow(radius,2)-Math.pow(getYCoordinate(i)-y0,2));
+			minColumn = (int)floor(min(getCellColumnCoordinate(x0 - localRadius), getCellColumnCoordinate(x0 - prevLocalRadius)));
+			maxColumn = (int)ceil(max(getCellColumnCoordinate(x0 + localRadius), getCellColumnCoordinate(x0 + prevLocalRadius)));
+			for(int j = minColumn; j < maxColumn; j++){
+				if(map[i][j] == false)
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Returns the number of cells in the width of the passableMap of this world.
+	 * 
+	 * @return	| if(nbCellRows() == 0) 
+	 * 			| 		then result == 0
+	 * 			| else 
+	 * 			|		result == getPassableMap()[0].length
+	 */
+	public int nbCellColumns(){
+		boolean[][] map = getPassableMap();
+		if(map.length == 0)
+			return 0;
+		return map[0].length;
+	}
+	
+	/**
+	 * Returns the number of cells in the height of the passableMap of this world.
+	 * 
+	 * @return	| result == getPassableMap().length
+	 */
+	public int nbCellRows(){
+		return getPassableMap().length;
+	}
+	
+	/**
+	 * Returns the width of a cell of the passableMap of this world (in metres).
+	 * 
+	 * @return	| result == getWidth()/nbCellColumns()
+	 */
+	public double cellWidth(){
+		return getWidth()/nbCellColumns();
+	}
+	
+	/**
+	 * Returns the height of a cell of the passableMap of this world (in metres).
+	 * 
+	 * @return	| result == getHeight()/nbCellRows()
+	 */
+	public double cellHeight(){
+		return getHeight()/nbCellRows();
+	}
+	
+	/**
+	 * Transforms x-coordinates (metres) to the scale of cellcoordinates for the passableMap of this world.
+	 * 
+	 * @param x		The x-coordinate to transform (in metres).
+	 * @return		| result == (x / cellWidth())
+	 * @note		The result of this method is a double an can be a non-integer number.
+	 */
+	public double getCellColumnCoordinate(double x){
+		return (x / cellWidth());
+	}
+	
+	/**
+	 * Transforms y-coordinates (metres) to the scale of cellcoordinates for the passableMap of this world
+	 * 
+	 * @param y		The y-coordinate to transform (in metres).
+	 * @return		| result == (nbCellRows() - (y / cellHeight()))
+	 * @note		The result of this method is a double an can be a non-integer number.
+	 */
+	public double getCellRowCoordinate(double y){
+		return nbCellRows() - (y / cellHeight());
+	}
+	
+	/**
+	 * Transforms cell(row)coordinates (for the passableMap of this world) to the scale of x-coordinates (in metres).
+	 * 
+	 * @param rowCoordinate		The cell(row)coordinate
+	 * @return					| result == cellWidth()*rowCoordinate
+	 */
+	public double getXCoordinate(int rowCoordinate){
+		return cellWidth()*rowCoordinate;
+	}
+	
+	/**
+	 * Transforms cell(column)coordinates (for the passableMap of this world) to the scale of y-coordinates (in metres).
+	 * 
+	 * @param columnCoordinate		The cell(column)coordinate
+	 * @return						| result == getHeight()-cellHeight()*columnCoordinate
+	 */
+	public double getYCoordinate(int columnCoordinate){
+		return getHeight()-cellHeight()*columnCoordinate;
+	}
+	
+	/**
+	 * Gets the locationtype of a given position and for an entity with a given radius.
+	 * 
+	 * @param pos		The position to check.
+	 * @param radius	The radius of the entity.
+	 * @return			| if(!isPassablePosition(pos,radius)) then result == IMPASSABLE
+	 * 					| else if(!isPassablePosition(pos,radius*1.1)) then result == CONTACT
+	 * 					| else result == PASSABLE
+	 */
+	public LocationType getLocationType(Position pos, double radius){
+		if(!isPassablePosition(pos,radius))
+			return LocationType.IMPASSABLE;
+		if(!isPassablePosition(pos,radius*1.1))
+			return LocationType.CONTACT;
+		return LocationType.PASSABLE;
 	}
 	
 	/**
@@ -172,7 +322,7 @@ public class World {
 	 * @param passableMap	The map to check
 	 * @return		| if(passableMap == null)
 	 * 				|	then result == false
-	 * @return		| result == (for each row in passableMap: (row.length == passableMap[0].length))
+	 * @return		| result == (for each boolean[] row in passableMap: (row.length == passableMap[0].length))
 	 */
 	public static boolean isValidPassableMap(boolean[][] passableMap){
 		if(passableMap == null)
@@ -188,17 +338,19 @@ public class World {
 	 * Sets the passable map for this world.
 	 * 
 	 * @param passableMap The map to set
-	 * @post	| ArrayUtil.deepEquals(new.getPassableMap(),passableMap)
-	 * @throws IllegalArgumentException
-	 * 			| !isValidPassableMap(passableMap)
+	 * @post	| if(!isValidPassableMap(passableMap))
+	 * 			|		then ArrayUtil.deepEquals(new.getPassableMap(),new boolean[][]{})
+	 * 			| 		else ArrayUtil.deepEquals(new.getPassableMap(),passableMap)
 	 */
 	@Raw @Model
 	private void setPassableMap(boolean[][] passableMap) throws IllegalArgumentException{
 		if(!isValidPassableMap(passableMap))
-			throw new IllegalArgumentException();
-		
-		this.passableMap = ArrayUtil.deepClone(passableMap);
+			this.passableMap = new boolean[][]{};
+		else
+			this.passableMap = ArrayUtil.deepClone(passableMap);
 	}
 	
 	private boolean[][] passableMap;
+	
+	
 }
