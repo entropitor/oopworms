@@ -5,18 +5,19 @@ import static org.junit.Assert.*;
 
 public class AssertUtil {
 	/**
-	 * @effect 	Wraps a JUnit assertTrue around a fuzzyEquals
-	 * 			| assertTrue(fuzzyEquals(x,y));
+	 * @effect 	Calls assertFuzzyEquals with precision = DEFAULT_EPSILON
+	 * 			| assertFuzzyEquals(x, y, DEFAULT_EPSILON);
 	 */
 	public static void assertFuzzyEquals(double x, double y){
-		assertTrue(fuzzyEquals(x,y));
+		assertFuzzyEquals(x, y, DEFAULT_EPSILON);
 	}
 	
 	/**
-	 * @effect 	Wraps a JUnit assertTrue around a fuzzyEquals (with given precision)
-	 * 			| assertTrue(fuzzyEquals(x,y,precision));
+	 * @effect 	Calls the assertEquals with the same arguments 
+	 * 			(this method just renames assertEquals to a more appropiate name).
+	 * 			| assertEquals(x, y, precision);
 	 */
 	public static void assertFuzzyEquals(double x, double y, double precision){
-		assertTrue(fuzzyEquals(x,y,precision));
+		assertEquals(x, y, precision);
 	}
 }
