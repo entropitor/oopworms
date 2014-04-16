@@ -4,6 +4,8 @@ import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Value;
 
+import static java.lang.Math.pow;
+
 /**
  * A class of Positions with x- and y-coordinate.
  * @author Jens Claes
@@ -11,7 +13,7 @@ import be.kuleuven.cs.som.annotate.Value;
  * @version 1.0
  * 
  * @invar	The position is a valid position
- * 			| isValidPosition(getX(),getY())
+ * 			| isValidPosition(this)
  */
 @Value
 public class Position {
@@ -122,5 +124,18 @@ public class Position {
 	@Override
 	public int hashCode(){
 		return (int) (getX()*getY());
+	}
+	
+	/**
+	 * Calculates the square of the distance to another position.
+	 * 
+	 * @param pos	The other position.
+	 * @return		The square of the distance to the other position.
+	 * 				| pow(this.getX()-pos.getX(),2)+pow(this.getY()-pos.getY(),2)
+	 */
+	public double squaredDistance(Position pos){
+		if(pos == null)
+			throw new IllegalArgumentException();
+		return pow(this.getX()-pos.getX(),2)+pow(this.getY()-pos.getY(),2);
 	}
 }

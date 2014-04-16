@@ -71,4 +71,14 @@ public class PositionTest {
 		assertFalse(position.equals(new Position(3,5)));
 		assertFalse(position.equals(null));
 	}
+	
+	@Test
+	public void testSquaredDistance_LegalCase() {
+		assertFuzzyEquals(position.squaredDistance(new Position(2,9)),20);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testSquaredDistance_IllegalCase() throws Exception {
+		position.squaredDistance(null);
+	}
 }
