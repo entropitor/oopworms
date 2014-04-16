@@ -194,15 +194,15 @@ public class World {
 		
 		double nextLocalRadius = 0, localRadius = 0;
 		for (int i = minRow; i < maxRow; i++) {
-			//Get the 'radius' at the level of the next row(line). 
-			//('radius' = fartest offset from x0 at the level of that row(line).
+			//Get the 'radius' (half of the chord) at the level of the next row(line). 
+			//('radius' = farthest offset from x0 at the level of that row(line).
 			if(i != maxRow -1)
 				nextLocalRadius = Math.sqrt(Math.pow(radius,2)-Math.pow(getYCoordinate(i+1)-y0,2));
 			
 			//Get the first and last column that overlaps with the circle in this row.
 			int minColumn = (int)floor(min(getCellColumnCoordinate(x0 - nextLocalRadius), getCellColumnCoordinate(x0 - localRadius)));
 			int maxColumn = (int)ceil(max(getCellColumnCoordinate(x0 + nextLocalRadius), getCellColumnCoordinate(x0 + localRadius)));
-
+			
 			
 			//Circle crosses a Vertical Line twice within one grid row.
 			//Only possible at the row of the center of the circle.
