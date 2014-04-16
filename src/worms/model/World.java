@@ -361,7 +361,7 @@ public class World {
 	 * 			| 		else ArrayUtil.deepEquals(new.getPassableMap(),passableMap)
 	 */
 	@Raw @Model
-	private void setPassableMap(boolean[][] passableMap) throws IllegalArgumentException{
+	private void setPassableMap(boolean[][] passableMap){
 		if(!isValidPassableMap(passableMap))
 			this.passableMap = new boolean[][]{};
 		else
