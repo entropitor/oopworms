@@ -209,6 +209,115 @@ public class WorldTest {
 		world = new World(300,300,passableMap,new Random());
 		assertEquals(IMPASSABLE, world.getLocationType(new Position(150,150), 55));
 	}
+
+	@Test
+	public void testIsPassablePosition_ImpassableRadiusRightCase() {
+		passableMap = new boolean[][]{{true,true,true},{true,true,false},{true,true,true}};
+		world = new World(300,300,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(150,150), 55));
+	}
+	
+	@Test
+	public void testIsPassablePosition_ImpassableRadiusLeftCase() {
+		passableMap = new boolean[][]{{true,true,true},{false,true,true},{true,true,true}};
+		world = new World(300,300,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(150,150), 55));
+	}
+	
+	@Test
+	public void testIsPassablePosition_ImpassableRadiusAboveCase() {
+		passableMap = new boolean[][]{{true,false,true},{true,true,true},{true,true,true}};
+		world = new World(300,300,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(150,150), 55));
+	}
+	
+	@Test
+	public void testIsPassablePosition_ImpassableRadiusBelowCase() {
+		passableMap = new boolean[][]{{true,true,true},{true,true,true},{true,false,true}};
+		world = new World(300,300,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(150,150), 55));
+	}
+	
+	@Test
+	public void testIsPassablePosition_ImpassableRadiusLeftUpperDiagonalCase() {
+		passableMap = new boolean[][]{{false,true,true},{true,true,true},{true,true,true}};
+		world = new World(300,300,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(150,150), 73));
+	}
+	
+	@Test
+	public void testIsPassablePosition_ImpassableRadiusRightUpperDiagonalCase() {
+		passableMap = new boolean[][]{{true,true,false},{true,true,true},{true,true,true}};
+		world = new World(300,300,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(150,150), 73));
+	}
+	
+	@Test
+	public void testIsPassablePosition_ImpassableRadiusLeftLowerDiagonalCase() {
+		passableMap = new boolean[][]{{true,true,true},{true,true,true},{false,true,true}};
+		world = new World(300,300,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(150,150), 73));
+	}
+	
+	@Test
+	public void testIsPassablePosition_ImpassableRadiusRightLowerDiagonalCase() {
+		passableMap = new boolean[][]{{true,true,true},{true,true,true},{true,true,false}};
+		world = new World(300,300,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(150,150), 73));
+	}
+	
+	@Test
+	public void testIsPassablePosition_VericalCrossingLeftCase() {
+		//Circle crosses a Vertical Line twice within one grid row.
+		//Vertical line on the left of the circle
+		passableMap = new boolean[][]	{{true,true,true,true,true,true},
+										{true,true,true,true,true,true},
+										{false,true,true,true,true,true},
+										{true,true,true,true,true,true},
+										{true,true,true,true,true,true}};
+		world = new World(60,50,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(22,25), 12.5));
+		
+		passableMap = new boolean[][]	{{true,true,true,true,true,true},
+										{true,true,true,true,true,true},
+										{true,true,true,true,false,true},
+										{true,true,true,true,true,true},
+										{true,true,true,true,true,true}};
+		world = new World(60,50,passableMap,new Random());
+		assertEquals(true, world.isPassablePosition(new Position(22,25), 12.5));
+	}
+	
+	@Test
+	public void testIsPassablePosition_VericalCrossingRightCase() {
+		//Circle crosses a Vertical Line twice within one grid row.
+		//Vertical line on the right of the circle
+		passableMap = new boolean[][]	{{true,true,true,true,true,true},
+										{true,true,true,true,true,true},
+										{false,true,true,true,true,true},
+										{true,true,true,true,true,true},
+										{true,true,true,true,true,true}};
+		world = new World(60,50,passableMap,new Random());
+		assertEquals(true, world.isPassablePosition(new Position(29,25), 11.5));
+		
+		passableMap = new boolean[][]	{{true,true,true,true,true,true},
+										{true,true,true,true,true,true},
+										{true,true,true,true,false,true},
+										{true,true,true,true,true,true},
+										{true,true,true,true,true,true}};
+		world = new World(60,50,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(29,25), 11.5));
+	}
+	
+	@Test
+	public void testIsPassablePosition_ImpassableFarRadiusCase() {
+		passableMap = new boolean[][]	{{false,true,true,true,true,true},
+										{true,true,true,true,true,true},
+										{true,true,true,true,true,true},
+										{true,true,true,true,true,true},
+										{true,true,true,true,true,true}};
+		world = new World(60,50,passableMap,new Random());
+		assertEquals(false, world.isPassablePosition(new Position(25,25), 22));
+	}
 	
 	@Test
 	public void testGetLocationType_ContactCase(){

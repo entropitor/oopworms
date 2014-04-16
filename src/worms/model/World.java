@@ -153,12 +153,13 @@ public class World {
 	 * @return			| if(!isInsideWorldBoundaries(pos,radius)) result == false
 	 * @return			| if(nbCellRows() == 0 || nbCellColumns() == 0) result == true
 	 * @return			If there's an impassable position in the world that lies within the circle, than the result is false.
-	 * 					| for each Position other in World:
-	 * 					| 		if (other.squaredDistance(pos) < Math.pow(radius,2))
-	 * 					|			if (getPassableMap()[(int)floor(getCellRowCoordinate(other.getY()))][(int)floor(getCellColumnCoordinate(other.getX()))] == false)
-	 * 					|				result == true
-	 * @return			True in all other cases
-	 * 					| result == true
+	 * 					| if( 
+	 * 					|		for some Position other in Position:
+	 * 					|			other.squaredDistance(pos) < Math.pow(radius,2)
+	 * 					|			&& !getPassableMap()[(int)floor(getCellRowCoordinate(other.getY()))][(int)floor(getCellColumnCoordinate(other.getX()))]
+	 * 					|  )
+	 * 					|	then result == false
+	 * 					| 	else result == true
 	 */
 	public boolean isPassablePosition(Position pos, double radius){
 		/*
@@ -182,24 +183,41 @@ public class World {
 		
 		boolean[][] map = getPassableMap();
 		
+		//Get the rows in which the circle lies
 		int minRow = (int)floor(getCellRowCoordinate(pos.getY()+radius));
 		int maxRow = (int)ceil(getCellRowCoordinate(pos.getY()-radius));
+		//Get the row in which the center of the circle lies.
+		int horizontalRow = (int)floor(getCellRowCoordinate(pos.getY()));
 		
 		double x0 = pos.getX();
 		double y0 = pos.getY();
 		
-		int minColumn,maxColumn;
-		double localRadius = 0, prevLocalRadius = 0;
+		double nextLocalRadius = 0, localRadius = 0;
 		for (int i = minRow; i < maxRow; i++) {
-			prevLocalRadius = localRadius;
-			if(i != minRow)
-				localRadius = Math.sqrt(Math.pow(radius,2)-Math.pow(getYCoordinate(i)-y0,2));
-			minColumn = (int)floor(min(getCellColumnCoordinate(x0 - localRadius), getCellColumnCoordinate(x0 - prevLocalRadius)));
-			maxColumn = (int)ceil(max(getCellColumnCoordinate(x0 + localRadius), getCellColumnCoordinate(x0 + prevLocalRadius)));
+			//Get the 'radius' at the level of the next row(line). 
+			//('radius' = fartest offset from x0 at the level of that row(line).
+			if(i != maxRow -1)
+				nextLocalRadius = Math.sqrt(Math.pow(radius,2)-Math.pow(getYCoordinate(i+1)-y0,2));
+			
+			//Get the first and last column that overlaps with the circle in this row.
+			int minColumn = (int)floor(min(getCellColumnCoordinate(x0 - nextLocalRadius), getCellColumnCoordinate(x0 - localRadius)));
+			int maxColumn = (int)ceil(max(getCellColumnCoordinate(x0 + nextLocalRadius), getCellColumnCoordinate(x0 + localRadius)));
+
+			
+			//Circle crosses a Vertical Line twice within one grid row.
+			//Only possible at the row of the center of the circle.
+			if(i == horizontalRow){
+				if(x0-getXCoordinate(minColumn) < radius)
+					minColumn--;
+				if(getXCoordinate(maxColumn)-x0 < radius)
+					maxColumn++;
+			}				
+			
 			for(int j = minColumn; j < maxColumn; j++){
 				if(map[i][j] == false)
 					return false;
 			}
+			localRadius = nextLocalRadius;
 		}
 		return true;
 	}
@@ -269,23 +287,23 @@ public class World {
 	}
 	
 	/**
-	 * Transforms cell(row)coordinates (for the passableMap of this world) to the scale of x-coordinates (in metres).
+	 * Transforms cell(column)coordinates (for the passableMap of this world) to the scale of x-coordinates (in metres).
 	 * 
-	 * @param rowCoordinate		The cell(row)coordinate
-	 * @return					| result == cellWidth()*rowCoordinate
+	 * @param columnCoordinate		The cell(column)coordinate
+	 * @return						| result == cellWidth()*columnCoordinate
 	 */
-	public double getXCoordinate(int rowCoordinate){
-		return cellWidth()*rowCoordinate;
+	public double getXCoordinate(int columnCoordinate){
+		return cellWidth()*columnCoordinate;
 	}
 	
 	/**
-	 * Transforms cell(column)coordinates (for the passableMap of this world) to the scale of y-coordinates (in metres).
+	 * Transforms cell(row)coordinates (for the passableMap of this world) to the scale of y-coordinates (in metres).
 	 * 
-	 * @param columnCoordinate		The cell(column)coordinate
-	 * @return						| result == getHeight()-cellHeight()*columnCoordinate
+	 * @param rowCoordinate		The cell(row)coordinate
+	 * @return						| result == getHeight()-cellHeight()*rowCoordinate
 	 */
-	public double getYCoordinate(int columnCoordinate){
-		return getHeight()-cellHeight()*columnCoordinate;
+	public double getYCoordinate(int rowCoordinate){
+		return getHeight()-cellHeight()*rowCoordinate;
 	}
 	
 	/**
