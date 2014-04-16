@@ -269,7 +269,7 @@ public class World {
 	 * 
 	 * @param x		The x-coordinate to transform (in metres).
 	 * @return		| result == (x / cellWidth())
-	 * @note		The result of this method is a double an can be a non-integer number.
+	 * @note		The result of this method is a double and can be a non-integer number.
 	 */
 	public double getCellColumnCoordinate(double x){
 		return (x / cellWidth());
@@ -280,7 +280,7 @@ public class World {
 	 * 
 	 * @param y		The y-coordinate to transform (in metres).
 	 * @return		| result == (nbCellRows() - (y / cellHeight()))
-	 * @note		The result of this method is a double an can be a non-integer number.
+	 * @note		The result of this method is a double and can be a non-integer number.
 	 */
 	public double getCellRowCoordinate(double y){
 		return nbCellRows() - (y / cellHeight());
