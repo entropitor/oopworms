@@ -110,12 +110,11 @@ public abstract class Entity {
 	}
 	
 	/**
-	 * Terminate this entity
-	 * @post	This entity is terminated
+	 * Terminates this entity
+	 * @post	This entity is terminated.
 	 * 			| new.isTerminated()
-	 * @post	The entity is detached from it's world.
-	 *			| (getWorld().hasAsEntity(this) == false
-	 *			|  && new.getWorld() == null)
+	 * @post	The world of this entity is nullified.
+	 *			| !new.hasWorld()
 	 */
 	public void terminate(){
 		if(!isTerminated()){
@@ -129,8 +128,12 @@ public abstract class Entity {
 	/**
 	 * Checks whether this entity can be in the given world.
 	 * 
-	 * @param world	The world to be checked.
-	 * @return	| if(isTerminated)
+	 * @param world	The world to be checked against.
+	 * @return	If this entity is terminated, true if the given world is 
+	 *			not effective. If this entry is not terminated, true if
+	 *			the given world is not effective or the given world is
+	 *			effective and not terminated.
+	 *			| if(isTerminated)
 	 * 			|	result == (world == null)
 	 * 			| else
 	 * 			|	result == (world == null || !world.isTerminated())
@@ -144,7 +147,8 @@ public abstract class Entity {
 	/**
 	 * Checks whether this entity is in a world.
 	 * 
-	 * @return	| result == (getWorld() != null)
+	 * @return	True iff this entity's world is effective.
+	 *			| result == (getWorld() != null)
 	 */
 	public boolean hasWorld(){
 		return (world != null);
