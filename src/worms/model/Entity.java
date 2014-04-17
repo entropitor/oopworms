@@ -157,7 +157,7 @@ public abstract class Entity {
 	/**
 	 * Sets this entity's world to the given world.
 	 * 
-	 * @param world
+	 * @param world 	The new world this entity will belong to.
 	 * @post	new.getWorld() == world
 	 * @throws IllegalArgumentException
 	 * 			The given world is not effective.
