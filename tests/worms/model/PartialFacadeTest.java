@@ -4,14 +4,19 @@ package worms.model;
 
 import java.util.Random;
 
-import org.junit.Before;
+import org.junit.Before;*/
 import org.junit.Test;
 
-import worms.model.Facade;
+/*import worms.model.Facade;
 import worms.model.Worm;
 import worms.util.Util;*/
 
 public class PartialFacadeTest {
+	
+	@Test
+	public void testCI() {
+		
+	}
 
 	/*private static final double EPS = Util.DEFAULT_EPSILON;
 
