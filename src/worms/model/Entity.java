@@ -10,6 +10,8 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 		 	| Position.isValidPosition(getPosition())
  * @invar	The radius of the worm is a valid radius for this worm.
  * 			| canHaveAsRadius(getRadius())
+ * @invar	This entity has a valid world.
+ * 			| canHaveAsWorld(getWorld())
  */
 public abstract class Entity {
 	/**
@@ -130,18 +132,19 @@ public abstract class Entity {
 	 * 
 	 * @param world	The world to be checked against.
 	 * @return	If this entity is terminated, true if the given world is 
-	 *			not effective. If this entry is not terminated, true if
-	 *			the given world is not effective or the given world is
-	 *			effective and not terminated.
+	 *			not effective.
+	 *			If this entry is not terminated, true if
+	 *			the given world is effective and not terminated.
 	 *			| if(isTerminated)
 	 * 			|	result == (world == null)
 	 * 			| else
-	 * 			|	result == (world == null || !world.isTerminated())
+	 * 			|	result == (world != null && !world.isTerminated())
 	 */
 	public boolean canHaveAsWorld(World world){
 		if(isTerminated())
 			return (world == null);
-		return (world == null || !world.isTerminated());
+		else
+			return (world != null && !world.isTerminated());
 	}
 
 	/**
@@ -151,7 +154,7 @@ public abstract class Entity {
 	 *			| result == (getWorld() != null)
 	 */
 	public boolean hasWorld(){
-		return (world != null);
+		return (getWorld() != null);
 	}
 
 	/**
