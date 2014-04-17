@@ -2,7 +2,6 @@ package worms.model;
 
 import static org.junit.Assert.*;
 import static worms.util.AssertUtil.*;
-import static worms.util.ArrayUtil.*;
 import static worms.model.LocationType.*;
 
 import java.util.Random;
