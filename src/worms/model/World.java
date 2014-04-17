@@ -156,6 +156,7 @@ public class World {
 	 * 					| if( 
 	 * 					|		for some Position other in Position:
 	 * 					|			other.squaredDistance(pos) < Math.pow(radius,2)
+	 * 					|			&& world.isInsideWorldBoundaries(pos)
 	 * 					|			&& !getPassableMap()[(int)floor(getCellRowCoordinate(other.getY()))][(int)floor(getCellColumnCoordinate(other.getX()))]
 	 * 					|  )
 	 * 					|	then result == false
@@ -207,9 +208,9 @@ public class World {
 			//Circle crosses a Vertical Line twice within one grid row.
 			//Only possible at the row of the center of the circle.
 			if(i == horizontalRow){
-				if(x0-getXCoordinate(minColumn) < radius)
+				while(x0-getXCoordinate(minColumn) < radius)
 					minColumn--;
-				if(getXCoordinate(maxColumn)-x0 < radius)
+				while(getXCoordinate(maxColumn)-x0 < radius)
 					maxColumn++;
 			}				
 			
