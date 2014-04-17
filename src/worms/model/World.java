@@ -1,6 +1,8 @@
 package worms.model;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import worms.util.ArrayUtil;
 import static java.lang.Math.floor;
@@ -14,6 +16,7 @@ import be.kuleuven.cs.som.annotate.*;
  * 
  * @invar	| isValidWidth(getWidth()) && isValidHeight(getHeight())
  * @invar	| isValidPassableMap(getPassableMap())
+ * @invar	| hasProperEntities();
  */
 public class World {
 
@@ -369,6 +372,133 @@ public class World {
 	}
 	
 	private boolean[][] passableMap;
+
+	/**
+	 * Checks whether this world is terminated.
+	 */
+	@Basic @Raw
+	public boolean isTerminated(){
+		return isTerminated;
+	}
 	
+	/**
+	 * Terminate this world
+	 *
+	 * @post	This world is terminated
+	 * 			| new.isTerminated()
+	 * @post	All entities in this world are terminated and removed.
+	 *			| (for each entity in entities:
+	 *			|	entity.isTerminated() && !new.hasAsEntity(entity))
+	 */
+	public void terminate(){
+		if(!isTerminated()){
+			for (Entity entity : entities)
+				entity.terminate();
+			entities.clear();
+			isTerminated = true;
+		}
+	}
+
+	private boolean isTerminated = false;
 	
+	/**
+	 * Adds the given entity to this world's set of entities.
+	 * 
+	 * @param entity	The entity to add.
+	 * @post	| hasAsEntity(entity);
+	 * @throws IllegalArgumentException
+	 * 			The given entity is not effective, is terminated
+	 * 			or this world already contains the given entity.
+	 * 			| (entity == null || entity.isTerminated() || hasAsEntity(entity))
+	 */
+	public void addAsEntity(Entity entity) throws IllegalArgumentException{
+		if(entity == null || entity.isTerminated() || hasAsEntity(entity))
+			throw new IllegalArgumentException();
+		entity.setWorld(this);
+		entities.add(entity);
+	}
+	
+	/**
+	 * Checks whether the given entity belongs to this world.
+	 * 
+	 * @param entity	The entity to be checked.
+	 * @return	[Whether the latest addition of the given entity to
+	 *			this world is more recent than its latest removal.]
+	 *			//TODO: formalize this.
+	 *			// (of mag je hier gewoon entities.contains(entity) schrijven?)
+	 * @throws IllegalArgumentException
+	 *			The given entity is not effective.
+	 */
+	public boolean hasAsEntity(Entity entity) throws IllegalArgumentException{
+		if(entity == null)
+			throw new IllegalArgumentException();
+		return entities.contains(entity);
+	}
+
+	/**
+	 * Removes the given entity from this world and terminates it.
+	 * 
+	 * @param entity	The entity to remove.
+	 * @post	| !hasAsEntity(entity)
+	 * @throws IllegalArgumentException
+	 *			The given entity is not effective or this world
+	 *			does not contain the given entity.
+	 *			| (entity == null || !hasAsEntity(entity))
+	 */
+	public void removeAsEntity(Entity entity) throws IllegalArgumentException{
+		if(entity == null || !hasAsEntity(entity))
+			throw new IllegalArgumentException();
+		entity.terminate();
+		entities.remove(entity);
+	}
+
+	/**
+	 * Checks whether the given entity can belong to this world.
+	 * 
+	 * @param entity	The entity to be checked.
+	 * @return	Whether the given entity is effective, is not terminated
+	 *			and can have this world as its world.
+	 *			| result == ((entity != null) 
+	 *			|			 && !entity.isTerminated()
+	 *			|			 && entity.canHaveAsWorld(this))
+	 */
+	public boolean canHaveAsEntity(Entity entity){
+		return ((entity != null) 
+				&& !entity.isTerminated()
+				&& entity.canHaveAsWorld(this));
+	}
+
+	/**
+	 * Checks whether this world has a proper set of entities.
+	 * 
+	 * @return	Whether this world can have each entity as an entity
+	 *			and each entity references this world.
+	 *			| result == (for each entity in entities:
+	 *			|				(canHaveAsEntity(entity)
+	 *		   	|				&& entity.getWorld() == this))
+	 * @note	[How to test the false case?]
+	 */
+	public boolean hasProperEntities(){
+		for (Entity entity : entities) {
+			if(!canHaveAsEntity(entity)
+			   || entity.getWorld() != this)
+				return false;
+		}
+		// Distinctiveness is gueranteed by java.util.Set<>.
+		return true;
+	}
+	
+	/**
+	 * A set containing all the entities in this world.
+	 * 
+	 * @invar	The referenced set is effective.
+	 * 			| entities != null
+	 * @invar	Each entity registered in the referenced set
+	 * 			is effective and not terminated.
+	 * 			| for each entity in entities:
+	 * 			|	(entity != null && !entity.isTerminated())
+	 * @note [Why the divide between these invars and the hasProperEntities()
+	 *		  checker? (This is copied from Person-Ownables)]
+	 */
+	private Set<Entity> entities = new HashSet<Entity>(); 
 }

@@ -113,12 +113,69 @@ public abstract class Entity {
 	 * Terminate this entity
 	 * @post	This entity is terminated
 	 * 			| new.isTerminated()
+	 * @post	The entity is detached from it's world.
+	 *			| (getWorld().hasAsEntity(this) == false
+	 *			|  && new.getWorld() == null)
 	 */
 	public void terminate(){
 		if(!isTerminated()){
+			world = null;
 			isTerminated = true;
 		}
 	}
 	
 	private boolean isTerminated = false;
+	
+	/**
+	 * Checks whether this entity can be in the given world.
+	 * 
+	 * @param world	The world to be checked.
+	 * @return	| if(isTerminated)
+	 * 			|	result == (world == null)
+	 * 			| else
+	 * 			|	result == (world == null || !world.isTerminated())
+	 */
+	public boolean canHaveAsWorld(World world){
+		if(isTerminated())
+			return (world == null);
+		return (world == null || !world.isTerminated());
+	}
+
+	/**
+	 * Checks whether this entity is in a world.
+	 * 
+	 * @return	| result == (getWorld() != null)
+	 */
+	public boolean hasWorld(){
+		return (world != null);
+	}
+
+	/**
+	 * Sets this entity's world to the given world.
+	 * 
+	 * @param world
+	 * @post	new.getWorld() == world
+	 * @throws IllegalArgumentException
+	 * 			The given world is not effective.
+	 * 			| (world == null)
+	 * @throws IllegalStateException
+	 * 			This entity already has a world.
+	 * 			| hasWorld()
+	 */
+	public void setWorld(World world) throws IllegalArgumentException,IllegalStateException{
+		if(world == null)
+			throw new IllegalArgumentException();
+		if(hasWorld())
+			throw new IllegalStateException("This entity already has a world.");
+		this.world = world;
+	}
+	
+	/**
+	 * Returns the world this entity belongs to.
+	 */
+	public World getWorld(){
+		return world;
+	}
+	
+	private World world = null;
 }
