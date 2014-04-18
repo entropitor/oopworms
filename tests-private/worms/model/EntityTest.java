@@ -21,12 +21,18 @@ public class EntityTest {
 
 	@Test
 	public void testTerminate_SingleCase(){
-		antares.addAsEntity(willy);
+		antares.addWorm(willy);
 		assertFalse(willy.isTerminated());
 
-		willy.terminate();
+		antares.removeWorm(willy);
 		assertTrue(willy.isTerminated());
 		assertEquals(willy.getWorld(), null);
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void testTermiante_WorldStillReferencesCase() {
+		antares.addWorm(willy);
+		willy.terminate();
 	}
 
 	@Test

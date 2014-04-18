@@ -119,9 +119,14 @@ public abstract class Entity {
 	 * @post	The entity has broken its side of the association
 	 *			with its world.
 	 *			| !new.hasWorld()
+	 * @throws	IllegalStateException
+	 * 			When the world still references this Entity.
+	 * 			| getWorld().hasAsEntity(this)
 	 */
-	public void terminate(){
+	public void terminate() throws IllegalStateException{
 		if(!isTerminated()){
+			if(world.hasAsEntity(this))
+				throw new IllegalStateException();
 			world = null;
 			isTerminated = true;
 		}
@@ -172,15 +177,19 @@ public abstract class Entity {
 	 * 			The given world is not effective or has not (yet)
 	 *			registered this entity.
 	 * 			| (world == null || !world.hasAsEntity(this))
+	 * @throws	IllegalArgumentException
+	 * 			| If this worm can't have the given world as its world.
 	 * @throws	IllegalStateException
 	 * 			This entity already has a world.
 	 * 			| hasWorld()
 	 */
-	public void setWorld(World world) throws IllegalArgumentException,IllegalStateException{
+	public void setWorld(@Raw World world) throws IllegalArgumentException,IllegalStateException{
 		if(world == null || !world.hasAsEntity(this))
 			throw new IllegalArgumentException();
 		if(hasWorld())
 			throw new IllegalStateException("This entity already has a world.");
+		if(!canHaveAsWorld(world))
+			throw new IllegalArgumentException();
 		this.world = world;
 	}
 	
