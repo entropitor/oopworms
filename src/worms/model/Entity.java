@@ -113,9 +113,11 @@ public abstract class Entity {
 	
 	/**
 	 * Terminates this entity
+	 *
 	 * @post	This entity is terminated.
 	 * 			| new.isTerminated()
-	 * @post	The world of this entity is nullified.
+	 * @post	The entity has broken its side of the association
+	 *			with its world.
 	 *			| !new.hasWorld()
 	 */
 	public void terminate(){
@@ -160,17 +162,22 @@ public abstract class Entity {
 	/**
 	 * Sets this entity's world to the given world.
 	 * 
-	 * @param world 	The new world this entity will belong to.
-	 * @post	new.getWorld() == world
-	 * @throws IllegalArgumentException
-	 * 			The given world is not effective.
-	 * 			| (world == null)
-	 * @throws IllegalStateException
+	 * @param	world
+	 *			The new world this entity will belong to.
+	 * @post	This entity has a world.
+	 *			| hasWorld()
+	 * @post	This entity references the given world.
+	 *			| new.getWorld() == world
+	 * @throws	IllegalArgumentException
+	 * 			The given world is not effective or has not (yet)
+	 *			registered this entity.
+	 * 			| (world == null || !world.hasAsEntity(this))
+	 * @throws	IllegalStateException
 	 * 			This entity already has a world.
 	 * 			| hasWorld()
 	 */
 	public void setWorld(World world) throws IllegalArgumentException,IllegalStateException{
-		if(world == null)
+		if(world == null || !world.hasAsEntity(this))
 			throw new IllegalArgumentException();
 		if(hasWorld())
 			throw new IllegalStateException("This entity already has a world.");
