@@ -50,22 +50,32 @@ public abstract class Projectile extends MassiveEntity {
 	}
 	
 	/**
+	 * Legalizes a propulsion yield so it's a valid propulsion yield
+	 * 
+	 * @param propulsionYield	The propulsionyield to legalize.
+	 * @return					| if(propulsionYield > 100) then result = 100
+	 * 							| else if (propulsionYield < 0) then result = 0
+	 * 							| else then result = propulsionYield 
+	 */
+	public static int legalizePropulsionYield(int propulsionYield){
+		if(propulsionYield > 100)
+			return 100;
+		else if(propulsionYield < 0)
+			return 0;
+		else 
+			return propulsionYield;
+	}
+	
+	/**
 	 * Sets the propulsion yield for this projectile.
 	 * 
 	 * @param propulsionYield
 	 * 			The projectile to set
-	 * @post	| if(propulsionYield > 100) then new.getPropulsionYield() = 100
-	 * 			| else if (propulsionYield < 0) then new.getPropulsionYield() = 0
-	 * 			| else then new.getPropulsionYield() = propulsionYield
+	 * @post	| new.getPropulsionYield() == legalizePropulsionYield(propulsionYield)
 	 */
 	@Raw @Model
 	private void setPropulsionYield(int propulsionYield){
-		if(propulsionYield > 100)
-			this.propulsionYield = 100;
-		else if(propulsionYield < 0)
-			this.propulsionYield = 0;
-		else 
-			this.propulsionYield = propulsionYield;
+		this.propulsionYield = legalizePropulsionYield(propulsionYield);
 	}
 	private int propulsionYield;
 	

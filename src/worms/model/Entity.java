@@ -2,6 +2,7 @@ package worms.model;
 
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
+import static java.lang.Math.pow;
 
 /**
  * A class of objects taking up space at a certain position in a game world.
@@ -96,11 +97,25 @@ public abstract class Entity {
 	 * 
 	 * @param entity	The entity to check collision against.
 	 * @return			Whether this entity collides with the given entity.
+	 * 					| result == (getPosition().squaredDistance(entity.getPosition()) < pow(getRadius() + entity.getRadius(),2))
+	 * @throws IllegalArgumentException
+	 * 					When the given entity is the null reference
+	 * 					| entity == null
+	 * @throws IllegalStateException
+	 * 					When this entity or the given entity are terminated.
+	 * 					| isTerminated() || entity.isTerminated()
+	 * @throws IllegalStateException
+	 * 					When the two entity's don't live in the same world.
+	 * 					| getWorld() != entity.getWorld()
 	 */
-	public boolean collidesWith(Entity entity){
-		//TODO implement
-		//TODO update @return-clause with formal statement.
-		return false;
+	public boolean collidesWith(Entity entity) throws IllegalArgumentException, IllegalStateException{
+		if(entity == null)
+			throw new IllegalArgumentException();
+		if(isTerminated() || entity.isTerminated())
+			throw new IllegalStateException();
+		if(getWorld() != entity.getWorld())
+			throw new IllegalStateException();
+		return getPosition().squaredDistance(entity.getPosition()) < pow(getRadius() + entity.getRadius(),2);
 	}
 	
 	/**

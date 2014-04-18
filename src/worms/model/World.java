@@ -869,7 +869,6 @@ public class World {
 	public void removeProjectile() {
 		setProjectile(null);
 	}
-	
 	/**
 	 * Checks if this world has a projectile
 	 * 

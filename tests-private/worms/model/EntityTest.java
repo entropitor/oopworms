@@ -50,6 +50,43 @@ public class EntityTest {
 		antares.removeWorm(willy);
 		assertTrue(willy.canHaveAsWorld(null));
 	}
+	
+	@Test
+	public void testCollidesWith_TrueCase() {
+		willy = new Worm(antares, 30,30, 1, 1, "Willy Wonka");
+		assertTrue(willy.collidesWith(new Worm(antares, 32, 30, 1, 1.01, "Charlie")));
+		assertTrue(willy.collidesWith(new Worm(antares, 30, 32, 1, 1.01, "Charlie")));
+		assertTrue(willy.collidesWith(new Worm(antares, 32, 32, 1, 2.01, "Charlie")));
+	}
+	
+	@Test
+	public void testCollidesWith_FalseCase() {
+		willy = new Worm(antares, 30,30, 1, 1, "Willy Wonka");
+		assertFalse(willy.collidesWith(new Worm(antares, 32, 30, 1, 0.5, "Charlie")));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCollidesWith_NullReferenceCase() throws Exception {
+		willy.collidesWith(null);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testCollidesWith_TerminatedCase() throws Exception {
+		antares.removeWorm(willy);
+		willy.collidesWith(new Worm(antares, 30, 30, 1, 1, "Charlie"));
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testCollidesWith_TerminatedComparedWithCase() throws Exception{
+		Worm worm = new Worm(antares, 30, 30, 1, 1, "Charlie");
+		antares.removeWorm(worm);
+		willy.collidesWith(worm);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testCollidesWith_DifferentWorldsCase() throws Exception {
+		willy.collidesWith(new Worm(braveNew, 30, 30, 1, 1, "Charlie"));
+	}
 
 	@Test
 	public void testCanHaveAsWorld_NormalCase(){
