@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static worms.util.AssertUtil.assertFuzzyEquals;
 
+import java.util.Random;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,9 +15,9 @@ public class WormTest_Jump {
 	
 	@Before
 	public void setup(){
-		//				   x    y    dir.     r       name
-		skippy = new Worm(2.72, -3.14, 2, 1.5, "Skippy The Bush Kangaroo");
-		eiffelTower = new Worm(48.51, 2.21, 3.4, 21851, "The Eiffel Tower");
+		World world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
+		skippy = new Worm(world, 2.72, -3.14, 2, 1.5, "Skippy The Bush Kangaroo");
+		eiffelTower = new Worm(world, 48.51, 2.21, 3.4, 21851, "The Eiffel Tower");
 	}
 
 	@Test

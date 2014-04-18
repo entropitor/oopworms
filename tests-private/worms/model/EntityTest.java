@@ -14,14 +14,13 @@ public class EntityTest {
 
 	@Before
 	public void setUp() throws Exception {
-		willy  = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
 		antares = new World(20,30,new boolean[][]{{}},new Random());
 		braveNew = new World(5,6,new boolean[][]{{false}},new Random(789));
+		willy  = new Worm(antares, 112, 358, 1.321, 34.55, "Willy Wonka");
 	}
 
 	@Test
 	public void testTerminate_SingleCase(){
-		antares.addWorm(willy);
 		assertFalse(willy.isTerminated());
 
 		antares.removeWorm(willy);
@@ -31,24 +30,24 @@ public class EntityTest {
 	
 	@Test(expected=IllegalStateException.class)
 	public void testTermiante_WorldStillReferencesCase() {
-		antares.addWorm(willy);
 		willy.terminate();
 	}
 
 	@Test
 	public void testCanHaveAsWorld_TerminatedTrueCase(){
-		willy.terminate();
+		antares.removeWorm(willy);
 		assertTrue(willy.canHaveAsWorld(null));
 	}
 
 	@Test
 	public void testCanHaveAsWorld_TerminatedFalseCase(){
-		willy.terminate();
+		antares.removeWorm(willy);
 		assertFalse(willy.canHaveAsWorld(antares));
 	}
 
 	@Test
 	public void testCanHaveAsWorld_NullCase(){
+		antares.removeWorm(willy);
 		assertTrue(willy.canHaveAsWorld(null));
 	}
 
@@ -77,16 +76,9 @@ public class EntityTest {
 	}
 
 	@Test
-	public void testSetWorld_NormalCase(){
-		assertEquals(willy.getWorld(), null);
-		willy.setWorld(antares);
-		assertEquals(willy.getWorld(), antares);
-	}
-
-	@Test
 	public void testHasWorld_SingleCase(){
-		assertFalse(willy.hasWorld());
-		willy.setWorld(antares);
 		assertTrue(willy.hasWorld());
+		antares.removeWorm(willy);
+		assertFalse(willy.hasWorld());
 	}
 }

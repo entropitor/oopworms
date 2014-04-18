@@ -894,11 +894,11 @@ public class World {
 	 * @param  projectile
 	 *         The projectile to check.
 	 * @return True if this world and the given projectile are not terminated.
-	 *       | result == (!projectile.isTerminated() && !this.isTerminated())
+	 *       | result == ((projectile == null) || (!projectile.isTerminated() && !this.isTerminated()))
 	 */
 	@Raw
 	public boolean canHaveAsProjectile(@Raw Projectile projectile) {
-		return (!projectile.isTerminated() && !this.isTerminated());
+		return (projectile == null) || (!projectile.isTerminated() && !this.isTerminated());
 	}
 
 	/**
@@ -925,7 +925,7 @@ public class World {
 	 * @param  projectile
 	 *         The projectile to be registered.
 	 * @post 	| new.getProjectile() == projectile
-	 * @post 	| (new projectile).getWorld() == this
+	 * @post 	| if(projectile != null) then (new projectile).getWorld() == this
 	 * @effect	| if(hasProjectile()) getProjectile().terminate()
 	 * @throws IllegalArgumentException
 	 *			| !canHaveAsProjectile(projectile)
@@ -938,9 +938,11 @@ public class World {
 			throw new IllegalArgumentException();
 		if(projectile != null && projectile.hasWorld())
 			throw new IllegalStateException();
+		
 		Projectile oldProjectile = this.projectile;
 		this.projectile = projectile;
-		projectile.setWorld(this);
+		if(projectile != null)
+			projectile.setWorld(this);
 		if(oldProjectile != null)
 			oldProjectile.terminate();
 	}

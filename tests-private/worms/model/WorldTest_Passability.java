@@ -19,8 +19,8 @@ public class WorldTest_Passability {
 	public void setUp() throws Exception {
 		passableMap = new boolean[][]{{true,true},{false,true},{true,true}};
 		world = new World(20,30,passableMap,new Random());
-		chilly  = new Worm(5, 5, 0.6, 35, "Henk Rijckaert");
-		willy  = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
+		chilly  = new Worm(world, 5, 5, 0.6, 35, "Henk Rijckaert");
+		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka");
 	}
 	
 	@Test

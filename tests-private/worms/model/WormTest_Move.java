@@ -6,6 +6,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static worms.util.AssertUtil.assertFuzzyEquals;
 
+import java.util.Random;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,10 +18,10 @@ public class WormTest_Move {
 
 	@Before
 	public void setup(){
-		//				   x    y    dir.     r       name
-		willy  = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
-		left = new Worm(0, 0, PI, 1, "Left");
-		diagonal = new Worm(2, -3, PI/4, 1, "Diagonal");
+		World world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
+		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka");
+		left = new Worm(world, 0, 0, PI, 1, "Left");
+		diagonal = new Worm(world, 2, -3, PI/4, 1, "Diagonal");
 	}
 
 	@Test

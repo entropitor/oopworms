@@ -17,15 +17,12 @@ public class WorldTest_Entities {
 		passableMap = new boolean[][]{{true,true},{false,true},{true,true}};
 		world = new World(20,30,passableMap,new Random());
 		otherWorld = new World(20,30,passableMap,new Random());
-		chilly  = new Worm(5, 5, 0.6, 35, "Henk Rijckaert");
-		willy  = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
+		chilly  = new Worm(world, 5, 5, 0.6, 35, "Henk Rijckaert");
+		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka");
 	}
 	
 	@Test
 	public void testTerminate(){
-		world.addWorm(chilly);
-		world.addWorm(willy);
-
 		assertTrue(world.hasAsEntity(chilly));
 		assertTrue(world.hasAsEntity(willy));
 		assertEquals(chilly.getWorld(), world);
@@ -41,7 +38,6 @@ public class WorldTest_Entities {
 	
 	@Test(expected = IllegalStateException.class)
 	public void testAddWorm_WormInOtherWorldCase() throws Exception {
-		world.addWorm(willy);
 		otherWorld.addWorm(willy);
 	}
 
@@ -52,43 +48,27 @@ public class WorldTest_Entities {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testAddWorm_TerminatedCase(){
+		world.addWorm(willy);
 		willy.terminate();
 		world.addWorm(willy);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testAddWorm_DoubleCase(){
-		assertFalse(world.hasAsEntity(willy));
-		world.addWorm(willy);
 		assertTrue(world.hasAsEntity(willy));
 		world.addWorm(willy);
-	}
-	
-	@Test
-	public void testAddWorm_NormalCase() {
-		world.addWorm(willy);
-		assertTrue(world.hasAsEntity(willy));
-		assertEquals(willy.getWorld(), world);
-		assertEquals(1, world.getNbWorms());
-	}
-
-	@Test(expected=IllegalArgumentException.class)
-	public void testHasAsEntity_NullCase(){
-		world.hasAsEntity(null);
 	}
 	
 	@Test
 	public void testHasAsEntity_TrueCase() {
-		world.addWorm(willy);
 		assertTrue(world.hasAsEntity(willy));
 	}
 
 	@Test
 	public void testHasAsEntity_FalseCase() {
-		assertFalse(world.hasAsEntity(chilly));
-		world.addWorm(willy);
-		assertFalse(world.hasAsEntity(chilly));
+		assertFalse(otherWorld.hasAsEntity(chilly));
 	}
+	
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testRemoveWorm_NullCase(){
@@ -97,13 +77,12 @@ public class WorldTest_Entities {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testRemoveWorm_NotHavingCase(){
-		assertFalse(world.hasAsEntity(willy));
-		world.removeWorm(willy);
+		assertFalse(otherWorld.hasAsEntity(willy));
+		otherWorld.removeWorm(willy);
 	}
 	
 	@Test
 	public void testRemoveWorm_NormalCase() {
-		world.addWorm(willy);
 		assertTrue(world.hasAsEntity(willy));
 		assertEquals(willy.getWorld(), world);
 
@@ -120,7 +99,7 @@ public class WorldTest_Entities {
 
 	@Test
 	public void testCanHaveAsWorm_TerminatedCase() {
-		willy.terminate();
+		world.removeWorm(willy);
 		assertFalse(world.canHaveAsWorm(willy));
 	}
 
@@ -131,10 +110,6 @@ public class WorldTest_Entities {
 
 	@Test
 	public void testHasProperWorms_SingleCase() {
-		assertTrue(world.hasProperWorms());
-		world.addWorm(chilly);
-		assertTrue(world.hasProperWorms());
-		world.addWorm(willy);
 		assertTrue(world.hasProperWorms());
 		world.removeWorm(chilly);
 		assertTrue(world.hasProperWorms());

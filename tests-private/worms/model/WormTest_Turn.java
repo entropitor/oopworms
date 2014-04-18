@@ -7,16 +7,19 @@ import static org.junit.Assert.assertTrue;
 import static worms.util.AssertUtil.assertFuzzyEquals;
 import static worms.util.Util.fuzzyEquals;
 
+import java.util.Random;
+
 import org.junit.Before;
 import org.junit.Test;
 
 public class WormTest_Turn {
 	private Worm willy;
+	World world;
 	
 	@Before
 	public void setup(){
-		//				   x    y    dir.     r       name
-		willy  = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
+		world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
+		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka");
 	}
 
 	@Test
@@ -55,7 +58,7 @@ public class WormTest_Turn {
 	
 	@Test
 	public void testCanTurn(){
-		Worm fatboy = new Worm(0, 0, 0, 20, "Big radius so lots 'o APs");
+		Worm fatboy = new Worm(world, 0, 0, 0, 20, "Big radius so lots 'o APs");
 		assertTrue(fatboy.canTurn(-PI));
 		
 //		Minimum radius is 0.25 atm., so no testing in this way.
@@ -65,7 +68,7 @@ public class WormTest_Turn {
 //		Worm nope = new Worm(0, 0, 0, 0.1000, "Radius too small so not enough APs");
 //		assertFalse(nope.canTurn(PI));
 		
-		Worm slim = new Worm(0, 0, 0, 0.25, "Slim shady");
+		Worm slim = new Worm(world, 0, 0, 0, 0.25, "Slim shady");
 		assertEquals(slim.getActionPoints(), 70);
 		assertTrue(slim.canTurn(-PI));
 		
