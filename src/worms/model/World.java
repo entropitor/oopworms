@@ -1,6 +1,10 @@
 package worms.model;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import worms.util.ArrayUtil;
 import static java.lang.Math.floor;
@@ -14,6 +18,7 @@ import be.kuleuven.cs.som.annotate.*;
  * 
  * @invar	| isValidWidth(getWidth()) && isValidHeight(getHeight())
  * @invar	| isValidPassableMap(getPassableMap())
+ * @invar	| hasProperFoods() && hasProperWorms() && hasProperProjectile();
  */
 public class World {
 
@@ -370,6 +375,512 @@ public class World {
 	}
 	
 	private boolean[][] passableMap;
+
+	/**
+	 * Checks whether this world is terminated.
+	 */
+	@Basic @Raw
+	public boolean isTerminated(){
+		return isTerminated;
+	}
 	
+	/**
+	 * Terminate this world
+	 *
+	 * @post	This world is terminated
+	 * 			| new.isTerminated()
+	 * @post	All entities in this world are terminated and removed.
+	 *			| (for each worm in getWorms():
+	 *			|	worm.isTerminated() && !new.hasAsEntity(worm))
+	 *			| && (for each food in getFoods():
+	 *			|	food.isTerminated() && !new.hasAsEntity(food))
+	 *			| && (if hasProjectile()) 
+	 *			|	then getProjectile().isTerminated() && !new.hasAsEntity(getProjectile())
+	 */
+	public void terminate(){
+		if(!isTerminated()){
+			Set<Entity> entities = getEntities();
+			
+			worms.clear();
+			foods.clear();
+			setProjectile(null);
+			
+			for (Entity entity : entities)
+				entity.terminate();
+			isTerminated = true;
+		}
+	}
+
+	private boolean isTerminated = false;
 	
+	/**
+	 * Returns a set of all food rations, all worms and the projectile in this world.
+	 *  
+	 * @return	An (unordered) set off all entities in this world (and only those).
+	 *			| for each entity in result: entity == getProjectile() || getWorms().contains(entity) || getFoods().contains(entity)
+	 *			| && for each worm in getWorms(): result.contains(worm)
+	 *			| && for each food in getFoods(): result.contains(food)
+	 *			| && if(hasProjectile()): result.contains(getProjectile())
+	 */
+	public Set<Entity> getEntities(){
+		Set<Entity> result = new HashSet<Entity>();
+		result.addAll(getFoods());
+		result.addAll(getWorms());
+		if(hasProjectile())
+			result.add(getProjectile());
+		return result;
+	}
+	
+	/**
+	 * Checks whether this world contains the given entity.
+	 * 
+	 * @param entity	The entity to check.
+	 * @return	Whether the given entity registered in this world.
+	 * 			| if(entity instanceof Food)
+	 *			| 	return hasAsFood((Food) entity);
+	 *			| if(entity instanceof Worm)
+	 *			| 	return hasAsWorm((Worm) entity);
+	 *			| if(entity instanceof Projectile)
+	 *			| 	return entity == getProjectile();
+	 *			| else
+	 *			|	return false;
+	 */
+	public boolean hasAsEntity(Entity entity){
+		if(entity instanceof Food)
+			return hasAsFood((Food) entity);
+		if(entity instanceof Worm)
+			return hasAsWorm((Worm) entity);
+		if(entity instanceof Projectile)
+			return entity == getProjectile();
+		return false;
+	}
+
+	/**
+	 * Returns the food rations in this world.
+	 * 
+	 */
+	@Basic
+	public Set<Food> getFoods(){
+		return new HashSet<Food>(foods);
+	}
+
+	/**
+	 * Checks whether this world can have the given food ration
+	 * as one of its food rations.
+	 * 
+	 * @param	food
+	 *			The food to check.
+	 * @return	True iff the given food is effective,
+	 *			the given food is not terminated and this world is not terminated.
+	 *			| result ==
+	 *			|   ((food != null) && (!food.isTerminated()) && (!this.isTerminated()))
+	 */
+	@Raw
+	public boolean canHaveAsFood(Food food){
+		return ((food != null) && (!food.isTerminated()) && (!this.isTerminated()));
+	}
+
+	/**
+	 * Checks whether this world has proper food rations attached to it.
+	 * 
+	 * @return True iff this world can have each of the
+	 *         foods attached to it as a food at its index,
+	 *         and if each of these foods references this world as
+	 *         the world to which they are attached.
+	 *       | result ==
+	 *       |   (for each food in getFoods():
+	 *       |     (this.canHaveAsFood(food) && (food.getWorld() == this)))
+	 * @note	Distinctiveness of this world's foods is gueranteed by java.util.Set<>.
+	 */
+	@Raw
+	public boolean hasProperFoods() {
+		for (Food food : foods)
+			if(!canHaveAsFood(food) || food.getWorld() != this)
+				return false;
+		return true;
+	}
+
+	/**
+	 * Checks whether this world has the given food as one of its
+	 * foods.
+	 * 
+	 * @param  food
+	 * 		   The food to check.
+	 * @return The given food is registered at some position as
+	 *         a food of this world.
+	 *       | result == (getFoods().contains(food))
+	 */
+	public boolean hasAsFood(@Raw Food food){
+		return foods.contains(food);
+		// Just as in the Share-Purchase example,
+		// a more efficient implementation would be possible if
+		// the consistency imposed on the bi-directional association
+		// would be guaranteed.
+		// return (food != null) && (food.getWorld() == this);
+	}
+
+	/**
+	 * Adds the given food to the list of foods of this world.
+	 * 
+	 * @param	food
+	 * 			The food to be added.
+	 * @post	The number of foods in this world is
+	 * 			incremented by 1.
+	 * 			| new.getNbFoods() == getNbFoods()+1
+	 * @post	The given food references this world.
+	 *			| (new food).getWorld() == this
+	 * @post	The food is added to the list of foods for this world.
+	 * 			| new.hasAsFood(food)
+	 * @throws	IllegalArgumentException
+	 *			| (!canHaveAsFood(food) || (this.hasAsFood(food)))
+	 * @throws 	IllegalStateException
+	 * 			| food.hasWorld()
+	 */
+	void addFood(@Raw Food food) throws IllegalArgumentException,IllegalStateException{
+		if(!canHaveAsFood(food) || (this.hasAsFood(food)))
+			throw new IllegalArgumentException();
+		if(food.hasWorld())
+			throw new IllegalStateException();
+		foods.add(food);
+		food.setWorld(this);
+	}
+
+	/**
+	 * Removes the given food from the list of foods of this world.
+	 * 
+	 * @param	food
+	 * 			The food to be removed.
+	 * @post	The number of foods of this world is
+	 * 			decremented by 1.
+	 * 			| new.getNbFoods() == getNbFoods() - 1
+	 * @post	This world no longer has the given food as
+	 * 			one of its foods.
+	 * 			| !new.hasAsFood(food)
+	 * @effect	The given food is terminated
+	 *			(and thus no longer references this world).
+	 *			| food.terminate()
+	 * @throws	IllegalArgumentException
+	 *			The given food is not effective or this world
+	 *			does not have the given food as one of its foods.
+	 *			| ((food == null) || (!this.hasAsFood(food)))
+	 */
+	@Raw
+	void removeFood(Food food) throws IllegalArgumentException{
+		if((food == null) || (!this.hasAsFood(food)))
+			throw new IllegalArgumentException();
+		foods.remove(food);
+		food.terminate();
+	}
+
+	/**
+	 * An (unordered) set containing all the food rations in this world.
+	 * 
+	 * @invar	The referenced set is effective.
+	 * 			| foods != null
+	 * @invar	Each food registered in the referenced set
+	 * 			is effective and not terminated.
+	 * 			| for each food in foods:
+	 * 			|	(food != null && !food.isTerminated())
+	 * @invar	No food is registered more than once
+	 *       	in the referenced collection.
+	 *       	(This is gueranteed by java.util.Set<>.)
+	 *       	| let food_list == new ArrayList(foods) in:
+	 *			|	(for each i,j in 0..food_list.size()-1:
+	 *			|		((i == j) ||
+	 *			|		(food_list.get(i) != food_list.get(j)))
+	 */
+	private final Set<Food> foods = new HashSet<Food>();
+
+	/**
+	 * Returns all the worms in this world.
+	 */
+	@Basic
+	public List<Worm> getWorms(){
+		return new ArrayList<Worm>(worms);
+	}
+
+	/**
+	 * Returns the worm associated with this world at the
+	 * given index.
+	 * 
+	 * @param	index
+	 *			The (0-based) index of the worm to return.
+	 * @throws	IndexOutOfBoundsException
+	 * 			The given index is negative or it exceeds or equals the
+	 * 			number of worms in this world.
+	 *			| (index < 0) || (index >= getNbWorms())
+	 */
+	@Basic
+	@Raw
+	public Worm getWormAt(int index) throws IndexOutOfBoundsException{
+		return worms.get(index);
+	}
+
+	/**
+	 * Returns the number of worms in this world.
+	 */
+	@Basic
+	@Raw
+	public int getNbWorms(){
+		return worms.size();
+	}
+
+	/**
+	 * Checks whether this world can have the given worm
+	 * as one of its worms.
+	 * 
+	 * @param	worm
+	 *			The worm to check.
+	 * @return	True iff the given worm is effective,
+	 *			the given worm is not terminated and this world is not terminated.
+	 *			| result ==
+	 *			|   ((worm != null) && (!worm.isTerminated()) && (!this.isTerminated()))
+	 */
+	@Raw
+	public boolean canHaveAsWorm(Worm worm){
+		return ((worm != null) && (!worm.isTerminated()) && (!this.isTerminated()));
+	}
+
+	/**
+	 * Checks whether this world can have the given worm
+	 * as one of its worms at the given (1-based) index.
+	 * 
+	 * @param  worm
+	 *         The worm to check.
+	 * @return False if the given index is negative or exceeds the
+	 *         number of worms for this world.
+	 *       | if ((index < 0) || (index > getNbWorms()))
+	 *       |   then result == false
+	 *         Otherwise, false if this world cannot have the given
+	 *         worm as one of its worms.
+	 *       | else if ( ! this.canHaveAsWorm(worm) )
+	 *       |   then result == false
+	 *         Otherwise, true iff the given worm is
+	 *         not registered at another index than the given index.
+	 *       | else result ==
+	 *       |   (for each i in 0..getNbWorms()-1:
+	 *       |     (i == index) || (getWormAt(i) != worm))
+	 */
+	@Raw
+	public boolean canHaveAsWormAt(Worm worm, int index){
+		if ((index < 0) || (index > getNbWorms()))
+			return false;
+		if (!this.canHaveAsWorm(worm))
+			return false;
+		for (int i = 0; i < getNbWorms(); i++)
+			if ((i != index) && (getWormAt(i) == worm))
+				return false;
+		return true;
+	}
+
+	/**
+	 * Checks whether this world has proper worms attached to it.
+	 * 
+	 * @return True iff this world can have each of the
+	 *         worms attached to it as a worm at its index,
+	 *         and if each of these worms references this world as
+	 *         the world to which they are attached.
+	 *       | result ==
+	 *       |   (for each i in 0..getNbWorms()-1:
+	 *       |     (this.canHaveAsWormAt(worm,i) &&
+	 *       |       (worm.getWorld() == this)))
+	 */
+	public boolean hasProperWorms() {
+		for (int i = 0; i < getNbWorms(); i++){
+			if (!canHaveAsWormAt(getWormAt(i), i))
+				return false;
+			if (getWormAt(i).getWorld() != this)
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Checks whether this world has the given worm as one of its
+	 * worms.
+	 * 
+	 * @param  worm
+	 * 		   The worm to check.
+	 * @return The given worm is registered at some position as
+	 *         a worm of this world.
+	 *       | for some i in 0..getNbWorms()-1:
+	 *       |   getWormAt(i) == worm
+	 */
+	public boolean hasAsWorm(@Raw Worm worm){
+		return worms.contains(worm);
+		// Just as in the Share-Purchase example,
+		// a more efficient implementation would be possible if
+		// the consistency imposed on the bi-directional association
+		// would be guaranteed.
+		// return (worm != null) && (worm.getWorld() == this);
+	}
+
+	/**
+	 * Adds the given worm to the list of worms of this world.
+	 * 
+	 * @param	worm
+	 * 			The worm to be added.
+	 * @post	The number of worms in this world is
+	 * 			incremented by 1.
+	 * 			| new.getNbWorms() == getNbWorms()+1
+	 * @post	This world has the given worm as its last worm.
+	 * 			| new.getWormAt(getNbWorms()) == worm
+	 * @post	The given worm references this world.
+	 *			| (new worm).getWorld() == this
+	 * @throws	IllegalArgumentException
+	 *			| (!canHaveAsWormAt(worm, getNbWorms()) || (this.hasAsWorm(worm)))
+	 * @throws	IllegalStateException
+	 * 			| worm.hasWorld()
+	 */
+	void addWorm(@Raw Worm worm) throws IllegalArgumentException, IllegalStateException{
+		if(!canHaveAsWormAt(worm, getNbWorms()) || (this.hasAsWorm(worm)))
+			throw new IllegalArgumentException();
+		if(worm.hasWorld())
+			throw new IllegalStateException();
+		worms.add(worm);
+		worm.setWorld(this);
+	}
+
+	/**
+	 * Removes the given worm from the list of worms of this world.
+	 * 
+	 * @param	worm
+	 * 			The worm to be removed.
+	 * @post	The number of worms of this world is
+	 * 			decremented by 1.
+	 * 			| new.getNbWorms() == getNbWorms() - 1
+	 * @post	This world no longer has the given worm as
+	 * 			one of its worms.
+	 * 			| ! new.hasAsWorm(worm)
+	 * @effect	The given worm is terminated
+	 *			(and thus no longer references this world).
+	 *			| worm.terminate()
+	 * @post	All worms registered at an index beyond the index at
+	 * 			which the given worm was registered, are shifted
+	 * 			one position to the left.
+	 * 			| (for each i,j in 0..getNbWorms()-1:
+	 * 			|   if ((getWormAt(i) == worm) && (i < j))
+	 * 			|     then new.getWormAt(j-1) == getWormAt(j))
+	 * @throws	IllegalArgumentException
+	 *			The given worm is not effective or this world
+	 *			does not have the given worm as one of its worms.
+	 *			| ((worm == null) || (this.hasAsWorm(worm)))
+	 */
+	@Raw
+	void removeWorm(Worm worm) throws IllegalArgumentException{
+		if((worm == null) || (!this.hasAsWorm(worm)))
+			throw new IllegalArgumentException();
+		worms.remove(worm);
+		worm.terminate();
+	}
+
+	/**
+	 * An ordered list containing all the worms in this world.
+	 * 
+	 * @invar	The referenced list is effective.
+	 * 			| worms != null
+	 * @invar	Each worm registered in the referenced list
+	 * 			is effective and not terminated.
+	 * 			| for each worm in worms:
+	 * 			|	(worm != null && !worm.isTerminated())
+	 * @invar	No worm is registered at several positions
+	 *       	in the referenced list.
+	 *			| for each i,j in 0..worms.size()-1:
+	 *			|    ((i == j) ||
+	 *			|     (worms.get(i) != worms.get(j))
+	 */
+	private final List<Worm> worms = new ArrayList<Worm>();
+
+	/** 
+	 * Return the live projectile of this world.
+	 * A null reference is returned if this world currently
+	 * has no live projectile.
+	 */
+	@Basic @Raw
+	public Projectile getProjectile() {
+		return this.projectile;
+	}
+
+	/**
+	 * Check whether this world can have the given projectile as
+	 * its projectile.
+	 *
+	 * @param  projectile
+	 *         The projectile to check.
+	 * @return True if the projectile is null or this world and the given projectile are not terminated.
+	 *       | result == ((projectile == null) || (!projectile.isTerminated() && !this.isTerminated()))
+	 */
+	@Raw
+	public boolean canHaveAsProjectile(@Raw Projectile projectile) {
+		return (projectile == null) || (!projectile.isTerminated() && !this.isTerminated());
+	}
+
+	/**
+	 * Check whether this world has a proper projectile.
+	 *
+	 * @return True iff this world can have its current projectile
+	 *         as projectile, and if that projectile, if it is effective, 
+	 * 		   references this world.
+	 *       | result ==
+	 *       |   (canHaveAsProjectile(getProjectile() &&
+	 *       |	  (!hasProjectile() ||
+	 *       |		  (getProjectile().getWorld() == this)))
+	 */
+	@Raw
+	public boolean hasProperProjectile() {
+		return (canHaveAsProjectile(getProjectile()) &&
+				(!hasProjectile() ||
+					(getProjectile().getWorld() == this)));
+	}
+
+	/** 
+	 * Register the given projectile as the projectile of this world.
+	 * 
+	 * @param  projectile
+	 *         The projectile to be registered.
+	 * @post 	| new.getProjectile() == projectile
+	 * @post 	| if(projectile != null) then (new projectile).getWorld() == this
+	 * @effect	| if(hasProjectile()) getProjectile().terminate()
+	 * @throws IllegalArgumentException
+	 *			| !canHaveAsProjectile(projectile)
+	 * @throws IllegalStateException
+	 * 			| (projectile != null) && projectile.hasWorld()
+	 */
+	@Raw
+	public void setProjectile(@Raw Projectile projectile) throws IllegalArgumentException,IllegalStateException {
+		if(!canHaveAsProjectile(projectile))
+			throw new IllegalArgumentException();
+		if(projectile != null && projectile.hasWorld())
+			throw new IllegalStateException();
+		
+		Projectile oldProjectile = this.projectile;
+		this.projectile = projectile;
+		if(projectile != null)
+			projectile.setWorld(this);
+		if(oldProjectile != null)
+			oldProjectile.terminate();
+	}
+	
+	/**
+	 * Disassociates this world's projectile.
+	 *
+	 * @effect	| setProjectile(null)
+	 */
+	public void removeProjectile() {
+		setProjectile(null);
+	}
+	
+	/**
+	 * Checks if this world has a projectile
+	 * 
+	 * @return	| result == (getProjectile() != null)
+	 */
+	public boolean hasProjectile(){
+		return getProjectile() != null;
+	}
+
+	/**
+	 * The single live Projectile of this world, or null if there is none.
+	 */
+	private Projectile projectile = null;
 }

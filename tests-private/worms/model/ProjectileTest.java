@@ -2,16 +2,22 @@ package worms.model;
 
 import static org.junit.Assert.*;
 
+import java.util.Random;
+
 import org.junit.Before;
 import org.junit.Test;
 
 public class ProjectileTest {
 	
 	Projectile projectile;
+	World world;
+	boolean[][] passableMap;
 
 	@Before
 	public void setUp() throws Exception {
-		projectile = new RifleProjectile(39);
+		passableMap = new boolean[][]{{true,true},{false,true},{true,true}};
+		world = new World(20,30,passableMap,new Random());
+		projectile = new RifleProjectile(world, 39);
 	}
 
 	@Test
@@ -21,19 +27,19 @@ public class ProjectileTest {
 
 	@Test
 	public void testConstructor_NormalCase() {
-		projectile = new RifleProjectile(39);
+		projectile = new RifleProjectile(world, 39);
 		assertEquals(projectile.getPropulsionYield(),39);
 	}
 	
 	@Test
 	public void testConstructor_TooHighPropulsionCase(){
-		projectile = new RifleProjectile(101);
+		projectile = new RifleProjectile(world, 101);
 		assertEquals(projectile.getPropulsionYield(),100);
 	}
 	
 	@Test
 	public void testConstructor_TooLowPropulsionCase(){
-		projectile = new RifleProjectile(-3);
+		projectile = new RifleProjectile(world, -3);
 		assertEquals(projectile.getPropulsionYield(),0);
 	}
 	
@@ -47,5 +53,4 @@ public class ProjectileTest {
 		assertFalse(projectile.isValidPropulsionYield(-3));
 		assertFalse(projectile.isValidPropulsionYield(101));
 	}
-
 }

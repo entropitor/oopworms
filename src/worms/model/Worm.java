@@ -27,9 +27,11 @@ import be.kuleuven.cs.som.annotate.Raw;
 public class Worm extends MassiveEntity {
 
 	/**
-	 * Creates a new worm that is positioned at the given location, faces the given direction, 
+	 * Creates a new worm that is positioned at the given location in the given world, faces the given direction, 
 	 * has the given radius and the given name.
 	 * 
+	 * @param world
+	 * 			The world where the worm lives in.
 	 * @param x
 	 * 			The x-coordinate of the position of the new worm (in metres)
 	 * @param y
@@ -50,14 +52,20 @@ public class Worm extends MassiveEntity {
 	 * 			| setRadius(radius)
 	 * @effect	Replenish the action points to their maximum.
 	 * 			| replenishActionPoints()
+	 * @effect	Adds the worm to the given world.
+	 * 			| world.addWorm(this)
+	 * @throws	NullPointerException
+	 * 			The given world is not effective.
+	 * 			| world == null
 	 */
 	@Raw
-	public Worm(double x, double y, double direction, double radius, String name) throws IllegalArgumentException{
+	public Worm(World world, double x, double y, double direction, double radius, String name) throws IllegalArgumentException,NullPointerException{
 		setPosition(new Position(x,y));
 		setDirection(direction);
 		setName(name);
 		setRadius(radius);
 		replenishActionPoints();
+		world.addWorm(this);
 	}
 	
 	/**

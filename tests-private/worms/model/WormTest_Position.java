@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Random;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -16,8 +17,8 @@ public class WormTest_Position {
 
 	@Before
 	public void setup(){
-		//				   x    y    dir.     r       name
-		willy  = new Worm(112, 358, 1.321, 34.55, "Willy Wonka");
+		World world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
+		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka");
 	}
 
 	@BeforeClass

@@ -10,6 +10,8 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 		 	| Position.isValidPosition(getPosition())
  * @invar	The radius of the worm is a valid radius for this worm.
  * 			| canHaveAsRadius(getRadius())
+ * @invar	This entity has a proper world.
+ * 			| hasProperWorld()
  */
 public abstract class Entity {
 	/**
@@ -110,15 +112,102 @@ public abstract class Entity {
 	}
 	
 	/**
-	 * Terminate this entity
-	 * @post	This entity is terminated
+	 * Terminates this entity
+	 *
+	 * @post	This entity is terminated.
 	 * 			| new.isTerminated()
+	 * @post	The entity has broken its side of the association
+	 *			with its world.
+	 *			| !new.hasWorld()
+	 * @throws	IllegalStateException
+	 * 			When the world still references this Entity.
+	 * 			| getWorld().hasAsEntity(this)
 	 */
-	public void terminate(){
+	@Raw
+	public void terminate() throws IllegalStateException{
 		if(!isTerminated()){
+			if(world.hasAsEntity(this))
+				throw new IllegalStateException();
+			world = null;
 			isTerminated = true;
 		}
 	}
 	
 	private boolean isTerminated = false;
+	
+	/**
+	 * Checks whether this entity can be in the given world.
+	 * 
+	 * @param world	The world to be checked against.
+	 * @return	If this entity is terminated, true if the given world is 
+	 *			not effective.
+	 *			If this entry is not terminated, true if
+	 *			the given world is effective and not terminated.
+	 *			| if(isTerminated)
+	 * 			|	result == (world == null)
+	 * 			| else
+	 * 			|	result == (world != null && !world.isTerminated())
+	 */
+	public boolean canHaveAsWorld(World world){
+		if(isTerminated())
+			return (world == null);
+		else
+			return (world != null && !world.isTerminated());
+	}
+	
+	/**
+	 * Checks whether this entity is properly associated with its world.
+	 * 
+	 * @return	Whether this entity can have its current world as its world
+	 * 			and whether its world has registered this entity.
+	 * 			| result == (canHaveAsWorld(world) && world.hasAsEntity(this))
+	 */
+	public boolean hasProperWorld(){
+		return (canHaveAsWorld(world) && world.hasAsEntity(this));
+	}
+
+	/**
+	 * Checks whether this entity is in a world.
+	 * 
+	 * @return	True iff this entity's world is effective.
+	 *			| result == (getWorld() != null)
+	 */
+	public boolean hasWorld(){
+		return (getWorld() != null);
+	}
+
+	/**
+	 * Sets this entity's world to the given world.
+	 * 
+	 * @param	world
+	 *			The new world this entity will belong to.
+	 * @post	This entity has a world.
+	 *			| hasWorld()
+	 * @post	This entity references the given world.
+	 *			| new.getWorld() == world
+	 * @throws	IllegalArgumentException
+	 * 			This entity cannot have the given world as its world
+	 * 			or the given world has not (yet) registered this entity. 
+	 * 			| (!canHaveAsWorld(world) || !world.hasAsEntity(this))
+	 * @throws	IllegalStateException
+	 * 			This entity already has a world.
+	 * 			| hasWorld()
+	 */
+	@Raw
+	public void setWorld(@Raw World world) throws IllegalArgumentException,IllegalStateException{
+		if(!canHaveAsWorld(world) || !world.hasAsEntity(this))
+			throw new IllegalArgumentException();
+		if(hasWorld())
+			throw new IllegalStateException("This entity already has a world.");
+		this.world = world;
+	}
+	
+	/**
+	 * Returns the world this entity belongs to.
+	 */
+	public World getWorld(){
+		return world;
+	}
+	
+	private World world = null;
 }

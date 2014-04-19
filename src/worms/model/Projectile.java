@@ -14,15 +14,22 @@ import be.kuleuven.cs.som.annotate.Raw;
 public abstract class Projectile extends MassiveEntity {
 	
 	/**
-	 * Construct a new Projectile with a given propulsionyield.
-	 * 
+	 * Construct a new Projectile with a given propulsion yield.
+	 *
+	 * @param world
+	 * 			The world with which the projectile will be associated.
 	 * @param propulsionYield
 	 * 			The propulsionyield for the new projectile.
 	 * @effect	| setPropulsionYield(propulsionYield)
+	 * @effect	| world.setProjectile(this)
+	 * @throws	NullPointerException
+	 * 			The given world is not effective.
+	 * 			| world == null
 	 */
 	@Raw
-	public Projectile(int propulsionYield){
+	public Projectile(World world, int propulsionYield) throws NullPointerException{
 		setPropulsionYield(propulsionYield);
+		world.setProjectile(this);
 	}
 	
 	/**

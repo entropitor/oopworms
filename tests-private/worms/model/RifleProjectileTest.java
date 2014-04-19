@@ -3,16 +3,22 @@ package worms.model;
 import static org.junit.Assert.*;
 import static worms.util.AssertUtil.*;
 
+import java.util.Random;
+
 import org.junit.Before;
 import org.junit.Test;
 
 public class RifleProjectileTest {
 	
 	Projectile rifleProjectile;
+	World world;
+	boolean[][] passableMap;
 
 	@Before
 	public void setUp() throws Exception {
-		rifleProjectile = new RifleProjectile(39);
+		passableMap = new boolean[][]{{true,true},{false,true},{true,true}};
+		world = new World(20,30,passableMap,new Random());
+		rifleProjectile = new RifleProjectile(world, 39);
 	}
 	
 	@Test

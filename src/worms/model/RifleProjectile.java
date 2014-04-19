@@ -8,8 +8,8 @@ import be.kuleuven.cs.som.annotate.Raw;
 public class RifleProjectile extends Projectile {
 
 	@Raw
-	public RifleProjectile(int propulsionYield) {
-		super(propulsionYield);
+	public RifleProjectile(World world, int propulsionYield) throws NullPointerException{
+		super(world, propulsionYield);
 	}
 
 	/**
