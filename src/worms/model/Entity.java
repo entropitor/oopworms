@@ -186,18 +186,16 @@ public abstract class Entity {
 	 * @post	This entity references the given world.
 	 *			| new.getWorld() == world
 	 * @throws	IllegalArgumentException
-	 * 			The given world is not effective or has not (yet)
-	 *			registered this entity.
-	 * 			| (world == null || !world.hasAsEntity(this))
-	 * @throws	IllegalArgumentException
-	 * 			| If this worm can't have the given world as its world.
+	 * 			This entity cannot have the given world as its world
+	 * 			or the given world has not (yet) registered this entity. 
+	 * 			| (!canHaveAsWorld(world) || !world.hasAsEntity(this))
 	 * @throws	IllegalStateException
 	 * 			This entity already has a world.
 	 * 			| hasWorld()
 	 */
 	@Raw
 	public void setWorld(@Raw World world) throws IllegalArgumentException,IllegalStateException{
-		if(world == null || !world.hasAsEntity(this) || !canHaveAsWorld(world))
+		if(!canHaveAsWorld(world) || !world.hasAsEntity(this))
 			throw new IllegalArgumentException();
 		if(hasWorld())
 			throw new IllegalStateException("This entity already has a world.");
