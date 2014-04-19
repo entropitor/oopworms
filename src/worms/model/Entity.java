@@ -105,7 +105,7 @@ public abstract class Entity {
 	 * 					When this entity or the given entity are terminated.
 	 * 					| isTerminated() || entity.isTerminated()
 	 * @throws IllegalStateException
-	 * 					When the two entity's don't live in the same world.
+	 * 					When the two entities don't live in the same world.
 	 * 					| getWorld() != entity.getWorld()
 	 */
 	public boolean collidesWith(Entity entity) throws IllegalArgumentException, IllegalStateException{

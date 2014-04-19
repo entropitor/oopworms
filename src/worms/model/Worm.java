@@ -570,12 +570,14 @@ public class Worm extends MassiveEntity {
 	 * @effect			A new projectile is added to the world of the worm with the given yield
 	 * 					| getSelectedWeapon().getNewProjectile(getWorld(), yield)
 	 * @post			The new projectile's position is set in the direction of this worm's direction, just outsides this worm's perimeter.
-	 * 					| let projectile = (new getWorld()).getProjectile() in
-	 * 					| let projectilesPosition = (new projectile).getPosition()) in
-	 * 					| fuzzyEquals(projectilesPosition.squaredDistance(getPosition()),pow(getRadius()+(new projectile).getRadius(),2))
-	 * 					| && !(new projectile).collidesWith(this)
-	 * 					| && fuzzyEquals(projectilesPosition.getX(), getPosition().getX()+cos(getDirection())*(getRadius()+(new projectile).getRadius()))
-	 * 					| && fuzzyEquals(projectilesPosition.getY(), getPosition().getY()+sin(getDirection())*(getRadius()+(new projectile).getRadius()))
+	 * 					| let
+	 *					| 	projectile == (new getWorld()).getProjectile() &&
+	 *					| 	projectilesPosition == (new projectile).getPosition())
+	 *					| in
+	 * 					| 	fuzzyEquals(projectilesPosition.squaredDistance(getPosition()),pow(getRadius()+(new projectile).getRadius(),2))
+	 * 					| 	&& !(new projectile).collidesWith(this)
+	 * 					| 	&& fuzzyEquals(projectilesPosition.getX(), getPosition().getX()+cos(getDirection())*(getRadius()+(new projectile).getRadius()))
+	 * 					| 	&& fuzzyEquals(projectilesPosition.getY(), getPosition().getY()+sin(getDirection())*(getRadius()+(new projectile).getRadius()))
 	 * @post			The new projectile's direction is set to the direction of this worm.
 	 * 					| fuzzyEquals((new (new getWorld()).getProjectile()).getDirection(),getDirection())
 	 * @throws	IllegalStateException
@@ -740,7 +742,7 @@ public class Worm extends MassiveEntity {
 	 * Adds a weapon to the list of weapons for this worm.
 	 * 
 	 * @param weapon	The weapon to add.
-	 * @post			If the weapon is valid not yet in the list of weapons, the weapon is added at the end of the list.
+	 * @post			If the weapon is valid and not yet in the list of weapons, the weapon is added at the end of the list.
 	 * 					| if(canHaveAsWeapon(weapon) && canHaveAsNbWeapons(getNbWeapons()+1) && !hasWeapon(weapon))
 	 * 					| then new.getWeaponAt(getNbWeapons()) == weapon && new.getNbWeapons() == getNbWeapons()+1
 	 */
@@ -791,7 +793,6 @@ public class Worm extends MassiveEntity {
 			if(getNbWeapons() > 0)
 				selectedWeapon %= getNbWeapons();
 		}
-		
 	}
 	
 	private final List<Weapon> weapons = new ArrayList<Weapon>();
@@ -799,7 +800,7 @@ public class Worm extends MassiveEntity {
 	 * The index of the selected weapon in the list of weapons.
 	 * 
 	 * @invar		If there are weapons, than this index is bigger or equal to 0 and smaller than the number of weapons, else it's 0.
-	 * 				| if(getNbWeapons()
+	 * 				| if(0 < getNbWeapons())
 	 * 				|		then 0 <= selectedWeapon && selectedWeapon < getNbWeapons()
 	 * 				| else
 	 * 				|		selectedWeapon == 0
