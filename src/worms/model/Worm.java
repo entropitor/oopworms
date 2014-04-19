@@ -707,7 +707,7 @@ public class Worm extends MassiveEntity {
 	}
 	
 	/**
-	 * Returns the list of weapons for this worm.
+	 * Get the weapon at the given index.
 	 * 
 	 * @param index			The index of the weapon in the list
 	 * @throws IndexOutOfBoundsException	
@@ -795,6 +795,17 @@ public class Worm extends MassiveEntity {
 		}
 	}
 	
+	/**
+	 * The list of weapons for this worm.
+	 * 
+	 * @invar		Every weapon only appears once in the list.
+	 *				| for each i,j in 0..weapons.size()-1:
+	 *				|    ((i == j) ||
+	 *				|     (weapons.get(i) != weapons.get(j))
+	 * @invar		The null reference is not in the list of weapons
+	 * 				| for each weapon in weapons:
+	 * 				|	(weapon != null)
+	 */
 	private final List<Weapon> weapons = new ArrayList<Weapon>();
 	/**
 	 * The index of the selected weapon in the list of weapons.
