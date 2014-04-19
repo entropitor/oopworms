@@ -29,6 +29,8 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 			| isValidName(getName())
  * @invar	The amount of action points is a valid amount of action points for this worm.
  * 			| canHaveAsActionPoints(getActionPoints())
+ * @invar	The amount of hit points is a valid amount of hit points for this worm.
+ * 			| canHaveAsHitPoints(getHitPoints())
  * @invar	The worm has proper weapons.
  * 			| hasProperWeapons()
  * @invar	The worm can have as much weapons as it has.
@@ -62,6 +64,8 @@ public class Worm extends MassiveEntity {
 	 * 			| setRadius(radius)
 	 * @effect	Replenish the action points to their maximum.
 	 * 			| replenishActionPoints()
+	 * @effect	Replenish the hit points to their maximum.
+	 * 			| replenishHitPoints()
 	 * @effect	Adds the worm to the given world.
 	 * 			| world.addWorm(this)
 	 * @effect	Add a Bazooka to the list of weapons.
@@ -79,6 +83,7 @@ public class Worm extends MassiveEntity {
 		setName(name);
 		setRadius(radius);
 		replenishActionPoints();
+		replenishHitPoints();
 		world.addWorm(this);
 		addWeapon(new Bazooka());
 		addWeapon(new Rifle());
@@ -525,7 +530,137 @@ public class Worm extends MassiveEntity {
 			this.actionPoints = this.getMaxActionPoints();
 	}
 	private int actionPoints;
+
+	/**
+	 * Returns the current number of hit points of this worm.
+	 */
+	@Basic @Raw
+	public int getHitPoints(){
+		return this.hitPoints;
+	}
 	
+	/**
+	 * Returns the maximum number of hit points this worm can have.
+	 * 
+	 * @return	The maximum number of this worm, equal to its mass
+	 * 			rounded to the nearest integer. 
+	 * 			When the rounded mass is bigger than Integer.MAX_VALUE, 
+	 * 			this method returns Integer.MAX_VALUE.
+	 * 			| if( round(getMass()) > Integer.MAX_VALUE) then result == Integer.MAX_VALUE
+	 * 			| else result == (int) round(getMass());
+	 */
+	public int getMaxHitPoints(){
+		long maxAP = round(this.getMass());
+		if(maxAP > Integer.MAX_VALUE)
+			return Integer.MAX_VALUE;
+		return (int) maxAP;
+	}
+	
+	 /**
+	  * Checks whether or not the given amount of hit points (HP) 
+	  * is a valid amount of hit points for this worm.
+	  * 
+	  * @param amount
+	  * 		The amount of hit points to check.
+	  * @return	Whether or not the given number of HP is nonnegative
+	  * 		and not bigger than the maximum allowed number of hit points
+	  * 		for this worm.
+	  *			| result == (0 <= amount 
+	  *			| 			&& amount <= getMaxHitPoints())
+	  */
+	@Raw
+	public boolean canHaveAsHitPoints(int amount){
+		return (0 <= amount 
+				&& amount <= this.getMaxHitPoints());
+	}
+	
+	/**
+	 * Subtract a number of hit points (HP) from this worm's HP. 
+	 *
+	 * @param amount
+	 * 			The number of HP to be subtracted from the current amount of HP.
+	 * @effect	If the specified amount is positive, set this worms HP to be 
+	 *			the current amount of HP minus the specified amount.
+	 *			| if (amount > 0)
+	 *			| 	then setHitPoints(getHitPoints() - amount)
+	 * @note	Note that provoking an overflow (underflow) is not possible here,
+	 * 			given that this.getHitPoints() >= 0.
+	 */
+	@Model
+	private void decreaseHitPoints(int amount){
+		if (amount > 0)
+			this.setHitPoints(this.getHitPoints() - amount);
+	}
+
+	/**
+	 * Add a number of hit points (HP) to this worm's HP. 
+	 *
+	 * @param amount
+	 * 			The number of HP to be added to the current amount of HP.
+	 * @effect	If the specified amount is positive, set this worms HP to be 
+	 *			the current amount of HP plus the specified amount.
+	 *			If an overflow would occur, the HP of this worm are set to their maximum value.
+	 *			| if (amount > 0)
+	 *			| 	if ((Integer.MAX_VALUE - this.getHitPoints()) <= amount)
+	 *			| 		then setHitPoints(getHitPoints() + amount);
+	 *			| 	else
+	 *			| 		// Overflow would occur.
+	 *			| 		replenishHitPoints();
+	 * @note	Note that, while convenient maybe, a call like for example increaseHitPoints(-5) 
+	 * 			will <i>not</i> decrease the amount of HP by 5.
+	 * 			This is the reasoning behind this decision:
+	 * 			When calling <i>increase</i>HitPoints(), one should not expect
+	 * 			a decrease in HP.
+	 */
+	@Model
+	private void increaseHitPoints(int amount){
+		if (amount > 0)
+			if ((Integer.MAX_VALUE - this.getHitPoints()) >= amount)
+				this.setHitPoints(this.getHitPoints() + amount);
+			else
+				// Overflow would occur.
+				this.replenishHitPoints();
+	}
+
+	/**
+	 * Gives this worm all his hit points (HP).
+	 *
+	 * @effect	Sets this worm's HP to the maximum allowed number.
+	 *			| setHitPoints(getMaxHitPoints())		
+	 */
+	@Raw @Model
+	private void replenishHitPoints(){
+		this.setHitPoints(this.getMaxHitPoints());
+	}
+	
+	/**
+	 * Sets this worm's hit points (HP) to the given amount.
+	 * 
+	 * @param amount
+	 * 			The number of HP 
+	 * @post	If the given amount of HP is a valid amount of HP for this worm,
+	 * 			set this worm's HP to the given amount.
+	 * 			| if (canHaveAsHitPoints(amount))
+	 * 			| 	new.getHitPoints() == amount
+	 * @post	A negative amount zeroes this worm's HP.
+	 * 			| if (amount < 0)
+	 *			| 	new.getHitPoints() == 0
+	 * @post	An amount larger than the maximum allowed number of HP
+	 * 			sets this worm's HP to this maximum allowed number.
+	 * 			| if (amount > this.getMaxHitPoints())
+	 *			| 	new.getHitPoints() == getMaxHitPoints()
+	 */
+	@Raw @Model
+	private void setHitPoints(int amount){
+		if (this.canHaveAsHitPoints(amount))
+			this.hitPoints = amount;
+		if (amount < 0)
+			this.hitPoints = 0;
+		if (amount > this.getMaxHitPoints())
+			this.hitPoints = this.getMaxHitPoints();
+	}
+	private int hitPoints;
+
 	/**
 	 * @post		The action points are set to zero.
 	 * 				| new.getActionPoints() == 0
