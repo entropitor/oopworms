@@ -10,8 +10,8 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 		 	| Position.isValidPosition(getPosition())
  * @invar	The radius of the worm is a valid radius for this worm.
  * 			| canHaveAsRadius(getRadius())
- * @invar	This entity has a valid world.
- * 			| canHaveAsWorld(getWorld())
+ * @invar	This entity has a proper world.
+ * 			| hasProperWorld()
  */
 public abstract class Entity {
 	/**
@@ -123,6 +123,7 @@ public abstract class Entity {
 	 * 			When the world still references this Entity.
 	 * 			| getWorld().hasAsEntity(this)
 	 */
+	@Raw
 	public void terminate() throws IllegalStateException{
 		if(!isTerminated()){
 			if(world.hasAsEntity(this))
@@ -152,6 +153,17 @@ public abstract class Entity {
 			return (world == null);
 		else
 			return (world != null && !world.isTerminated());
+	}
+	
+	/**
+	 * Checks whether this entity is properly associated with its world.
+	 * 
+	 * @return	Whether this entity can have its current world as its world
+	 * 			and whether its world has registered this entity.
+	 * 			| result == (canHaveAsWorld(world) && world.hasAsEntity(this))
+	 */
+	public boolean hasProperWorld(){
+		return (canHaveAsWorld(world) && world.hasAsEntity(this));
 	}
 
 	/**
@@ -183,13 +195,12 @@ public abstract class Entity {
 	 * 			This entity already has a world.
 	 * 			| hasWorld()
 	 */
+	@Raw
 	public void setWorld(@Raw World world) throws IllegalArgumentException,IllegalStateException{
-		if(world == null || !world.hasAsEntity(this))
+		if(world == null || !world.hasAsEntity(this) || !canHaveAsWorld(world))
 			throw new IllegalArgumentException();
 		if(hasWorld())
 			throw new IllegalStateException("This entity already has a world.");
-		if(!canHaveAsWorld(world))
-			throw new IllegalArgumentException();
 		this.world = world;
 	}
 	

@@ -412,98 +412,12 @@ public class World {
 
 	private boolean isTerminated = false;
 	
-	// /**
-	//  * Adds the given entity to this world's set of entities.
-	//  * 
-	//  * @param entity	The entity to add.
-	//  * @post	| hasAsEntity(entity);
-	//  * @throws IllegalArgumentException
-	//  * 			The given entity is not effective, is terminated
-	//  * 			or this world already contains the given entity.
-	//  * 			| (entity == null || entity.isTerminated() || hasAsEntity(entity))
-	//  */
-	// public void addAsEntity(Entity entity) throws IllegalArgumentException{
-	// 	if(entity == null || entity.isTerminated() || hasAsEntity(entity))
-	// 		throw new IllegalArgumentException();
-	// 	entity.setWorld(this);
-	// 	entities.add(entity);
-	// }
-	
-	// /**
-	//  * Checks whether the given entity belongs to this world.
-	//  * 
-	//  * @param entity	The entity to be checked.
-	//  * @return	[Whether the latest addition of the given entity to
-	//  *			this world is more recent than its latest removal.]
-	//  *			//TODO: formalize this.
-	//  *			// (of mag je hier gewoon entities.contains(entity) schrijven?)
-	//  * @throws IllegalArgumentException
-	//  *			The given entity is not effective.
-	//  */
-	// public boolean hasAsEntity(Entity entity) throws IllegalArgumentException{
-	// 	if(entity == null)
-	// 		throw new IllegalArgumentException();
-	// 	return entities.contains(entity);
-	// }
-
-	// /**
-	//  * Removes the given entity from this world and terminates it.
-	//  * 
-	//  * @param entity	The entity to remove.
-	//  * @post	| !hasAsEntity(entity)
-	//  * @throws IllegalArgumentException
-	//  *			The given entity is not effective or this world
-	//  *			does not contain the given entity.
-	//  *			| (entity == null || !hasAsEntity(entity))
-	//  */
-	// public void removeAsEntity(Entity entity) throws IllegalArgumentException{
-	// 	if(entity == null || !hasAsEntity(entity))
-	// 		throw new IllegalArgumentException();
-	// 	entity.terminate();
-	// 	entities.remove(entity);
-	// }
-
-	// /**
-	//  * Checks whether the given entity can belong to this world.
-	//  * 
-	//  * @param entity	The entity to be checked.
-	//  * @return	Whether the given entity is effective, is not terminated
-	//  *			and can have this world as its world.
-	//  *			| result == ((entity != null) 
-	//  *			|			 && !entity.isTerminated()
-	//  *			|			 && entity.canHaveAsWorld(this))
-	//  */
-	// public boolean canHaveAsEntity(Entity entity){
-	// 	return ((entity != null) 
-	// 			&& !entity.isTerminated()
-	// 			&& entity.canHaveAsWorld(this));
-	// }
-
-	// /**
-	//  * Checks whether this world has a proper set of entities.
-	//  * 
-	//  * @return	Whether this world can have each entity as an entity
-	//  *			and each entity references this world.
-	//  *			| result == (for each entity in entities:
-	//  *			|				(canHaveAsEntity(entity)
-	//  *		   	|				&& entity.getWorld() == this))
-	//  */
-	// public boolean hasProperEntities(){
-	// 	for (Entity entity : entities) {
-	// 		if(!canHaveAsEntity(entity)
-	// 		   || entity.getWorld() != this)
-	// 			return false;
-	// 	}
-	// 	// Distinctiveness is gueranteed by java.util.Set<>.
-	// 	return true;
-	// }
-	
 	/**
 	 * Returns a set of all food rations, all worms and the projectile in this world.
 	 *  
 	 * @return	An (unordered) set off all entities in this world (and only those).
 	 *			| for each entity in result: entity == getProjectile() || getWorms().contains(entity) || getFoods().contains(entity)
-	 *			| && for each worm in getWorms(): result.contatins(worm)
+	 *			| && for each worm in getWorms(): result.contains(worm)
 	 *			| && for each food in getFoods(): result.contains(food)
 	 *			| && if(hasProjectile()): result.contains(getProjectile())
 	 */
@@ -550,15 +464,6 @@ public class World {
 	}
 
 	/**
-	 * Returns the number of foods in this world.
-	 */
-	@Basic
-	@Raw
-	public int getNbFoods(){
-		return foods.size();
-	}
-
-	/**
 	 * Checks whether this world can have the given food ration
 	 * as one of its food rations.
 	 * 
@@ -584,6 +489,7 @@ public class World {
 	 *       | result ==
 	 *       |   (for each food in getFoods():
 	 *       |     (this.canHaveAsFood(food) && (food.getWorld() == this)))
+	 * @note	Distinctiveness of this world's foods is gueranteed by java.util.Set<>.
 	 */
 	@Raw
 	public boolean hasProperFoods() {
@@ -674,6 +580,13 @@ public class World {
 	 * 			is effective and not terminated.
 	 * 			| for each food in foods:
 	 * 			|	(food != null && !food.isTerminated())
+	 * @invar	No food is registered more than once
+	 *       	in the referenced collection.
+	 *       	(This is gueranteed by java.util.Set<>.)
+	 *       	| let food_list == new ArrayList(foods) in:
+	 *			|	(for each i,j in 0..food_list.size()-1:
+	 *			|		((i == j) ||
+	 *			|		(food_list.get(i) != food_list.get(j)))
 	 */
 	private final Set<Food> foods = new HashSet<Food>();
 
@@ -893,7 +806,7 @@ public class World {
 	 *
 	 * @param  projectile
 	 *         The projectile to check.
-	 * @return True if this world and the given projectile are not terminated.
+	 * @return True if the projectile is null or this world and the given projectile are not terminated.
 	 *       | result == ((projectile == null) || (!projectile.isTerminated() && !this.isTerminated()))
 	 */
 	@Raw
@@ -947,6 +860,14 @@ public class World {
 			oldProjectile.terminate();
 	}
 	
+	/**
+	 * Disassociates this world's projectile.
+	 *
+	 * @effect	| setProjectile(null)
+	 */
+	public void removeProjectile() {
+		setProjectile(null);
+	}
 	
 	/**
 	 * Checks if this world has a projectile
@@ -954,7 +875,6 @@ public class World {
 	 * @return	| result == (getProjectile() != null)
 	 */
 	public boolean hasProjectile(){
-		//FIXME tests
 		return getProjectile() != null;
 	}
 

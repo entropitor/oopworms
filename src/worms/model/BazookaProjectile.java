@@ -8,8 +8,8 @@ import be.kuleuven.cs.som.annotate.Raw;
 public class BazookaProjectile extends Projectile {
 
 	@Raw
-	public BazookaProjectile(int propulsionYield) {
-		super(propulsionYield);
+	public BazookaProjectile(World world, int propulsionYield) throws NullPointerException{
+		super(world, propulsionYield);
 	}
 
 	/**

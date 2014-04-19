@@ -1,7 +1,11 @@
 package worms.model;
 
 import static org.junit.Assert.*;
+
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,15 +14,20 @@ public class WorldTest_Entities {
 	
 	World world, otherWorld;
 	boolean[][] passableMap;
+	Food pizzaCalzone, zacherTorte;
 	Worm chilly, willy;
+	Projectile bullet;
 
 	@Before
 	public void setUp() throws Exception {
 		passableMap = new boolean[][]{{true,true},{false,true},{true,true}};
 		world = new World(20,30,passableMap,new Random());
 		otherWorld = new World(20,30,passableMap,new Random());
+		pizzaCalzone = new Food(world);
+		zacherTorte = new Food(world);
 		chilly  = new Worm(world, 5, 5, 0.6, 35, "Henk Rijckaert");
 		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka");
+		bullet = new RifleProjectile(world, 30);
 	}
 	
 	@Test
@@ -35,96 +44,41 @@ public class WorldTest_Entities {
 		assertEquals(chilly.getWorld(), null);
 		assertEquals(willy.getWorld(), null);
 	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void testAddWorm_WormInOtherWorldCase() throws Exception {
-		otherWorld.addWorm(willy);
-	}
 
-	@Test(expected=IllegalArgumentException.class)
-	public void testAddWorm_NullCase(){
-		world.addWorm(null);
-	}
-
-	@Test(expected=IllegalArgumentException.class)
-	public void testAddWorm_TerminatedCase(){
-		world.addWorm(willy);
-		willy.terminate();
-		world.addWorm(willy);
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testAddWorm_DoubleCase(){
-		assertTrue(world.hasAsEntity(willy));
-		world.addWorm(willy);
-	}
-	
 	@Test
-	public void testHasAsEntity_TrueCase() {
+	public void testGetEntities() {
+		Set<Entity> expected = new HashSet<Entity>(Arrays.asList(
+			chilly, willy, pizzaCalzone, zacherTorte, bullet));
+		assertEquals(world.getEntities(), expected);
+	}
+
+	@Test
+	public void testHasAsEntity_TrueWormCase() {
 		assertTrue(world.hasAsEntity(willy));
 	}
 
 	@Test
-	public void testHasAsEntity_FalseCase() {
-		assertFalse(otherWorld.hasAsEntity(chilly));
+	public void testHasAsEntity_TrueFoodCase() {
+		assertTrue(world.hasAsEntity(pizzaCalzone));
 	}
-	
 
-	@Test(expected=IllegalArgumentException.class)
-	public void testRemoveWorm_NullCase(){
-		world.removeWorm(null);
+	@Test
+	public void testHasAsEntity_TrueProjectileCase() {
+		assertTrue(world.hasAsEntity(bullet));
 	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testRemoveWorm_NotHavingCase(){
+
+	@Test
+	public void testHasAsEntity_FalseWormCase() {
 		assertFalse(otherWorld.hasAsEntity(willy));
-		otherWorld.removeWorm(willy);
-	}
-	
-	@Test
-	public void testRemoveWorm_NormalCase() {
-		assertTrue(world.hasAsEntity(willy));
-		assertEquals(willy.getWorld(), world);
-
-		world.removeWorm(willy);
-		assertFalse(world.hasAsEntity(willy));
-		assertTrue(willy.isTerminated());
-		assertEquals(willy.getWorld(), null);
 	}
 
 	@Test
-	public void testCanHaveAsWorm_NullCase() {
-		assertFalse(world.canHaveAsWorm(null));
+	public void testHasAsEntity_FalseFoodCase() {
+		assertFalse(otherWorld.hasAsEntity(pizzaCalzone));
 	}
 
 	@Test
-	public void testCanHaveAsWorm_TerminatedCase() {
-		world.removeWorm(willy);
-		assertFalse(world.canHaveAsWorm(willy));
-	}
-
-	@Test
-	public void testCanHaveAsWorm_TrueCase() {
-		assertTrue(world.canHaveAsWorm(willy));
-	}
-
-	@Test
-	public void testHasProperWorms_SingleCase() {
-		assertTrue(world.hasProperWorms());
-		world.removeWorm(chilly);
-		assertTrue(world.hasProperWorms());
-		world.removeWorm(willy);
-		assertTrue(world.hasProperWorms());
-	}
-	
-	@Test
-	public void testHasProjectile_TrueCase() {
-		world.setProjectile(new RifleProjectile(30));
-		assertTrue(world.hasProjectile());
-	}
-	
-	@Test
-	public void testHasProjectile_FalseCase() {
-		assertFalse(world.hasProjectile());
+	public void testHasAsEntity_FalseProjectileCase() {
+		assertFalse(otherWorld.hasAsEntity(bullet));
 	}
 }

@@ -22,7 +22,7 @@ public abstract class MassiveEntity extends Entity {
 	 * The gravitational acceleration on earth, in m/s².
 	 */
 	protected static final double GRAVITATIONAL_ACCELERATION = 9.80665;
-	
+
 	/**
 	 * Returns the constant density of this entity, in kg/m³.
 	 * @note	This method should be declared 'static' (Class-method:

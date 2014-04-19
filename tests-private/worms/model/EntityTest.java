@@ -62,12 +62,15 @@ public class EntityTest {
 		assertFalse(willy.canHaveAsWorld(antares));
 	}
 
+	@Test
+	public void testHasProperWorld_SingleCase(){
+		assertTrue(willy.hasProperWorld());
+	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetWorld_NullArgument(){
 		willy.setWorld(null);
 	}
-
 
 	@Test(expected=IllegalStateException.class)
 	public void testSetWorld_SecondWorld(){
