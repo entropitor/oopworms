@@ -64,17 +64,18 @@
 
     <target name="test" depends="jar">
         <mkdir dir="${report.dir}"/>
-        <junit printsummary="yes" haltonerror="false" haltonfailure="false">
+        <junit printsummary="yes" haltonerror="off" haltonfailure="off" failureproperty="test.failed">
             <classpath refid="fullpath">
             </classpath>
 
             <formatter type="xml"/>
 
-            <batchtest fork="yes" todir="${report.dir}">
+            <batchtest fork="no" todir="${report.dir}">
                 <fileset dir="${test.given.dir}"/>
                 <fileset dir="${test.own.dir}"/>
             </batchtest>
         </junit>
+        <fail message="Test failure detected, check test results." if="test.failed" />
     </target>
 
     <target name="testreport" depends="test">
