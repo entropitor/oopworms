@@ -1,8 +1,7 @@
 package worms.model;
 
 import static java.lang.Math.PI;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static worms.util.AssertUtil.assertFuzzyEquals;
 
 import java.util.Random;
@@ -33,6 +32,8 @@ public class WormTest_Constructor {
 		assertEquals(worm.getActionPoints(), 43597);
 		assertEquals(worm.getWorld(), world);
 		assertTrue(world.hasAsEntity(worm));
+		assertTrue(worm.getWeaponAt(0) instanceof Bazooka || worm.getWeaponAt(1) instanceof Bazooka);
+		assertTrue(worm.getWeaponAt(0) instanceof Rifle || worm.getWeaponAt(1) instanceof Rifle);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)

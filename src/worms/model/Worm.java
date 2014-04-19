@@ -9,6 +9,12 @@ import static java.lang.Math.sin;
 import static worms.util.ModuloUtil.posMod;
 import static worms.util.Util.fuzzyGreaterThanOrEqualTo;
 import static worms.util.Util.fuzzyLessThanOrEqualTo;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import worms.util.MathUtil;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
@@ -23,6 +29,10 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 			| isValidName(getName())
  * @invar	The amount of action points is a valid amount of action points for this worm.
  * 			| canHaveAsActionPoints(getActionPoints())
+ * @invar	The worm has proper weapons.
+ * 			| hasProperWeapons()
+ * @invar	The worm can have as much weapons as it has.
+ * 			| canHaveAsNbWeapons(getNbWeapons())
  */
 public class Worm extends MassiveEntity {
 
@@ -54,6 +64,10 @@ public class Worm extends MassiveEntity {
 	 * 			| replenishActionPoints()
 	 * @effect	Adds the worm to the given world.
 	 * 			| world.addWorm(this)
+	 * @effect	Add a Bazooka to the list of weapons.
+	 * 			| addWeapon(new Bazooka());
+	 * @effect	Add a Rifle to the list of weapons
+	 * 			| addWeapon(new Rifle());
 	 * @throws	NullPointerException
 	 * 			The given world is not effective.
 	 * 			| world == null
@@ -66,6 +80,8 @@ public class Worm extends MassiveEntity {
 		setRadius(radius);
 		replenishActionPoints();
 		world.addWorm(this);
+		addWeapon(new Bazooka());
+		addWeapon(new Rifle());
 	}
 	
 	/**
@@ -544,4 +560,249 @@ public class Worm extends MassiveEntity {
 	public boolean canJump(){
 		return (getDirection() <= PI) && (getActionPoints() > 0);
 	}
+	
+	/**
+	 * Fires the currently selected weapon.
+	 * 
+	 * @param yield		The propulsion yield with which to fire.
+	 * @post			The new action points are decreased with the cost of firing the selected weapon
+	 * 					| new.getActionPoints() == getActionPoints()-getSelectedWeapon().getCost()
+	 * @effect			A new projectile is added to the world of the worm with the given yield
+	 * 					| getSelectedWeapon().getNewProjectile(getWorld(), yield)
+	 * @post			The new projectile's position is set in the direction of this worm's direction, just outsides this worm's perimeter.
+	 * 					| let projectile = (new getWorld()).getProjectile() in
+	 * 					| let projectilesPosition = (new projectile).getPosition()) in
+	 * 					| fuzzyEquals(projectilesPosition.squaredDistance(getPosition()),pow(getRadius()+(new projectile).getRadius(),2))
+	 * 					| && !(new projectile).collidesWith(this)
+	 * 					| && fuzzyEquals(projectilesPosition.getX(), getPosition().getX()+cos(getDirection())*(getRadius()+(new projectile).getRadius()))
+	 * 					| && fuzzyEquals(projectilesPosition.getY(), getPosition().getY()+sin(getDirection())*(getRadius()+(new projectile).getRadius()))
+	 * @post			The new projectile's direction is set to the direction of this worm.
+	 * 					| fuzzyEquals((new (new getWorld()).getProjectile()).getDirection(),getDirection())
+	 * @throws	IllegalStateException
+	 * 					Thrown when there already is a projectile in the world.
+	 * 					| getWorld().hasProjectile()
+	 * @throws	IllegalStateException
+	 * 					Thrown when this worm has no weapons to fire.
+	 * 					| getNbWeapons() == 0
+	 * @throws	IllegalStateException
+	 * 					Thrown when this worm's selected weapon has no more projectiles.
+	 * 					| !getSelectedWeapon().hasMoreProjectiles()
+	 * @throws	IllegalStateException
+	 * 					Thrown when this worm has not enough action points to fire the currently selected weapon
+	 * 					| getActionPoints() < getSelectedWeapon().getCost()
+	 * @throws	IllegalStateException
+	 * 					Thrown when the worm is on impassable terrain
+	 * 					| !getWorld().isPassablePosition(getPosition(), getRadius())
+	 */
+	public void fire(int yield) throws IllegalStateException{
+		if(getWorld().getProjectile() != null)
+			throw new IllegalStateException();
+		
+		if(getNbWeapons() == 0)
+			throw new IllegalStateException();
+		
+		if(!getSelectedWeapon().hasMoreProjectiles())
+			throw new IllegalStateException();
+		
+		if(getActionPoints() < getSelectedWeapon().getCost())
+			throw new IllegalStateException();
+		
+		if(!getWorld().isPassablePosition(getPosition(), getRadius()))
+			throw new IllegalStateException();
+		
+		Projectile projectile = getSelectedWeapon().getNewProjectile(getWorld(), yield);
+		projectile.setDirection(getDirection());
+		double distance = getRadius()+projectile.getRadius();
+		Position pos = getPosition().offset(distance*cos(getDirection()),distance*sin(getDirection()));
+		projectile.setPosition(pos);
+		
+		decreaseActionPoints(getSelectedWeapon().getCost());
+	}
+	
+	/**
+	 * Checks whether or not this worm has proper weapons.
+	 * 
+	 * @return	The worm can have every weapon it has, or the result is false
+	 * 			| for each int index in 0..getNbWeapons()-1: (canHaveAsWeapon(getWeaponAt(index)) || result == false)
+	 * @return	The worm has no weapon twice, or the result is false
+	 * 			| for each int index in 0..getNbWeapons()-1:
+	 * 			|	for each int index2 in 0..getNbWeapons()-1:
+	 * 			|		getWeaponAt(index) != getWeaponAt(index2) || index == index2 || result == false
+	 * @return	In all other cases this method returns true.
+	 * 			| result == true.
+	 */
+	@Raw
+	public boolean hasProperWeapons(){
+		for(Weapon weapon : weapons){
+			if(!canHaveAsWeapon(weapon))
+				return false;
+		}
+		Set<Weapon> set = new HashSet<Weapon>(weapons);
+		if(set.size() < weapons.size())
+			return false;
+		return true;
+	}
+	
+	
+	/**
+	 * Returns the selected weapon.
+	 * 
+	 * @return		If this worm has no weapons, this method returns the null reference.
+	 * 				| if(getNbWeapons() == 0)	result == null
+	 * @return		If this worm has weapons, this method returns one of them.
+	 * 				| if(getNbWeapons() > 0)
+	 * 				| 	then hasWeapon(result)
+	 */
+	@Basic
+	public Weapon getSelectedWeapon(){
+		if(getNbWeapons() == 0)
+			return null;
+		return getWeaponAt(selectedWeapon);
+	}
+	
+	/**
+	 * Returns the index of the given weapon in the list of weapons for this worm.
+	 * 
+	 * @param weapon	The weapon of which the index must be returned.
+	 * @return			The index of the weapon in the list of weapons or -1 if the given weapon is not in the list.
+	 * 					| if(!hasWeapon(weapon))
+	 * 					|		then result == -1
+	 * 					| else
+	 * 					|		getWeaponAt(result) == weapon
+	 */
+	public int getIndexOfWeapon(Weapon weapon){
+		if(hasWeapon(weapon))
+			return weapons.indexOf(weapon);
+		else
+			return -1;
+	}
+	
+	/**
+	 * Checks whether or not this worm has the given weapon.
+	 * 
+	 * @param weapon	The weapon to check.
+	 * @return			Whether or not the weapon is in the list of weapons for this worm.
+	 * 					| result == (for some int index in 0..getNbWeapons()-1: getWeaponAt(index) == weapon))
+	 */
+	public boolean hasWeapon(Weapon weapon){
+		return weapons.contains(weapon);
+	}
+	
+	/**
+	 * Selects the next weapon for this worm.
+	 * 
+	 * @post	If this worm has multiple weapons, this method will select the next one.
+	 * 			| if(getNbWeapons() > 0)
+	 * 			|		new.getSelectedWeapon() == getWeaponAt((getIndexOfWeapon(getSelectedWeapon)+1)%getNbWeapons())
+	 */
+	public void selectNextWeapon(){
+		if(getNbWeapons() == 0)
+			selectedWeapon = 0;
+		else{
+			++selectedWeapon;
+			selectedWeapon %= getNbWeapons();
+		}
+	}
+	
+	/**
+	 * Returns the list of weapons for this worm.
+	 * 
+	 * @param index			The index of the weapon in the list
+	 * @throws IndexOutOfBoundsException	
+	 * 						If the given index is larger than or equal to getNbWeapons() or smaller than zero.
+	 * 						| index < 0 || index >= getNbWeapons()
+	 */
+	@Basic @Raw
+	public Weapon getWeaponAt(int index) throws IndexOutOfBoundsException{
+		return weapons.get(index);
+	}
+	
+	/**
+	 * Returns the number of weapons for this Worm.
+	 */
+	@Basic @Raw
+	public int getNbWeapons(){
+		return weapons.size();
+	}
+	
+	/**
+	 * Checks whether or not the worm can have as many weapons as provided.
+	 * 
+	 * @param nbWeapons		The number (of weapons) to check.
+	 * @return				Whether or not the number is bigger than or equal to zero.
+	 * 						| result == (nbWeapons >= 0)
+	 */
+	public boolean canHaveAsNbWeapons(int nbWeapons){
+		return nbWeapons >= 0;
+	}
+	
+	/**
+	 * Adds a weapon to the list of weapons for this worm.
+	 * 
+	 * @param weapon	The weapon to add.
+	 * @post			If the weapon is valid not yet in the list of weapons, the weapon is added at the end of the list.
+	 * 					| if(canHaveAsWeapon(weapon) && canHaveAsNbWeapons(getNbWeapons()+1) && !hasWeapon(weapon))
+	 * 					| then new.getWeaponAt(getNbWeapons()) == weapon && new.getNbWeapons() == getNbWeapons()+1
+	 */
+	public void addWeapon(Weapon weapon){
+		if(!canHaveAsWeapon(weapon))
+			return;
+		if(!canHaveAsNbWeapons(getNbWeapons()+1))
+			return;
+		if(!hasWeapon(weapon)){
+			weapons.add(weapon);
+		}
+	}
+	
+	/**
+	 * Checks whether or not this worm can have the weapon as a Weapon.
+	 * 
+	 * @param weapon	The weapon to check.
+	 * @return			Whether or not the weapon does NOT equal the null-reference
+	 * 					|	weapon != null
+	 */
+	public boolean canHaveAsWeapon(Weapon weapon){
+		return weapon != null;
+	}
+	
+	/**
+	 * Remove a weapon from the list of weapons for this worm.
+	 * 
+	 * @param weapon	The weapon to remove
+	 * @post			If the weapon is in the list of weapons, and the worm can survive with a weapon less, then the weapon is removed and all weapons further in the list or shifted to the right.
+	 * 					| if(canHaveAsNbWeapons(getNbWeapons()-1) && hasWeapon(weapon))
+	 * 					| 		then !new.hasWeapon(weapon) && new.getNbWeapons() == getNbWeapons()-1
+	 * 					|		&& for each int index in getIndexOfWeapon(weapon)+1..getNbWeapons()-1: new.getWeaponAt(index-1) == getWeaponAt(index)
+	 * @post			If the weapon was the active weapon, the next weapon will be selected, if there's any.
+	 * 					| if(getSelectedWeapon() == weapon)
+	 * 					|	if(getNbWeapons() > 1)
+	 * 					|		new.getSelectedWeapon() == getWeaponAt((getIndexOfWeapon(getSelectedWeapon)+1)%new.getNbWeapons())
+	 * 					|	else new.getSelectedWeapon() == null
+	 */
+	public void removeWeapon(Weapon weapon){
+		if(!canHaveAsNbWeapons(getNbWeapons()-1))
+			return;
+		if(hasWeapon(weapon)){
+			int index = getIndexOfWeapon(weapon);
+			weapons.remove(weapon);
+			
+			if(index < selectedWeapon)
+				selectedWeapon--;
+			if(getNbWeapons() > 0)
+				selectedWeapon %= getNbWeapons();
+		}
+		
+	}
+	
+	private final List<Weapon> weapons = new ArrayList<Weapon>();
+	/**
+	 * The index of the selected weapon in the list of weapons.
+	 * 
+	 * @invar		If there are weapons, than this index is bigger or equal to 0 and smaller than the number of weapons, else it's 0.
+	 * 				| if(getNbWeapons()
+	 * 				|		then 0 <= selectedWeapon && selectedWeapon < getNbWeapons()
+	 * 				| else
+	 * 				|		selectedWeapon == 0
+	 */
+	private int selectedWeapon = 0;
 }

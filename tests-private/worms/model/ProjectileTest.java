@@ -53,4 +53,19 @@ public class ProjectileTest {
 		assertFalse(projectile.isValidPropulsionYield(-3));
 		assertFalse(projectile.isValidPropulsionYield(101));
 	}
+	
+	@Test
+	public void testLegalizePropulsionYield_NormalCase() {
+		assertEquals(48,Projectile.legalizePropulsionYield(48));
+	}
+	
+	@Test
+	public void testLegalizePropulsionYield_NegativeCase() {
+		assertEquals(0,Projectile.legalizePropulsionYield(-48));
+	}
+	
+	@Test
+	public void testLegalizePropulsionYield_TooHighCase() {
+		assertEquals(100,Projectile.legalizePropulsionYield(148));
+	}
 }
