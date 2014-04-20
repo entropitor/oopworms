@@ -606,7 +606,7 @@ public class Worm extends MassiveEntity {
 	 * 			given that this.getHitPoints() >= 0.
 	 */
 	@Model
-	private void decreaseHitPoints(int amount){
+	protected void decreaseHitPoints(int amount){
 		if (amount > 0)
 			this.setHitPoints(this.getHitPoints() - amount);
 	}
@@ -679,40 +679,66 @@ public class Worm extends MassiveEntity {
 			this.hitPoints = this.getMaxHitPoints();
 	}
 	private int hitPoints;
-
+	
+	/** 
+	 * @return	False if the entity lies in the world.
+	 * 			| if(getWorld().isInsideWorldBoundaries(getPosition(), getRadius())) then result == false
+	 * @note	This return-clause should only be used if all other return-clauses (of super-method) can't determine the result of this method!
+	 */
+	@Override
+	public boolean afterJumpRemove(){
+		//Implied in super
+		/*if(getWorld().isInsideWorldBoundaries(getPosition(), getRadius()))
+			return false;*/
+		return super.afterJumpRemove();
+	}
+	
 	/**
+	 * @post		The hit points of other worms are left untouched
+	 * 				| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() == worm.getHitPoints()
 	 * @post		The action points are set to zero.
 	 * 				| new.getActionPoints() == 0
 	 */
 	@Override
-	public void jump() throws IllegalStateException{
-		super.jump();
+	public void handleAfterJump(){
 		decreaseActionPoints(getActionPoints());
+		super.handleAfterJump();
 	}
 	
 	/**
 	 * @return	The (virtual) force exerted by this worm (in Newton) equals the sum of 5 times its action points and 
-	 * 			its weight (its mass times the gravitational acceleration), in case he can jump.
-	 * 			Otherwise the result equals 0 Newton.
-	 * 			| if(canJump())
-	 * 			| 		then fuzzyEquals(result, ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION)))
-	 * 			| else
-	 * 			|		then result == 0
+	 * 			its weight (its mass times the gravitational acceleration).
+	 * 			| fuzzyEquals(result, ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION)))
 	 */
 	@Override
 	public double getJumpForce(){
-		if(!canJump())
-			return 0;
 		return ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION));
 	}
 	
 	/**
-	 * @return		Whether or not this worm is facing upwards and has any action points left.
-	 * 				| result == (getDirection() <= PI) && (getActionPoints() > 0)
+	 * @return		False when this worm has no action points left.
+	 * 				| if(getActionPoints() == 0) then result == false
+	 * @note		This return-clause should only be used if all other return-clauses (of super-method) can't determine the result of this method!
 	 */
-	@Override @Raw
+	@Override
 	public boolean canJump(){
-		return (getDirection() <= PI) && (getActionPoints() > 0);
+		if(getActionPoints() == 0)
+			return false;
+		return super.canJump() ;
+	}
+	
+	/**
+	 * @return	False if the position overlaps with any entity.
+	 * 			| if(for some entity in getWorld().getEntities(): entity.collidesWith(position,getRadius())) then result == false
+	 * @note	This return-clause should only be used if all other return-clauses (of super-method) can't determine the result of this method!
+	 */
+	@Override
+	public boolean blocksJump(Position position){
+		//Implied in super
+		/*for(Entity entity : getWorld().getEntities())
+			if(entity.collidesWith(position,getRadius()))
+				return false;*/
+		return super.blocksJump(position);
 	}
 	
 	/**

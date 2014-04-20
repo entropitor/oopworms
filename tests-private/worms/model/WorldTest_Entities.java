@@ -83,4 +83,37 @@ public class WorldTest_Entities {
 	public void testHasAsEntity_FalseProjectileCase() {
 		assertFalse(otherWorld.hasAsEntity(bullet));
 	}
+	
+	@Test
+	public void testRemoveAsEntity_LegalCase() {
+		assertTrue(world.hasAsEntity(bullet));
+		world.removeAsEntity(bullet);
+		assertFalse(world.hasAsEntity(bullet));
+		
+		assertTrue(world.hasAsEntity(willy));
+		world.removeAsEntity(willy);
+		assertFalse(world.hasAsEntity(willy));
+		
+		assertTrue(world.hasAsEntity(pizzaCalzone));
+		world.removeAsEntity(pizzaCalzone);
+		assertFalse(world.hasAsEntity(pizzaCalzone));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testRemoveAsEntity_DoesNotHaveWormCase() throws Exception {
+		world.removeAsEntity(willy);
+		world.removeAsEntity(willy);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testRemoveAsEntity_DoesNotHaveFoodCase() throws Exception {
+		world.removeAsEntity(pizzaCalzone);
+		world.removeAsEntity(pizzaCalzone);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testRemoveAsEntity_DoesNotHaveProjectileCase() throws Exception {
+		world.removeAsEntity(bullet);
+		world.removeAsEntity(bullet);
+	}
 }

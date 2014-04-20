@@ -96,8 +96,8 @@ public abstract class Entity {
 	 * Determines whether this entity collides with the given entity.
 	 * 
 	 * @param entity	The entity to check collision against.
-	 * @return			Whether this entity collides with the given entity.
-	 * 					| result == (getPosition().squaredDistance(entity.getPosition()) < pow(getRadius() + entity.getRadius(),2))
+	 * @post			Whether this entity collides with the circle defined by the given entity.
+	 * 					| result == collidesWith(entity.getPosition(), entity.getRadius())
 	 * @throws IllegalArgumentException
 	 * 					When the given entity is the null reference
 	 * 					| entity == null
@@ -115,7 +115,26 @@ public abstract class Entity {
 			throw new IllegalStateException();
 		if(getWorld() != entity.getWorld())
 			throw new IllegalStateException();
-		return getPosition().squaredDistance(entity.getPosition()) < pow(getRadius() + entity.getRadius(),2);
+		return collidesWith(entity.getPosition(), entity.getRadius());
+	}
+	
+	/**
+	 * Determines whether this entity collides with the given circle
+	 * 
+	 * @param pos		The center of the circle
+	 * @param radius	The radius of the circle.
+	 * @return			Whether this entity collides with the given circle.
+	 * 					| result == (getPosition().squaredDistance(pos) < pow(getRadius() + radius,2))
+	 * @throws IllegalArgumentException
+	 * 					When the given position is the null reference
+	 * 					| pos == null
+	 * 					When radius is not a valid number.
+	 * 					| Double.isNaN(radius)
+	 */
+	public boolean collidesWith(Position pos, double radius) throws IllegalArgumentException{
+		if(pos == null || Double.isNaN(radius))
+			throw new IllegalArgumentException();
+		return getPosition().squaredDistance(pos) < pow(getRadius() + radius,2);
 	}
 	
 	/**

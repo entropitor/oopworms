@@ -87,6 +87,30 @@ public class EntityTest {
 	public void testCollidesWith_DifferentWorldsCase() throws Exception {
 		willy.collidesWith(new Worm(braveNew, 30, 30, 1, 1, "Charlie"));
 	}
+	
+	@Test
+	public void testCollidesWithCircle_TrueCase() {
+		willy = new Worm(antares, 30,30, 1, 1, "Willy Wonka");
+		assertTrue(willy.collidesWith(new Position(32, 30), 1.01));
+		assertTrue(willy.collidesWith(new Position(30, 32), 1.01));
+		assertTrue(willy.collidesWith(new Position(32, 32), 2.01));
+	}
+	
+	@Test
+	public void testCollidesWithCircle_FalseCase() {
+		willy = new Worm(antares, 30,30, 1, 1, "Willy Wonka");
+		assertFalse(willy.collidesWith(new Position(32,30), 0.5));		
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCollidesWithCircle_NaNRadiusCase() throws Exception {
+		willy.collidesWith(new Position(30,30),Double.NaN);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCollidesWithCircle_NullPositionCase() throws Exception {
+		willy.collidesWith(null, 30);
+	}
 
 	@Test
 	public void testCanHaveAsWorld_NormalCase(){

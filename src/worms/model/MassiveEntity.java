@@ -2,9 +2,9 @@ package worms.model;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
-import static java.lang.Math.min;
 import static java.lang.Math.pow;
 import static java.lang.Math.sin;
+
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Model;
@@ -87,24 +87,61 @@ public abstract class MassiveEntity extends Entity {
 	/**
 	 * Makes this entity move along a ballistic trajectory.
 	 * 
+	 * @param timeStep
+	 * 				An elementary time interval during which it may be assumed that the worm will not completely move through a piece of impassable terrain.
 	 * @post		The new x- and y-coordinate of this entity will equal the x- and y-coordinates as 
 	 * 				calculated by getJumpStemp() after the jump is completed
-	 * 				| new.getXCoordinate() == getJumpStep(getJumpTime())[0]
-	 * 				| new.getYCoordinate() == getJumpStep(getJumpTime())[1]
-	 * @note		With the current physics, the new y-coordinate will (almost) equal the old y-coordinate
-	 * 				(taking floating point precision in calculation).
+	 * 				| new.getXCoordinate() == getJumpStep(getJumpTime()).getX()
+	 * 				| &&   new.getYCoordinate() == getJumpStep(getJumpTime()).getY()
+	 * @effect		After the position are set, everything that needs to be done after the jump will be done
+	 * 				| handleAfterJump()
 	 * @throws IllegalStateException
 	 * 				Thrown when this entity can't jump from his current position.
 	 * 				| !canJump()
+	 * 				When the end of the jump would be on impassable terrain.
+	 * 				| !getWorld().isPassablePosition(endPosition, getRadius())
 	 */
-	public void jump() throws IllegalStateException{
+	public void jump(double timeStep) throws IllegalStateException{
 		if(!canJump())
 			throw new IllegalStateException();
-		setPosition(getJumpStep(getJumpTime()));
+		Position endPosition = getJumpStep(getJumpTime(timeStep));
+		if(!getWorld().isPassablePosition(endPosition, getRadius()))
+			throw new IllegalStateException();
+		setPosition(endPosition);
+		handleAfterJump();
+	}
+	
+	/**
+	 * Checks whether or not the entity should be removed from the world
+	 * if this is the location where he just landed from a jump.
+	 * 
+	 * @return	True if the entity doesn't lie in the world anymore.
+	 * 			| if(!getWorld().isInsideWorldBoundaries(getPosition(), getRadius())) then result == true
+	 */
+	public boolean afterJumpRemove(){
+		if(!getWorld().isInsideWorldBoundaries(getPosition(), getRadius()))
+			return true;
+		return false;
+	}
+	
+	/**
+	 * Handles everything that needs to be handled after a jump: removing entities, damaging entities, ...
+	 * 
+	 * @post		The hitpoints of every worm in this world are left untouched or are decreased.
+	 * 				| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() <= worm.getHitPoints()
+	 * @effect		The entity will be removed from the world if it should be removed from the world.
+	 * 				| if(afterJumpRemove()) then getWorld().removeAsEntity(this);
+	 */
+	public void handleAfterJump(){
+		if(afterJumpRemove())
+			getWorld().removeAsEntity(this);
 	}
 	
 	/**
 	 * Calculates the force exerted by this entity (in Newton) in a potential jump from his current position.
+	 * 
+	 * @return	Result is non negative
+	 * 			| result >= 0
 	 */
 	protected abstract double getJumpForce();
 	
@@ -121,12 +158,52 @@ public abstract class MassiveEntity extends Entity {
 	/**
 	 * Calculates the time this entity will take to complete a potential jump from his current position.
 	 * 
-	 * @return 	Returns the amount of time needed to complete his (virtual) jump from his current position when he can jump.
-	 * 			This time equals 2 times the y-component of the initial velocity divided by the gravitational acceleration.
-	 * 			| fuzzyEquals(result, (2*getJumpVelocity()*sin(getDirection())/GRAVITATIONAL_ACCELERATION))
+	 * @param timeStep
+	 * 			An elementary time interval during which it may be assumed that the worm will not completely move through a piece of impassable terrain.
+	 * @return	If the entity can't jump, the jump time will equal 0
+	 * 			| if(!canJump()) then result == 0
+	 * @return	There is no non-negative t smaller than the result, that is a multiple of timeStep and where the position of the entity after a jump of t seconds would block the jump.
+	 * 			| !(for some t >= 0: Double.compare(t,result)<0 && !fuzzyEquals(t,result,timeStep) && fuzzyEquals(t%timeStep,0) && blocksJump(getJumpStep(t)))
+	 * @throws	IllegalArgumentException
+	 * 			Thrown when the timestep is negative or not a valid number
+	 * 			| timestep < 0 || Double.isNaN(timeStep)
 	 */
-	public double getJumpTime(){
-		return (2*getJumpVelocity()*sin(getDirection())/GRAVITATIONAL_ACCELERATION);
+	public double getJumpTime(double timeStep)throws IllegalArgumentException{
+		if(timeStep < 0 || Double.isNaN(timeStep))
+			throw new IllegalArgumentException();
+		
+		if(!canJump())
+			return 0;
+		
+		double t = 0;
+		while(true){
+			if(blocksJump(getJumpStep(t)))
+				return t;
+			t += timeStep;
+		}
+	}
+	
+	/**
+	 * Checks whether or not the given position would stop/block the (virtual) jump of this entity.
+	 * 
+	 * @param position	The position to check.
+	 * @return	False if the position is not further than getRadius() away
+	 * 			| if(position.squaredDistance(getPosition()) < getRadius()*getRadius()) then result == false
+	 * @return	True if the position is not within the world boundaries.
+	 * 			| if(!getWorld().isInsideWorldBoundaries(position, getRadius())) then result == true
+	 * @return	True if the position is a contact location or impassable terrain for the given worm.
+	 * 			| if(!getWorld().isPassablePosition(position, getRadius()*1.1)) then result == true
+	 * @return	False if the position doesn't overlap with any entity.
+	 * 			| if(!(for some entity in getWorld().getEntities(): entity.collidesWith(position,getRadius()))) then result == false
+	 */
+	public boolean blocksJump(Position position){
+		if(position.squaredDistance(getPosition()) < getRadius()*getRadius())
+			return false;
+		if(!getWorld().isInsideWorldBoundaries(position, getRadius()))
+			return true;
+		if(!getWorld().isPassablePosition(position, getRadius()*1.1))
+			return true;
+		return false;
 	}
 	
 	/**
@@ -135,31 +212,43 @@ public abstract class MassiveEntity extends Entity {
 	 * 
 	 * @param t		The time after the jump (in seconds).
 	 * @return		The position where the entity will be after t seconds.
-	 * 				|	fuzzyEquals(result.getX(), (getXCoordinate()+(getJumpVelocity()*cos(getDirection())*min(t,getJumpTime()))) &&
-	 * 				|	fuzzyEquals(result.getY(), (getYCoordinate()+(getJumpVelocity()*sin(getDirection())*min(t,getJumpTime()))-(GRAVITATIONAL_ACCELERATION/2*pow(time,2)))
+	 * 				In the current version this method uses a simplified model of terrestrial physics and considers uniform gravity with neither drag nor wind. 
+	 * 				In the future this method may involve further trajectory parameters. Clients should NOT consider this postcondition as final but rather as a guideline.
+	 * 				|	fuzzyEquals(result.getX(), (getXCoordinate()+(getJumpVelocity()*cos(getDirection())*t))) &&
+	 * 				|	fuzzyEquals(result.getY(), (getYCoordinate()+(getJumpVelocity()*sin(getDirection())*t)-(GRAVITATIONAL_ACCELERATION/2*pow(t,2))))
 	 * @throws IllegalArgumentException
 	 * 				Thrown when t is not a valid number or is less than zero
 	 * 				| Double.isNaN(t) || t < 0
-	 * @note		When this entity is unable to jump, this method will just return an array containing
-	 * 				the current x and y position, invariant of the given t.
+	 * @note		This method will just return where the entity will be after t seconds IF he performs a jump. 
+	 * 				This method will also return values if this entity can't jump, 
+	 * 				or the values of the position where the entity would be after t seconds assuming the entity has not stopped jumping yet. 
+	 * 				(if t > getJumpTime() it will just continue giving positions).
 	 */
 	public Position getJumpStep(double t) throws IllegalArgumentException{
 		if(Double.isNaN(t) || t < 0)
 			throw new IllegalArgumentException("Illegal timestep");
 		
-		//If t > getJumpTime() => jump is over, use getJumpTime() as time instead of t.
-		double time = min(t,getJumpTime());
 		double velocity = getJumpVelocity();
 		double direction = getDirection();
 		
-		double newX = getXCoordinate()+(velocity*cos(direction)*time);
-		double newY = getYCoordinate()+(velocity*sin(direction)*time)-(GRAVITATIONAL_ACCELERATION/2*pow(time,2));
+		double newX = getXCoordinate()+(velocity*cos(direction)*t);
+		double newY = getYCoordinate()+(velocity*sin(direction)*t)-(GRAVITATIONAL_ACCELERATION/2*pow(t,2));
 		return new Position(newX,newY);
 	}
 
 	/**
 	 * Checks whether or not this entity can jump.
+	 * 
+	 * @return	False if this entity is terminated.
+	 * 			| if(isTerminated()) then result == false
+	 * @return	False if this entity is on impassable terrain
+	 * 			| if(!getWorld().isPassablePosition(getPosition(), getRadius())) then result == false
 	 */
-	@Raw
-	public abstract boolean canJump();
+	public boolean canJump(){
+		if(isTerminated())
+			return false;
+		if(!getWorld().isPassablePosition(getPosition(), getRadius()))
+			return false;
+		return true;
+	}
 }

@@ -96,13 +96,62 @@ public abstract class Projectile extends MassiveEntity {
 	public double getRadius(){
 		return Math.cbrt(getMass()/this.getDensity()/4.0*3/PI);
 	}
-
+	
 	/**
-	 * @return	Returns true.
-	 * 			| result == true
+	 * @post		The hitpoints of the worms (in this world) this entity overlaps with at the end of the jump are decreased with the damage this projectile does.
+	 * 				The hitpoints of all other worms in this world are left untouched.
+	 * 				| for each worm in getWorld().getWorms(): 
+	 * 				| 	if(worm.collidesWith(getJumpStep(getJumpTime()),getRadius()))
+	 * 				| 		then (new worm).gitHitPoints() == worm.getHitPoints()-getDamage()
+	 * 				|	else 
+	 * 				|		then (new worm).gitHitPoints() == worm.getHitPoints()
 	 */
-	@Override @Raw
-	public boolean canJump() {
+	@Override
+	public void handleAfterJump(){
+		for(Worm worm : getWorld().getWorms()){
+			if(collidesWith(worm)){
+				worm.decreaseHitPoints(getDamage());
+			}
+		}
+		if(afterJumpRemove())
+			getWorld().removeProjectile();
+	}
+	
+	/**
+	 * @return		| result == true
+	 */
+	@Override
+	public boolean afterJumpRemove(){
 		return true;
 	}
+	
+	/**
+	 * @return	True if the position overlaps with a worm
+	 * 			| if(for some worm in getWorld().getWorms(): worm.collidesWith(position,getRadius())) then result == true
+	 */
+	@Override
+	public boolean blocksJump(Position position){
+		for(Worm worm : getWorld().getWorms())
+			if(worm.collidesWith(position,getRadius()))
+				return true;
+		return super.blocksJump(position);
+	}
+	
+	/**
+	 * @return		True in all other cases.
+	 * 				| result == true
+	 * @note		This return-clause should only be used if all other return-clauses (of super-method) can't determine the result of this method!
+	 */
+	@Override
+	public boolean canJump(){
+		return super.canJump();
+	}
+	
+	/**
+	 * Returns the damage this projectile does.
+	 * 
+	 * @return	| result >= 0
+	 */
+	@Raw @Basic
+	public abstract int getDamage();
 }

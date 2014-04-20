@@ -27,5 +27,13 @@ public class RifleProjectile extends Projectile {
 	public double getMass() {
 		return 10e-3;
 	}
+	
+	/**
+	 * @return	| result == 20
+	 */
+	@Override @Raw
+	public int getDamage() {
+		return 20;
+	}
 
 }
