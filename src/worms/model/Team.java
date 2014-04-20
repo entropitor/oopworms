@@ -93,11 +93,11 @@ public class Team {
 	 * Checks whether this team is properly associated with its world.
 	 * 
 	 * @return	Whether this team can have its current world as its world
-	 * 			and whether its world has registered this team.
-	 * 			| result == (canHaveAsWorld(world) && world.hasAsTeam(this))
+	 * 			and whether its world has registered this team (if the world doesn't equal the null references).
+	 * 			| result == (canHaveAsWorld(world) && (world == null || world.hasAsTeam(this)))
 	 */
 	public boolean hasProperWorld(){
-		return (canHaveAsWorld(world) && world.hasAsTeam(this));
+		return (canHaveAsWorld(world) && (world == null || world.hasAsTeam(this)));
 	}
 
 	/**
@@ -139,6 +139,7 @@ public class Team {
 	/**
 	 * Returns the world this team belongs to.
 	 */
+	@Raw @Basic
 	public World getWorld(){
 		return world;
 	}
@@ -232,11 +233,13 @@ public class Team {
 	}
 
 	/**
-	 * Returns all worms that are registered with this team.
+	 * Returns all worms that are registered with this team (and only those).
 	 *
 	 * @return	| for each worm in this.getWorld().getWorms():
 	 *			|	if(worm.getTeam() == this)
 	 *			|		result.contains(worm)
+	 * @return  | for each worm in result:
+	 *			|	worm.getTeam() == this && worm.getWorld() == getWorld()
 	 */
 	public Set<Worm> getWorms(){
 		Set<Worm> result = new HashSet<Worm>();

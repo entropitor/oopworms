@@ -43,7 +43,8 @@ public class Worm extends MassiveEntity {
 	/**
 	 * Creates a new worm without a team.
 	 *
-	 * @see		The overloaded constructor for info on parameters and effects.
+	 * @see 	#Worm(World, double, double, double, double, String, Team) 
+	 * 			The overloaded constructor for info on parameters and effects.
 	 *
 	 * @effect	Create a new worm with the given params and no team.
 	 *			| this(world, x, y, direction, radius, name, null);
@@ -84,9 +85,11 @@ public class Worm extends MassiveEntity {
 	 * @effect	Adds the worm to the given world.
 	 * 			| world.addWorm(this)
 	 * @effect	Add a Bazooka to the list of weapons.
-	 * 			| addWeapon(new Bazooka());
+	 * 			| addWeapon(new Bazooka())
 	 * @effect	Add a Rifle to the list of weapons
-	 * 			| addWeapon(new Rifle());
+	 * 			| addWeapon(new Rifle())
+	 * @effect	Add the worm to the given team
+	 * 			| setTeam(team)
 	 * @throws	NullPointerException
 	 * 			The given world is not effective.
 	 * 			| world == null

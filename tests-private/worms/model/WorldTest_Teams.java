@@ -120,4 +120,14 @@ public class WorldTest_Teams {
 		world.removeTeam(cool);
 		assertTrue(world.hasProperTeams());
 	}
+	
+	@Test
+	public void testTerminate_SingleCase() {
+		world.terminate();
+		assertTrue(world.isTerminated());
+		assertTrue(Ateam.isTerminated());
+		assertTrue(cool.isTerminated());
+		assertFalse(world.hasAsTeam(Ateam));
+		assertFalse(world.hasAsTeam(cool));
+	}
 }

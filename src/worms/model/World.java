@@ -409,7 +409,7 @@ public class World {
 				entity.terminate();
 			
 			Set<Team> teams = getTeams();
-			teams.clear();
+			this.teams.clear();
 			for (Team team : teams)
 				team.terminate();
 
