@@ -1,5 +1,6 @@
 package worms.model;
 
+import static org.junit.Assert.assertEquals;
 import static worms.util.AssertUtil.*;
 
 import java.util.Random;
@@ -33,6 +34,11 @@ public class BazookaProjectileTest {
 	@Test
 	public void testGetMass() {
 		assertFuzzyEquals(bazookaProjectile.getMass(),0.3);
+	}
+	
+	@Test
+	public void testGetDamage() {
+		assertEquals(bazookaProjectile.getDamage(), 80);
 	}
 
 }

@@ -155,7 +155,6 @@ public class World {
 	 * @param pos		The center of the circle.
 	 * @param radius	The radius of the circle.
 	 * @return			| if(pos == null || Double.isNaN(radius)) result == false
-	 * @return			| if(!isInsideWorldBoundaries(pos,radius)) result == false
 	 * @return			| if(nbCellRows() == 0 || nbCellColumns() == 0) result == true
 	 * @return			If there's an impassable position in the world that lies within the circle, than the result is false.
 	 * 					| if( 
@@ -181,9 +180,6 @@ public class World {
 		if(Double.isNaN(radius))
 			return false;
 		
-		if(!isInsideWorldBoundaries(pos, radius))
-			return false;
-		
 		if(nbCellRows() == 0 || nbCellColumns() == 0)
 			 return true;
 		
@@ -200,6 +196,8 @@ public class World {
 		
 		double nextLocalRadius = 0, localRadius = 0;
 		for (int i = minRow; i < maxRow; i++) {
+			if(i < 0 || i >= map.length)
+				continue;
 			//Get the 'radius' (half of the chord) at the level of the next row(line). 
 			//('radius' = farthest offset from x0 at the level of that row(line).
 			if(i != maxRow -1)
@@ -220,6 +218,8 @@ public class World {
 			}				
 			
 			for(int j = minColumn; j < maxColumn; j++){
+				if(j < 0 || j >= map[i].length)
+					continue;
 				if(map[i][j] == false)
 					return false;
 			}
@@ -453,6 +453,34 @@ public class World {
 		if(entity instanceof Projectile)
 			return entity == getProjectile();
 		return false;
+	}
+	
+	/**
+	 * Removes the entity from this world.
+	 * 
+	 * @param entity			The entity to remove.
+	 * @effect					The entity is removed from the proper collection.
+	 * 							| if(entity instanceof Food) then removeFood((Food) entity);
+	 * 							| if(entity instanceof Worm) then removeWorm((Worm) entity);
+	 * 							| if(entity instanceof Projectile) then removeProjectile();
+	 * @throws ClassCastException
+	 * 							| !(entity instanceof Food) && !(entity instanceof Worm) && !(entity instanceof Projectile)
+	 * @throws IllegalArgumentException
+	 * 							| entity instanceof Projectile && entity != getProjectile()
+	 */
+	public void removeAsEntity(Entity entity) throws IllegalArgumentException,ClassCastException{
+		//FIXME tests
+		if(entity instanceof Food)
+			removeFood((Food) entity);
+		else if(entity instanceof Worm)
+			removeWorm((Worm) entity);
+		else if(entity instanceof Projectile){
+			if(entity == getProjectile())
+				removeProjectile();
+			else
+				throw new IllegalArgumentException();
+		}else
+			throw new ClassCastException();
 	}
 
 	/**

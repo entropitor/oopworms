@@ -19,6 +19,7 @@ public class RifleProjectileTest {
 		passableMap = new boolean[][]{{true,true},{false,true},{true,true}};
 		world = new World(20,30,passableMap,new Random());
 		rifleProjectile = new RifleProjectile(world, 39);
+		rifleProjectile.setPosition(new Position(15, 20));
 	}
 	
 	@Test
@@ -39,6 +40,11 @@ public class RifleProjectileTest {
 	@Test
 	public void testGetMass() {
 		assertFuzzyEquals(rifleProjectile.getMass(),10e-3);
+	}
+	
+	@Test
+	public void testGetDamage() {
+		assertEquals(rifleProjectile.getDamage(), 20);
 	}
 
 }

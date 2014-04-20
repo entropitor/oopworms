@@ -21,11 +21,6 @@ public class ProjectileTest {
 	}
 
 	@Test
-	public void testCanJump() {
-		assertTrue(projectile.canJump());
-	}
-
-	@Test
 	public void testConstructor_NormalCase() {
 		projectile = new RifleProjectile(world, 39);
 		assertEquals(projectile.getPropulsionYield(),39);

@@ -28,4 +28,12 @@ public class BazookaProjectile extends Projectile {
 		return 2.5+7.0/100*getPropulsionYield();
 	}
 
+	/**
+	 * @return	| result == 80
+	 */
+	@Override @Raw
+	public int getDamage() {
+		return 80;
+	}
+
 }

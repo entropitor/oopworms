@@ -92,8 +92,8 @@ public class WorldTest_Passability {
 	}
 	
 	@Test
-	public void testIsPassablePosition_IllegalCase(){
-		assertFalse(world.isPassablePosition(new Position(100,100),0));
+	public void testIsPassablePosition_OutsideWorldCase(){
+		assertTrue(world.isPassablePosition(new Position(100,100),0));
 	}
 	
 	@Test
@@ -247,12 +247,12 @@ public class WorldTest_Passability {
 		passableMap = new boolean[][]{{true,true,true},{true,true,true},{true,true,true}};
 		world = new World(300,300,passableMap,new Random());
 		//contact because out of world is impassable terrain...
-		assertEquals(CONTACT, world.getLocationType(new Position(50,250), 50));
+		assertEquals(PASSABLE, world.getLocationType(new Position(50,250), 50));
 	}
 	
 	@Test
-	public void testGetLocationType_ExceptionalPositionCase(){
-		assertEquals(IMPASSABLE, world.getLocationType(new Position(100,100),20));
+	public void testGetLocationType_OutsideWorldCase(){
+		assertEquals(PASSABLE, world.getLocationType(new Position(100,100),20));
 	}
 	
 	@Test
