@@ -35,8 +35,23 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 			| hasProperWeapons()
  * @invar	The worm can have as much weapons as it has.
  * 			| canHaveAsNbWeapons(getNbWeapons())
+ * @invar	The worm has a proper team.
+ *			| hasProperTeam()
  */
 public class Worm extends MassiveEntity {
+
+	/**
+	 * Creates a new worm without a team.
+	 *
+	 * @see		The overloaded constructor for info on parameters and effects.
+	 *
+	 * @effect	Create a new worm with the given params and no team.
+	 *			| this(world, x, y, direction, radius, name, null);
+	 */
+	@Raw
+	public Worm(World world, double x, double y, double direction, double radius, String name) throws IllegalArgumentException,NullPointerException{
+		this(world, x, y, direction, radius, name, null);
+	}
 
 	/**
 	 * Creates a new worm that is positioned at the given location in the given world, faces the given direction, 
@@ -77,7 +92,7 @@ public class Worm extends MassiveEntity {
 	 * 			| world == null
 	 */
 	@Raw
-	public Worm(World world, double x, double y, double direction, double radius, String name) throws IllegalArgumentException,NullPointerException{
+	public Worm(World world, double x, double y, double direction, double radius, String name, Team team) throws IllegalArgumentException,NullPointerException{
 		setPosition(new Position(x,y));
 		setDirection(direction);
 		setName(name);
@@ -87,6 +102,7 @@ public class Worm extends MassiveEntity {
 		world.addWorm(this);
 		addWeapon(new Bazooka());
 		addWeapon(new Rifle());
+		setTeam(team);
 	}
 	
 	/**
@@ -952,4 +968,101 @@ public class Worm extends MassiveEntity {
 	 * 				|		selectedWeapon == 0
 	 */
 	private int selectedWeapon = 0;
+
+	/**
+	 * Terminates this worm.
+	 *
+	 * @post	This worm is removed from its team.
+	 *			| !new.hasTeam()
+	 */
+	@Raw
+	@Override
+	public void terminate() throws IllegalStateException{
+		removeTeam();
+		super.terminate();
+	}
+
+	/** 
+	 * Returns the team of this worm 
+	 * or null if this worm is not registered in a team. 
+	 */
+	@Basic @Raw
+	public Team getTeam() {
+		return this.team;
+	}
+
+	/**
+	 * Checks whether this worm can have the given team as its team.
+	 *
+	 * @param	team
+	 *			The team to check.
+	 * @return	True if the team is null or this worm and the given team are not terminated
+	 *			and the team is in the same world as this worm.
+	 *			| result == ((team == null) || 
+	 *			|				((!team.isTerminated() && !this.isTerminated()) &&
+	 *			|				(team.getWorld() == this.getWorld())))
+	 */
+	@Raw
+	public boolean canHaveAsTeam(@Raw Team team) {
+		return ((team == null) || 
+					((!team.isTerminated() && !this.isTerminated()) &&
+					(team.getWorld() == this.getWorld())));
+	}
+
+	/**
+	 * Checks whether this worm has a proper team.
+	 *
+	 * @return	True iff this worm can have its current team as its team.
+	 *			| result == canHaveAsTeam(getTeam())
+	 */
+	@Raw
+	public boolean hasProperTeam() {
+		return canHaveAsTeam(getTeam());
+	}
+
+	/** 
+	 * Registers the given team as the team of this worm.
+	 * 
+	 * @param 	team
+	 *			The team to be registered.
+	 * @post	The worm has the given team as its team.
+	 *			| new.getTeam() == team
+	 * @throws	IllegalArgumentException
+	 *			When this worm cannot have the given team as its team.
+	 *			| !canHaveAsTeam(team)
+	 * @throws	IllegalArgumentException
+	 *			When this worm is already registered with the given team.
+	 *			| (hasTeam() && (getTeam() == team))
+	 */
+	@Raw
+	public void setTeam(@Raw Team team) throws IllegalArgumentException {
+		if(!canHaveAsTeam(team) || (hasTeam() && (getTeam() == team)))
+			throw new IllegalArgumentException();
+		this.team = team;
+	}
+	
+	/**
+	 * Disassociates this worm's team.
+	 *
+	 * @effect	Sets this worm's team to the null reference.
+	 *			| setTeam(null)
+	 */
+	public void removeTeam() {
+		setTeam(null);
+	}
+
+	/**
+	 * Checks if this worm has a team
+	 * 
+	 * @return	Whether this worm's team is not null.
+	 *			| result == (getTeam() != null)
+	 */
+	public boolean hasTeam(){
+		return getTeam() != null;
+	}
+
+	/**
+	 * The team of this worm, or null if this worm does not have a team.
+	 */
+	private Team team = null;
 }

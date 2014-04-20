@@ -23,6 +23,11 @@ public class WorldTest_Foods {
 	}
 
 
+	@Test
+	public void testGetNbFoods_SingleCase() {
+		assertEquals(world.getNbFoods(), 2);
+	}
+	
 	@Test(expected = IllegalStateException.class)
 	public void testAddFood_FoodInOtherWorldCase() throws Exception {
 		otherWorld.addFood(pizzaCalzone);
