@@ -96,8 +96,8 @@ public abstract class Entity {
 	 * Determines whether this entity collides with the given entity.
 	 * 
 	 * @param entity	The entity to check collision against.
-	 * @effect			Whether this entity collides with the circle defined by the given entity.
-	 * 					| collidesWith(entity.getPosition(), entity.getRadius())
+	 * @post			Whether this entity collides with the circle defined by the given entity.
+	 * 					| result == collidesWith(entity.getPosition(), entity.getRadius())
 	 * @throws IllegalArgumentException
 	 * 					When the given entity is the null reference
 	 * 					| entity == null

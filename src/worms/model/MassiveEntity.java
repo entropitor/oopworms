@@ -87,29 +87,33 @@ public abstract class MassiveEntity extends Entity {
 	/**
 	 * Makes this entity move along a ballistic trajectory.
 	 * 
+	 * @param timeStep
+	 * 				An elementary time interval during which it may be assumed that the worm will not completely move through a piece of impassable terrain.
 	 * @post		The new x- and y-coordinate of this entity will equal the x- and y-coordinates as 
-	 * 				calculated by getJumpStemp() after the jump is completed (in case the entity isn't terminated).
-	 * 				| if(!new.isTerminated())
-	 * 				| then new.getXCoordinate() == getJumpStep(getJumpTime()).getX()
+	 * 				calculated by getJumpStemp() after the jump is completed
+	 * 				| new.getXCoordinate() == getJumpStep(getJumpTime()).getX()
 	 * 				| &&   new.getYCoordinate() == getJumpStep(getJumpTime()).getY()
-	 * @post		The hitpoints of every worm in this world are left untouched or are decreased.
-	 * 				| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() <= worm.getHitPoints()
-	 * @effect		The entity will be removed from the world if it should be removed from the world.
-	 * 				| if(new.afterJumpRemove()) then getWorld().removeAsEntity(this);
+	 * @effect		After the position are set, everything that needs to be done after the jump will be done
+	 * 				| handleAfterJump()
 	 * @throws IllegalStateException
 	 * 				Thrown when this entity can't jump from his current position.
 	 * 				| !canJump()
+	 * 				When the end of the jump would be on impassable terrain.
+	 * 				| !getWorld().isPassablePosition(endPosition, getRadius())
 	 */
 	public void jump(double timeStep) throws IllegalStateException{
 		if(!canJump())
 			throw new IllegalStateException();
-		setPosition(getJumpStep(getJumpTime(timeStep)));
-		if(afterJumpRemove())
-			getWorld().removeAsEntity(this);
+		Position endPosition = getJumpStep(getJumpTime(timeStep));
+		if(!getWorld().isPassablePosition(endPosition, getRadius()))
+			throw new IllegalStateException();
+		setPosition(endPosition);
+		handleAfterJump();
 	}
 	
 	/**
-	 * Checks whether or not the entity should be removed from the world.
+	 * Checks whether or not the entity should be removed from the world
+	 * if this is the location where he just landed from a jump.
 	 * 
 	 * @return	True if the entity doesn't lie in the world anymore.
 	 * 			| if(!getWorld().isInsideWorldBoundaries(getPosition(), getRadius())) then result == true
@@ -118,6 +122,19 @@ public abstract class MassiveEntity extends Entity {
 		if(!getWorld().isInsideWorldBoundaries(getPosition(), getRadius()))
 			return true;
 		return false;
+	}
+	
+	/**
+	 * Handles everything that needs to be handled after a jump: removing entities, damaging entities, ...
+	 * 
+	 * @post		The hitpoints of every worm in this world are left untouched or are decreased.
+	 * 				| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() <= worm.getHitPoints()
+	 * @effect		The entity will be removed from the world if it should be removed from the world.
+	 * 				| if(afterJumpRemove()) then getWorld().removeAsEntity(this);
+	 */
+	public void handleAfterJump(){
+		if(afterJumpRemove())
+			getWorld().removeAsEntity(this);
 	}
 	
 	/**
@@ -141,8 +158,10 @@ public abstract class MassiveEntity extends Entity {
 	/**
 	 * Calculates the time this entity will take to complete a potential jump from his current position.
 	 * 
-	 * @return	If the jumpVelocity equals 0 then so does the jumptime.
-	 * 			| if(getJumpVelocity() == 0) then result == 0
+	 * @param timeStep
+	 * 			An elementary time interval during which it may be assumed that the worm will not completely move through a piece of impassable terrain.
+	 * @return	If the entity can't jump, the jump time will equal 0
+	 * 			| if(!canJump()) then result == 0
 	 * @return	There is no non-negative t smaller than the result, that is a multiple of timeStep and where the position of the entity after a jump of t seconds would block the jump.
 	 * 			| !(for some t >= 0: Double.compare(t,result)<0 && !fuzzyEquals(t,result,timeStep) && fuzzyEquals(t%timeStep,0) && blocksJump(getJumpStep(t)))
 	 * @throws	IllegalArgumentException
@@ -152,7 +171,8 @@ public abstract class MassiveEntity extends Entity {
 	public double getJumpTime(double timeStep)throws IllegalArgumentException{
 		if(timeStep < 0 || Double.isNaN(timeStep))
 			throw new IllegalArgumentException();
-		if(getJumpVelocity() == 0)
+		
+		if(!canJump())
 			return 0;
 		
 		double t = 0;
@@ -171,8 +191,8 @@ public abstract class MassiveEntity extends Entity {
 	 * 			| if(position.squaredDistance(getPosition()) < getRadius()*getRadius()) then result == false
 	 * @return	True if the position is not within the world boundaries.
 	 * 			| if(!getWorld().isInsideWorldBoundaries(position, getRadius())) then result == true
-	 * @return	True if the position is a contact location for the given worm.
-	 * 			| if(getWorld().getLocationType(position, getRadius()) == LocationType.CONTACT) then result == true
+	 * @return	True if the position is a contact location or impassable terrain for the given worm.
+	 * 			| if(!getWorld().isPassablePosition(position, getRadius()*1.1)) then result == true
 	 * @return	False if the position doesn't overlap with any entity.
 	 * 			| if(!(for some entity in getWorld().getEntities(): entity.collidesWith(position,getRadius()))) then result == false
 	 */
@@ -181,7 +201,7 @@ public abstract class MassiveEntity extends Entity {
 			return false;
 		if(!getWorld().isInsideWorldBoundaries(position, getRadius()))
 			return true;
-		if(getWorld().getLocationType(position, getRadius()) == LocationType.CONTACT)
+		if(!getWorld().isPassablePosition(position, getRadius()*1.1))
 			return true;
 		return false;
 	}
@@ -225,8 +245,6 @@ public abstract class MassiveEntity extends Entity {
 	 * 			| if(!getWorld().isPassablePosition(getPosition(), getRadius())) then result == false
 	 */
 	public boolean canJump(){
-		//FIXME tests
-		//FIXME update tests projectile! (used to be canJump() == true)
 		if(isTerminated())
 			return false;
 		if(!getWorld().isPassablePosition(getPosition(), getRadius()))

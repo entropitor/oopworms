@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class WormTest_Jump {
-	Worm skippy,eiffelTower,jumperContact,jumperOutOfWorld;
+	Worm skippy,eiffelTower,jumperContact,jumperOutOfWorld,jumperClose,wormOnImpassableTerrain;
 	World jumpWorld;
 	static final double TIMESTEP = 1e-4;
 	
@@ -21,6 +21,7 @@ public class WormTest_Jump {
 		skippy = new Worm(world, 2.72, -3.14, 2, 1.5, "Skippy The Bush Kangaroo");
 		eiffelTower = new Worm(world, 48.51, 2.21, 3.4, 41, "The Eiffel Tower");
 		eiffelTower.jump(TIMESTEP);
+		wormOnImpassableTerrain = new Worm(world, 50, 250, 1, 3, "On impassable terrain");
 		
 		boolean[][] passableMap = new boolean[][]{	{true,true,true,true},
 													{true,true,true,true},
@@ -30,6 +31,7 @@ public class WormTest_Jump {
 		jumpWorld = new World(40,20,passableMap,new Random());
 		jumperContact = new Worm(jumpWorld, 12, 10, Math.PI/4, 3, "Jumper");
 		jumperOutOfWorld = new Worm(jumpWorld, 7, 11, 3*Math.PI/4, 3, "Jumps Out Of The World");
+		jumperClose = new Worm(jumpWorld, 16, 2, Math.PI/4, 3, "Cannot Jump because impassable terrain");
 	}
 
 	@Test
@@ -47,6 +49,11 @@ public class WormTest_Jump {
 		assertTrue(jumperOutOfWorld.isTerminated());
 	}
 	
+	@Test(expected = IllegalStateException.class)
+	public void testJump_CloseCase() throws Exception {
+		jumperClose.jump(TIMESTEP);
+	}
+	
 	@Test
 	public void testGetJumpTime_ContactLocationCase(){
 		assertFuzzyEquals(1.04469, jumperContact.getJumpTime(TIMESTEP));
@@ -55,6 +62,11 @@ public class WormTest_Jump {
 	@Test
 	public void testGetJumpTime_OutOfWorldCase() {
 		assertFuzzyEquals(0.764098, jumperOutOfWorld.getJumpTime(TIMESTEP));
+	}
+	
+	@Test
+	public void testGetJumpTime_CloseCase() {
+		assertFuzzyEquals(0.507499, jumperClose.getJumpTime(TIMESTEP));
 	}
 	
 	@Test(expected=IllegalStateException.class)
@@ -68,18 +80,8 @@ public class WormTest_Jump {
 	}
 	
 	@Test
-	public void testGetJumpForce_CanNotJumpZeroAPCase(){
-		assertFuzzyEquals(eiffelTower.getJumpForce(), 0);
-	}
-	
-	@Test
 	public void testGetJumpVelocity_CanJumpCase(){
 		assertFuzzyEquals(skippy.getJumpVelocity(), 7.4033797);
-	}
-	
-	@Test
-	public void testGetJumpVelocity_CanNotJumpZeroAPCase(){
-		assertFuzzyEquals(eiffelTower.getJumpVelocity(), 0);
 	}
 	
 	@Test
@@ -88,8 +90,20 @@ public class WormTest_Jump {
 	}
 	
 	@Test
-	public void testCanJump_FalseCase(){
+	public void testCanJump_FalseNoAPCase(){
 		assertFalse(eiffelTower.canJump());
+	}
+	
+	@Test
+	public void testCanJump_FalseTerminatedCase() {
+		skippy.getWorld().removeWorm(skippy);
+		assertTrue(skippy.isTerminated());
+		assertFalse(skippy.canJump());
+	}
+	
+	@Test
+	public void testCanJump_FalseImpassableTerrainCase() {
+		assertFalse(wormOnImpassableTerrain.canJump());
 	}
 	
 	@Test

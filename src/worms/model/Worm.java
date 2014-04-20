@@ -660,22 +660,8 @@ public class Worm extends MassiveEntity {
 			this.hitPoints = this.getMaxHitPoints();
 	}
 	private int hitPoints;
-
-	/**
-	 * @post		The action points are set to zero.
-	 * 				| new.getActionPoints() == 0
-	 * @post		The hit points of other worms are left untouched
-	 * 				| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() == worm.getHitPoints()
-	 */
-	@Override
-	public void jump(double timeStep) throws IllegalStateException{
-		super.jump(timeStep);
-		decreaseActionPoints(getActionPoints());
-	}
 	
-	/**
-	 * Checks whether or not the entity should be removed from the world.
-	 * 
+	/** 
 	 * @return	False if the entity lies in the world.
 	 * 			| if(getWorld().isInsideWorldBoundaries(getPosition(), getRadius())) then result == false
 	 * @note	This return-clause should only be used if all other return-clauses (of super-method) can't determine the result of this method!
@@ -689,18 +675,24 @@ public class Worm extends MassiveEntity {
 	}
 	
 	/**
+	 * @post		The hit points of other worms are left untouched
+	 * 				| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() == worm.getHitPoints()
+	 * @post		The action points are set to zero.
+	 * 				| new.getActionPoints() == 0
+	 */
+	@Override
+	public void handleAfterJump(){
+		decreaseActionPoints(getActionPoints());
+		super.handleAfterJump();
+	}
+	
+	/**
 	 * @return	The (virtual) force exerted by this worm (in Newton) equals the sum of 5 times its action points and 
-	 * 			its weight (its mass times the gravitational acceleration), in case he can jump.
-	 * 			Otherwise the result equals 0 Newton.
-	 * 			| if(canJump())
-	 * 			| 		then fuzzyEquals(result, ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION)))
-	 * 			| else
-	 * 			|		then result == 0
+	 * 			its weight (its mass times the gravitational acceleration).
+	 * 			| fuzzyEquals(result, ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION)))
 	 */
 	@Override
 	public double getJumpForce(){
-		if(!canJump())
-			return 0;
 		return ((5*getActionPoints()) + (getMass()*GRAVITATIONAL_ACCELERATION));
 	}
 	

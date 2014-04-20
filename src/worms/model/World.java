@@ -469,7 +469,6 @@ public class World {
 	 * 							| entity instanceof Projectile && entity != getProjectile()
 	 */
 	public void removeAsEntity(Entity entity) throws IllegalArgumentException,ClassCastException{
-		//FIXME tests
 		if(entity instanceof Food)
 			removeFood((Food) entity);
 		else if(entity instanceof Worm)

@@ -107,16 +107,14 @@ public abstract class Projectile extends MassiveEntity {
 	 * 				|		then (new worm).gitHitPoints() == worm.getHitPoints()
 	 */
 	@Override
-	public void jump(double timeStep) throws IllegalStateException{
-		if(!canJump())
-			throw new IllegalStateException();
-		setPosition(getJumpStep(getJumpTime(timeStep)));
+	public void handleAfterJump(){
 		for(Worm worm : getWorld().getWorms()){
 			if(collidesWith(worm)){
 				worm.decreaseHitPoints(getDamage());
 			}
 		}
-		getWorld().removeProjectile();
+		if(afterJumpRemove())
+			getWorld().removeProjectile();
 	}
 	
 	/**
@@ -137,6 +135,16 @@ public abstract class Projectile extends MassiveEntity {
 			if(worm.collidesWith(position,getRadius()))
 				return true;
 		return super.blocksJump(position);
+	}
+	
+	/**
+	 * @return		True in all other cases.
+	 * 				| result == true
+	 * @note		This return-clause should only be used if all other return-clauses (of super-method) can't determine the result of this method!
+	 */
+	@Override
+	public boolean canJump(){
+		return super.canJump();
 	}
 	
 	/**
