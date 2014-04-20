@@ -389,24 +389,30 @@ public class World {
 	 *
 	 * @post	This world is terminated
 	 * 			| new.isTerminated()
-	 * @post	All entities in this world are terminated and removed.
+	 * @post	All entities and teams in this world are terminated and disassociated.
 	 *			| (for each worm in getWorms():
 	 *			|	worm.isTerminated() && !new.hasAsEntity(worm))
 	 *			| && (for each food in getFoods():
 	 *			|	food.isTerminated() && !new.hasAsEntity(food))
 	 *			| && (if hasProjectile()) 
 	 *			|	then getProjectile().isTerminated() && !new.hasAsEntity(getProjectile())
+	 *			| && (for each team in getTeams():
+	 *			|	team.isTerminated() && !new.hasAsTeam(team))
 	 */
 	public void terminate(){
 		if(!isTerminated()){
 			Set<Entity> entities = getEntities();
-			
 			worms.clear();
 			foods.clear();
 			setProjectile(null);
-			
 			for (Entity entity : entities)
 				entity.terminate();
+			
+			Set<Team> teams = getTeams();
+			this.teams.clear();
+			for (Team team : teams)
+				team.terminate();
+
 			isTerminated = true;
 		}
 	}
@@ -465,6 +471,15 @@ public class World {
 	}
 
 	/**
+	 * Returns the number of food rations in this world.
+	 */
+	@Basic
+	@Raw
+	public int getNbFoods(){
+		return foods.size();
+	}
+
+	/**
 	 * Checks whether this world can have the given food ration
 	 * as one of its food rations.
 	 * 
@@ -484,7 +499,7 @@ public class World {
 	 * Checks whether this world has proper food rations attached to it.
 	 * 
 	 * @return True iff this world can have each of the
-	 *         foods attached to it as a food at its index,
+	 *         foods attached to it as a food,
 	 *         and if each of these foods references this world as
 	 *         the world to which they are attached.
 	 *       | result ==
@@ -882,4 +897,155 @@ public class World {
 	 * The single live Projectile of this world, or null if there is none.
 	 */
 	private Projectile projectile = null;
+
+	/**
+	 * Returns the teams in this world.
+	 * 
+	 */
+	@Basic
+	public Set<Team> getTeams(){
+		return new HashSet<Team>(teams);
+	}
+
+	/**
+	 * Returns the number of teams in this world.
+	 */
+	@Basic
+	@Raw
+	public int getNbTeams(){
+		return teams.size();
+	}
+
+	/**
+	 * Checks whether this world can have the given team
+	 * as one of its teams.
+	 * 
+	 * @param	team
+	 *			The team to check.
+	 * @return	True iff the given team is effective,
+	 *			the given team is not terminated and this world is not terminated.
+	 *			| result ==
+	 *			|   ((team != null) && (!team.isTerminated()) && (!this.isTerminated()))
+	 */
+	@Raw
+	public boolean canHaveAsTeam(Team team){
+		return ((team != null) && (!team.isTerminated()) && (!this.isTerminated()));
+	}
+
+	/**
+	 * Checks whether this world has proper teams attached to it.
+	 * 
+	 * @return	True iff this world can have each of the
+	 *        	teams attached to it as a team,
+	 *        	each of these teams references this world as
+	 *			the world to which they are attached
+	 *			and there are maximum ten teams in this world.
+	 *			| result ==
+	 *			|   ((for each team in getTeams():
+	 *			|     (this.canHaveAsTeam(team) && (team.getWorld() == this))) &&
+	 *			|	getNbTeams() <= 10)
+	 * @note	Distinctiveness of this world's teams is gueranteed by java.util.Set<>.
+	 */
+	@Raw
+	public boolean hasProperTeams() {
+		for (Team team : teams)
+			if(!canHaveAsTeam(team) || team.getWorld() != this)
+				return false;
+		if (getNbTeams() > 10)
+			return false;
+		return true;
+	}
+
+	/**
+	 * Checks whether this world has the given team as one of its
+	 * teams.
+	 * 
+	 * @param  team
+	 * 		   The team to check.
+	 * @return The given team is registered at some position as
+	 *         a team of this world.
+	 *       | result == (getTeams().contains(team))
+	 */
+	public boolean hasAsTeam(@Raw Team team){
+		return teams.contains(team);
+		// Just as in the Share-Purchase example,
+		// a more efficient implementation would be possible if
+		// the consistency imposed on the bi-directional association
+		// would be guaranteed.
+		// return (team != null) && (team.getWorld() == this);
+	}
+
+	/**
+	 * Adds the given team to the list of teams of this world.
+	 * 
+	 * @param	team
+	 * 			The team to be added.
+	 * @post	The number of teams in this world is
+	 * 			incremented by 1.
+	 * 			| new.getNbTeams() == getNbTeams()+1
+	 * @post	The given team references this world.
+	 *			| (new team).getWorld() == this
+	 * @post	The team is added to the list of teams for this world.
+	 * 			| new.hasAsTeam(team)
+	 * @throws	IllegalArgumentException
+	 *			| (!canHaveAsTeam(team) || (this.hasAsTeam(team)))
+	 * @throws 	IllegalStateException
+	 * 			| team.hasWorld()
+	 * @throws 	IllegalStateException
+	 * 			| (getNbTeams() > 9)
+	 */
+	void addTeam(@Raw Team team) throws IllegalArgumentException,IllegalStateException{
+		if(!canHaveAsTeam(team) || (this.hasAsTeam(team)))
+			throw new IllegalArgumentException();
+		if(team.hasWorld() || getNbTeams() > 9)
+			throw new IllegalStateException();
+		teams.add(team);
+		team.setWorld(this);
+	}
+
+	/**
+	 * Removes the given team from the list of teams of this world.
+	 * 
+	 * @param	team
+	 * 			The team to be removed.
+	 * @post	The number of teams of this world is
+	 * 			decremented by 1.
+	 * 			| new.getNbTeams() == getNbTeams() - 1
+	 * @post	This world no longer has the given team as
+	 * 			one of its teams.
+	 * 			| !new.hasAsTeam(team)
+	 * @effect	The given team is terminated
+	 *			(and thus no longer references this world).
+	 *			| team.terminate()
+	 * @throws	IllegalArgumentException
+	 *			The given team is not effective or this world
+	 *			does not have the given team as one of its teams.
+	 *			| ((team == null) || (!this.hasAsTeam(team)))
+	 */
+	@Raw
+	void removeTeam(Team team) throws IllegalArgumentException{
+		if((team == null) || (!this.hasAsTeam(team)))
+			throw new IllegalArgumentException();
+		teams.remove(team);
+		team.terminate();
+	}
+
+	/**
+	 * An (unordered) set containing all the teams in this world.
+	 * 
+	 * @invar	The referenced set is effective.
+	 * 			| teams != null
+	 * @invar	Each team registered in the referenced set
+	 * 			is effective and not terminated.
+	 * 			| for each team in teams:
+	 * 			|	(team != null && !team.isTerminated())
+	 * @invar	No team is registered more than once
+	 *       	in the referenced collection.
+	 *       	(This is gueranteed by java.util.Set<>.)
+	 *       	| let team_list == new ArrayList(teams) in:
+	 *			|	(for each i,j in 0..team_list.size()-1:
+	 *			|		((i == j) ||
+	 *			|		(team_list.get(i) != team_list.get(j)))
+	 */
+	private final Set<Team> teams = new HashSet<Team>();
 }

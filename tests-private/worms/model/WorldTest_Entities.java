@@ -49,7 +49,9 @@ public class WorldTest_Entities {
 	public void testGetEntities() {
 		Set<Entity> expected = new HashSet<Entity>(Arrays.asList(
 			chilly, willy, pizzaCalzone, zacherTorte, bullet));
-		assertEquals(world.getEntities(), expected);
+		for (Entity entity : expected)
+			assertTrue(world.getEntities().contains(entity));
+		assertEquals(world.getEntities().size(), expected.size());
 	}
 
 	@Test
