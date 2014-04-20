@@ -41,6 +41,31 @@ public class WorldTest_Teams {
 		assertTrue(world.hasAsTeam(cool));
 		world.addTeam(cool);
 	}
+	
+	@Test
+	public void testAddTeam_TenTeamsCase() {
+		new Team(world, "Three");
+		new Team(world, "Four");
+		new Team(world, "Five");
+		new Team(world, "Six");
+		new Team(world, "Seven");
+		new Team(world, "Eight");
+		new Team(world, "Nine");
+		new Team(world, "Ten");
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void testAddTeam_ElevenTeamsCase() {
+		new Team(world, "Three");
+		new Team(world, "Four");
+		new Team(world, "Five");
+		new Team(world, "Six");
+		new Team(world, "Seven");
+		new Team(world, "Eight");
+		new Team(world, "Nine");
+		new Team(world, "Ten");
+		new Team(world, "NopeNoPlaceForYou");
+	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testRemoveTeam_NullCase(){
@@ -88,36 +113,11 @@ public class WorldTest_Teams {
 	}
 
 	@Test
-	public void testHasProperTeams_NormalCase() {
+	public void testHasProperTeams_SingleCase() {
 		assertTrue(world.hasProperTeams());
 		world.removeTeam(Ateam);
 		assertTrue(world.hasProperTeams());
 		world.removeTeam(cool);
 		assertTrue(world.hasProperTeams());
-	}
-
-	@Test
-	public void testHasProperTeams_TenTeamsCase() {
-		new Team(world, "Three");
-		new Team(world, "Four");
-		new Team(world, "Five");
-		new Team(world, "Six");
-		new Team(world, "Seven");
-		new Team(world, "Eight");
-		new Team(world, "Nine");
-		new Team(world, "Ten");
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void testHasProperTeams_ElevenTeamsCase() {
-		new Team(world, "Three");
-		new Team(world, "Four");
-		new Team(world, "Five");
-		new Team(world, "Six");
-		new Team(world, "Seven");
-		new Team(world, "Eight");
-		new Team(world, "Nine");
-		new Team(world, "Ten");
-		new Team(world, "NopeNoPlaceForYou");
 	}
 }
