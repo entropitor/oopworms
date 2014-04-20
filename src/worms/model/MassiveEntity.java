@@ -5,9 +5,6 @@ import static java.lang.Math.cos;
 import static java.lang.Math.pow;
 import static java.lang.Math.sin;
 
-import java.util.concurrent.TimeoutException;
-
-import worms.util.Util;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Model;
@@ -144,7 +141,7 @@ public abstract class MassiveEntity extends Entity {
 	/**
 	 * Calculates the time this entity will take to complete a potential jump from his current position.
 	 * 
-	 * @return	If the jumpVelocity equals 0 than so does the jumptime.
+	 * @return	If the jumpVelocity equals 0 then so does the jumptime.
 	 * 			| if(getJumpVelocity() == 0) then result == 0
 	 * @return	There is no non-negative t smaller than the result, that is a multiple of timeStep and where the position of the entity after a jump of t seconds would block the jump.
 	 * 			| !(for some t >= 0: Double.compare(t,result)<0 && !fuzzyEquals(t,result,timeStep) && fuzzyEquals(t%timeStep,0) && blocksJump(getJumpStep(t)))
@@ -167,7 +164,7 @@ public abstract class MassiveEntity extends Entity {
 	}
 	
 	/**
-	 * Checks whether or not the given position would stops/block the (virtual) jump of this entity.
+	 * Checks whether or not the given position would stop/block the (virtual) jump of this entity.
 	 * 
 	 * @param position	The position to check.
 	 * @return	False if the position is not further than getRadius() away
@@ -196,7 +193,7 @@ public abstract class MassiveEntity extends Entity {
 	 * @param t		The time after the jump (in seconds).
 	 * @return		The position where the entity will be after t seconds.
 	 * 				In the current version this method uses a simplified model of terrestrial physics and considers uniform gravity with neither drag nor wind. 
-	 * 				In the future this method may involve further trajectory parameters. Clients should NOT consider this postconditional as final but rather as a guideline.
+	 * 				In the future this method may involve further trajectory parameters. Clients should NOT consider this postcondition as final but rather as a guideline.
 	 * 				|	fuzzyEquals(result.getX(), (getXCoordinate()+(getJumpVelocity()*cos(getDirection())*t))) &&
 	 * 				|	fuzzyEquals(result.getY(), (getYCoordinate()+(getJumpVelocity()*sin(getDirection())*t)-(GRAVITATIONAL_ACCELERATION/2*pow(t,2))))
 	 * @throws IllegalArgumentException
@@ -204,7 +201,7 @@ public abstract class MassiveEntity extends Entity {
 	 * 				| Double.isNaN(t) || t < 0
 	 * @note		This method will just return where the entity will be after t seconds IF he performs a jump. 
 	 * 				This method will also return values if this entity can't jump, 
-	 * 				or the values of the position where the enity would be after t seconds assuming the entity has not stopped jumping yet. 
+	 * 				or the values of the position where the entity would be after t seconds assuming the entity has not stopped jumping yet. 
 	 * 				(if t > getJumpTime() it will just continue giving positions).
 	 */
 	public Position getJumpStep(double t) throws IllegalArgumentException{

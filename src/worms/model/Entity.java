@@ -3,7 +3,6 @@ package worms.model;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
 import static java.lang.Math.pow;
-import static java.lang.Math.pow;
 
 /**
  * A class of objects taking up space at a certain position in a game world.
