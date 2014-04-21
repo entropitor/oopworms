@@ -18,7 +18,7 @@ public class Food extends Entity {
 	 * 			The given world is not effective.
 	 * 			| world == null
 	 */
-	public Food(World world) throws NullPointerException{
+	public Food(World world) throws IllegalArgumentException,IllegalStateException,NullPointerException{
 		world.addFood(this);
 	}
 	

@@ -27,6 +27,13 @@ public class PositionTest {
 	}
 	
 	@Test
+	public void testGetAsArray_SingleCase(){
+		assertFuzzyEquals(position.getAsArray()[0], 4);
+		assertFuzzyEquals(position.getAsArray()[1], 5);
+		assertFuzzyEquals(position.getAsArray().length, 2);
+	}
+	
+	@Test
 	public void testIsValidPosition_TrueCase(){
 		assertTrue(Position.isValidPosition(-23,54.204840));
 		assertTrue(Position.isValidPosition(Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY));

@@ -26,7 +26,7 @@ public class Team {
 	 * @effect	Set the name to the given name
 	 * 			| setName(name);
 	 * @effect	Adds the team to the given world.
-	 * 			| world.addWorm(this)
+	 * 			| world.addTeam(this)
 	 * @throws	NullPointerException
 	 * 			The given world is not effective.
 	 * 			| world == null
