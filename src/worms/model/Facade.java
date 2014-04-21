@@ -128,14 +128,21 @@ public class Facade implements IFacade {
 
 	@Override
 	public void addNewFood(World world) {
-		// TODO Auto-generated method stub
+		try{
+			world.addNewFood();
+		}catch(IllegalStateException e){
+			throw new ModelException(e);
+		}
 		
 	}
 
 	@Override
 	public void addNewWorm(World world) {
-		// TODO Auto-generated method stub
-		
+		try{
+			world.addNewWorm();
+		}catch(IllegalStateException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override

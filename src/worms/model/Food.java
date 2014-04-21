@@ -1,5 +1,7 @@
 package worms.model;
 
+import be.kuleuven.cs.som.annotate.Basic;
+import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Raw;
 
 /**
@@ -22,7 +24,11 @@ public class Food extends Entity {
 		world.addFood(this);
 	}
 	
-	@Override @Raw
+	/**
+	 * @return	The radius of a food entity equals 0.20 metres
+	 * 			| result == 0.20
+	 */
+	@Override @Basic @Raw @Immutable
 	public double getRadius() {
 		return 0.20;
 	}

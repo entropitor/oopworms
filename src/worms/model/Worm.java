@@ -95,7 +95,7 @@ public class Worm extends MassiveEntity {
 	 * 			| world == null
 	 */
 	@Raw
-	public Worm(World world, double x, double y, double direction, double radius, String name, Team team) throws IllegalArgumentException,NullPointerException{
+	public Worm(World world, double x, double y, double direction, double radius, String name, Team team)
 			throws IllegalArgumentException,IllegalStateException,NullPointerException{
 		setPosition(new Position(x,y));
 		setDirection(direction);

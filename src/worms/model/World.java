@@ -11,6 +11,10 @@ import static java.lang.Math.floor;
 import static java.lang.Math.ceil;
 import static java.lang.Math.min;
 import static java.lang.Math.max;
+import static java.lang.Math.PI;
+import static java.lang.Math.sin;
+import static java.lang.Math.cos;
+import static java.lang.Math.pow;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -44,19 +48,19 @@ public class World {
 	 * @post	| new.getWidth() == width
 	 * @post	| new.getHeight() == height
 	 * @effect	| setPassableMap(passableMap)
+	 * @post	| new.getRandom() == random.
 	 * @throws IllegalArgumentException
 	 * 			| !isValidWidth(width) || !isValidHeight(height)
 	 */
 	@Raw
 	public World(double width, double height, boolean[][] passableMap, Random random) throws IllegalArgumentException{
-		// TODO Auto-generated constructor stub
-		
 		if(!isValidWidth(width) || !isValidHeight(height))
 			throw new IllegalArgumentException();
 		
 		this.width = width;
 		this.height = height;
 		setPassableMap(passableMap);
+		this.random = random;
 	}
 	
 	/**
@@ -1075,4 +1079,153 @@ public class World {
 	 *			|		(team_list.get(i) != team_list.get(j)))
 	 */
 	private final Set<Team> teams = new HashSet<Team>();
+	
+	/**
+	 * Create and add a new worm to the given world. 
+	 * The new worm will be placed at a random adjacent location. 
+	 * The new worm can have an arbitrary (but valid) radius and direction. 
+	 * The new worm may (but isn't required to) have joined a team.
+	 * 
+	 * @post	| getNbWorms()+1 == new.getNbWorms()
+	 * @post	| let 
+	 * 			|		worm = new.getWormAt(getNbWorms())
+	 * 			| in
+	 * 			|		Worm.isValidName((new worm).getName) 
+	 * 			|		&& Worm.isValidDirection((new worm).getDirection())
+	 * 			|		&& (new worm).canHaveAsRadius((new worm).getRadius())
+	 * 			|		&& (new worm).canHaveAsTeam((new worm).getTeam())
+	 * 			|		&& Position.isValidPosition((new worm).getPosition())
+	 * 			|		&& isInsideWorldBoundaries((new worm).getPosition(), (new worm).getRadius()) && getLocationType((new worm).getPosition(), (new worm).getRadius()) == LocationType.CONTACT
+	 * 			|		&& (new worm).getWorld() == this
+	 * @throws IllegalStateException
+	 * 			When no valid position for the worm can be found (see @see World#findContactLocation(Position, double) tag for formal condition)
+	 * @see World#findContactLocation(Position, double) findContactLocation(Position, double) for formal condition @throws IllegalStateException
+	 */
+	public void addNewWorm() throws IllegalStateException{
+		Random random = getRandom();
+		double direction = random.nextDouble()*2*PI;
+		double radius = 0.25+random.nextDouble()*min(getWidth(),getHeight())/50;
+		
+		String name = firstNames[random.nextInt(firstNames.length)];
+		name += " '" + aliasNames[random.nextInt(aliasNames.length)] + "' ";
+		name += lastNames[random.nextInt(lastNames.length)];
+		
+		Team team = null;
+		if(getNbTeams() > 0 && random.nextBoolean()){
+			int teamIndex = random.nextInt(getNbTeams());
+			team = new ArrayList<Team>(getTeams()).get(teamIndex);
+		}
+		
+		Position pos = findContactLocation(getRandomPerimeterLocation(),radius);
+		
+		new Worm(this, pos.getX(), pos.getY(), direction, radius, name, team);
+	}
+	
+	private final static String[] firstNames = new String[]{"Willy","Beowulf","Chilly","Leonal","Denzel","Wallis","Jeffrey","Tomas","Jens"};
+	private final static String[] aliasNames = new String[]{"The Terminator","CannonFodder","Trojan Horse"};
+	private final static String[] lastNames = new String[]{"Smith","Johnson","Williams","Jones","Brown","Claes","Fiers"};
+	
+	
+	/**
+	 * Create and add a new food ration to the given world. 
+	 * The food will be placed at a random adjacent location.
+	 * 
+	 * @effect	Create a food object, add it to this world and set the position to a random contact location.
+	 * 			| let food = new Food(this) in food.setPosition(findContactLocation(getRandomPerimeterLocation(), food.getRadius()))
+	 */
+	public void addNewFood() throws IllegalStateException{
+		Food food = new Food(this);
+		Position pos = findContactLocation(getRandomPerimeterLocation(), food.getRadius());
+		food.setPosition(pos);
+	}
+	
+	/**
+	 * Find a random location on the edge of the world
+	 * 
+	 * @return	| result.getX() == 0 || result.getX() == getWidth() || result.getY() == 0 || result.getY() == getHeight()
+	 * @return	| isInsideWorldBoundaries(result)
+	 */
+	public Position getRandomPerimeterLocation(){
+		if(random.nextBoolean()){
+			if(random.nextBoolean()){
+				return new Position(0,random.nextDouble()*getHeight());
+			}else{
+				return new Position(getWidth(),random.nextDouble()*getHeight());
+			}
+		}else{
+			if(random.nextBoolean()){
+				return new Position(random.nextDouble()*getWidth(),0);
+			}else{
+				return new Position(random.nextDouble()*getWidth(),getHeight());
+			}
+		}
+	}
+	
+	/**
+	 * Find a contact location starting from the given startPosition
+	 * 
+	 * @param startPosition
+	 * 				The position to start looking from
+	 * @param radius	
+	 * 				The radius of the entity for which to look.
+	 * @return		| isInsideWorldBoundaries(result, radius) && getLocationType(result, radius) == LocationType.CONTACT
+	 * @throws IllegalStateException
+	 * 				When no proper location can be found:
+	 * 				In the current implementation this method will look on a straight line towards the middle of the map at points with a distance of 0.1*radius between them,
+	 * 				if all of them are either partially outside of the world boundaries or aren't contact locations, than this method will throw the IllegalStateException
+	 * 				However this implementation can change in the future and build applications on the 2nd part of this condition. 
+	 * 				| let 
+	 * 				|		theta = Math.atan2(pos.getY()-centerOfMap.getY(),pos.getX()-centerOfMap.getX())
+	 * 				|		centerOfMap = new Position(getWidth()/2, getHeight()/2)
+	 * 				| in
+	 * 				|		for each i in 0..Math.floor(Math.sqrt(centerOfMap.squaredDistance(startPosition))/(radius*0.1)):
+	 * 				|				let pos = startPosition.offset(-i*radius*0.1*cos(theta), -i*radius*0.1*sin(theta))
+	 * 				|				in  !(isInsideWorldBoundaries(pos, radius) && getLocationType(pos, radius) == LocationType.CONTACT)
+	 * 				
+	 */
+	public Position findContactLocation(Position startPosition, double radius) throws IllegalStateException{
+		Position centerOfMap = new Position(getWidth()/2, getHeight()/2);
+		double theta = Math.atan2(startPosition.getY()-centerOfMap.getY(),startPosition.getX()-centerOfMap.getX());
+		
+		Position pos = startPosition;
+		if(isInsideWorldBoundaries(pos, radius) && getLocationType(pos, radius) == LocationType.CONTACT)
+			return pos;
+		while(centerOfMap.squaredDistance(pos) >= pow(radius*0.1,2)){
+			pos = pos.offset(-radius*0.1*cos(theta), -radius*0.1*sin(theta));
+			if(isInsideWorldBoundaries(pos, radius) && getLocationType(pos, radius) == LocationType.CONTACT)
+				return pos;
+		};
+		
+		throw new IllegalStateException();
+	}
+	
+	/**
+	 * Get the random number generator for this world.
+	 */
+	@Basic @Immutable @Model
+	private Random getRandom(){
+		//NOTE: this exposes the random number generator completly to the client (it can be reset using setSeed).
+		//if future versions require that the random number generator is completly hidden from the client (only settable on world generation)
+		//than the random number generation should be refactored. 
+		//(Probably best to extend Random (but then there's problem with Liskov!) with a FixedRandom class that saves the random number generator and 
+		//calls the respectively functions on its random property object but throws an error when trying to rewrite the seed).
+		//That's why this method is made private
+		
+		//OLD @note that announced this.
+		/*@note 	The Random return type might be changed in the future to a very similair one:
+		 * 			This method exposes the random number generator completly to the client (it can be reset using the setSeed method of the RandomClass).
+		 * 			In the future this method *might* return an instance of a class similair to java.util.Random but one that doesn't offer a method to set a seed.
+		 * 			That class will however behave completly like a normal Random variable would and thus it will generate the exact same numbers as the Random class itself.
+		 * 			(The reason that class won't be a subclass of Random is because of the Liskov-Principle which forbids a subclass of Random to throw an Exception when the superclass doesn't announce this)
+		 */
+		//OLD @post-condition for constructor that used this.
+		/*let newRandom = new.getRandom() in:
+		 * 			|  newRandom.nextBoolean() == random.nextBoolean() && newRandom.nextDouble() == random.nextDouble() && newRandom.nextFloat() == random.nextFloat() 
+		 * 			|  && newRandom.nextGaussian() == random.nextGaussian() && newRandom.nextInt() == random.nextInt() && (for each n in Integer: newRandom.nextInt(n) == random.nextInt(n))
+		 * 			|  && newRandom.nextLong() == random.nextLong()
+		 */
+		return random;
+	}
+	
+	private final Random random;
 }
