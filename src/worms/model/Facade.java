@@ -29,7 +29,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public void turn(Worm worm, double angle) throws ModelException {
-		if (worm.canTurn(angle))
+		if (Worm.isValidTurningAngle(angle) && worm.canTurn(angle))
 			worm.turn(angle);
 		else
 			throw new ModelException("The worm can not turn over the given angle.");
@@ -47,8 +47,7 @@ public class Facade implements IFacade {
 	@Override
 	public double[] getJumpStep(Worm worm, double t) throws ModelException{
 		try{
-			Position pos = worm.getJumpStep(t);
-			return new double[]{pos.getX(),pos.getY()};
+			return worm.getJumpStep(t).getAsArray();
 		}catch(IllegalArgumentException e){
 			throw new ModelException(e);
 		}
@@ -121,13 +120,13 @@ public class Facade implements IFacade {
 	public void addEmptyTeam(World world, String newName) throws ModelException {
 		try {
 			new Team(world, newName);
-		} catch (IllegalArgumentException|NullPointerException e) {
+		} catch (IllegalArgumentException|IllegalStateException|NullPointerException e) {
 			throw new ModelException(e);
 		}
 	}
 
 	@Override
-	public void addNewFood(World world) {
+	public void addNewFood(World world) throws ModelException{
 		try{
 			world.addNewFood();
 		}catch(IllegalStateException e){
@@ -137,7 +136,7 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void addNewWorm(World world) {
+	public void addNewWorm(World world) throws ModelException{
 		try{
 			world.addNewWorm();
 		}catch(IllegalStateException e){
@@ -158,7 +157,7 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public Food createFood(World world, double x, double y) {
+	public Food createFood(World world, double x, double y) throws ModelException{
 		try {
 			Food f = new Food(world);
 			f.setPosition(new Position(x, y));
@@ -170,7 +169,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public World createWorld(double width, double height,
-			boolean[][] passableMap, Random random) {
+			boolean[][] passableMap, Random random) throws ModelException{
 		try {
 			return new World(width, height, passableMap, random);
 		} catch (IllegalArgumentException e) {
@@ -180,7 +179,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public Worm createWorm(World world, double x, double y, double direction,
-			double radius, String name) {
+			double radius, String name) throws ModelException{
 		if(!Worm.isValidDirection(direction))
 			throw new ModelException("Not a valid direction.");
 		try {
@@ -218,18 +217,30 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public double[] getJumpStep(Projectile projectile, double t) {
-		return projectile.getJumpStep(t).getAsArray();
+	public double[] getJumpStep(Projectile projectile, double t) throws ModelException{
+		try{
+			return projectile.getJumpStep(t).getAsArray();
+		}catch(IllegalArgumentException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
-	public double getJumpTime(Projectile projectile, double timeStep) {
-		return projectile.getJumpTime(timeStep);
+	public double getJumpTime(Projectile projectile, double timeStep) throws ModelException{
+		try{
+			return projectile.getJumpTime(timeStep);
+		}catch(IllegalArgumentException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
-	public double getJumpTime(Worm worm, double timeStep) {
-		return worm.getJumpTime(timeStep);
+	public double getJumpTime(Worm worm, double timeStep) throws ModelException{
+		try{
+			return worm.getJumpTime(timeStep);
+		}catch(IllegalArgumentException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
@@ -293,14 +304,12 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean isActive(Food food) {
-		// TODO Auto-generated method stub
-		return false;
+		return !food.isTerminated();
 	}
 
 	@Override
 	public boolean isActive(Projectile projectile) {
-		// TODO Auto-generated method stub
-		return false;
+		return !projectile.isTerminated();
 	}
 
 	@Override
@@ -310,7 +319,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean isAlive(Worm worm) {
-		return worm.isTerminated();
+		return !worm.isTerminated();
 	}
 
 	@Override
@@ -325,19 +334,19 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void jump(Projectile projectile, double timeStep) {
+	public void jump(Projectile projectile, double timeStep) throws ModelException{
 		try {
 			projectile.jump(timeStep);
-		} catch (IllegalStateException e) {
+		} catch (IllegalStateException|IllegalArgumentException e) {
 			throw new ModelException(e);
 		}
 	}
 
 	@Override
-	public void jump(Worm worm, double timeStep) {
+	public void jump(Worm worm, double timeStep) throws ModelException{
 		try {
 			worm.jump(timeStep);
-		} catch (IllegalStateException e) {
+		} catch (IllegalStateException|IllegalArgumentException e) {
 			throw new ModelException(e);
 		}
 	}

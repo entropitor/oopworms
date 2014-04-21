@@ -1098,8 +1098,8 @@ public class World {
 	 * 			|		&& isInsideWorldBoundaries((new worm).getPosition(), (new worm).getRadius()) && getLocationType((new worm).getPosition(), (new worm).getRadius()) == LocationType.CONTACT
 	 * 			|		&& (new worm).getWorld() == this
 	 * @throws IllegalStateException
-	 * 			When no valid position for the worm can be found (see @see World#findContactLocation(Position, double) tag for formal condition)
-	 * @see World#findContactLocation(Position, double) findContactLocation(Position, double) for formal condition @throws IllegalStateException
+	 * 			When no valid position for the worm can be found. See the throws IllegalStateException clause of {@link World#findContactLocation(Position, double)} for a formal condition
+	 * 			(with startPosition = a position returned from {@link World#getRandomPerimeterLocation()}, and as radius the radius of the worm that was randomly decided on.)
 	 */
 	public void addNewWorm() throws IllegalStateException{
 		Random random = getRandom();

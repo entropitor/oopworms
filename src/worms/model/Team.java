@@ -32,7 +32,7 @@ public class Team {
 	 * 			| world == null
 	 */
 	@Raw
-	public Team(World world, String name) throws IllegalArgumentException,NullPointerException{
+	public Team(World world, String name) throws IllegalArgumentException,IllegalStateException,NullPointerException{
 		setName(name);
 		world.addTeam(this);
 	}

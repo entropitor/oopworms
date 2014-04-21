@@ -144,4 +144,14 @@ public class WormTest_Jump {
 		assertFuzzyEquals(jumpstep.getX(), 2.72);
 		assertFuzzyEquals(jumpstep.getY(), -3.14);
 	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testJump_IllegalTimeStepNegativeCase() throws Exception {
+		skippy.jump(-3);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testJump_IllegalTimeStepNaNCase() throws Exception {
+		skippy.jump(Double.NaN);
+	}
 }
