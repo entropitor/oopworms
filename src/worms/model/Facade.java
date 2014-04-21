@@ -47,8 +47,7 @@ public class Facade implements IFacade {
 	@Override
 	public double[] getJumpStep(Worm worm, double t) throws ModelException{
 		try{
-			Position pos = worm.getJumpStep(t);
-			return new double[]{pos.getX(),pos.getY()};
+			return worm.getJumpStep(t).getAsArray();
 		}catch(IllegalArgumentException e){
 			throw new ModelException(e);
 		}
