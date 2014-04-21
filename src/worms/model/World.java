@@ -49,6 +49,7 @@ public class World {
 	 * @post	| new.getHeight() == height
 	 * @effect	| setPassableMap(passableMap)
 	 * @post	| new.getRandom() == random.
+	 * @post	| !new.hasStarted()
 	 * @throws IllegalArgumentException
 	 * 			| !isValidWidth(width) || !isValidHeight(height)
 	 */
@@ -581,11 +582,15 @@ public class World {
 	 *			| (!canHaveAsFood(food) || (this.hasAsFood(food)))
 	 * @throws 	IllegalStateException
 	 * 			| food.hasWorld()
+	 * @throws	IllegalStateException
+	 * 			| hasStarted()
 	 */
 	void addFood(@Raw Food food) throws IllegalArgumentException,IllegalStateException{
 		if(!canHaveAsFood(food) || (this.hasAsFood(food)))
 			throw new IllegalArgumentException();
 		if(food.hasWorld())
+			throw new IllegalStateException();
+		if(hasStarted())
 			throw new IllegalStateException();
 		foods.add(food);
 		food.setWorld(this);
@@ -651,12 +656,13 @@ public class World {
 	 * 
 	 * @param	index
 	 *			The (0-based) index of the worm to return.
+	 * @return	The worm at the given index
+	 * 			| getWorms().get(index)
 	 * @throws	IndexOutOfBoundsException
 	 * 			The given index is negative or it exceeds or equals the
 	 * 			number of worms in this world.
 	 *			| (index < 0) || (index >= getNbWorms())
 	 */
-	@Basic
 	@Raw
 	public Worm getWormAt(int index) throws IndexOutOfBoundsException{
 		return worms.get(index);
@@ -777,11 +783,15 @@ public class World {
 	 *			| (!canHaveAsWormAt(worm, getNbWorms()) || (this.hasAsWorm(worm)))
 	 * @throws	IllegalStateException
 	 * 			| worm.hasWorld()
+	 * @throws	IllegalStateException
+	 * 			| hasStarted()
 	 */
 	void addWorm(@Raw Worm worm) throws IllegalArgumentException, IllegalStateException{
 		if(!canHaveAsWormAt(worm, getNbWorms()) || (this.hasAsWorm(worm)))
 			throw new IllegalArgumentException();
 		if(worm.hasWorld())
+			throw new IllegalStateException();
+		if(hasStarted())
 			throw new IllegalStateException();
 		worms.add(worm);
 		worm.setWorld(this);
@@ -807,6 +817,9 @@ public class World {
 	 * 			| (for each i,j in 0..getNbWorms()-1:
 	 * 			|   if ((getWormAt(i) == worm) && (i < j))
 	 * 			|     then new.getWormAt(j-1) == getWormAt(j))
+	 * @post	If the worm was the current worm, the next turn will start.
+	 * 			| if(hasStarted() && getCurrentWorm() == worm)
+	 * 			|	startNextTurn()
 	 * @throws	IllegalArgumentException
 	 *			The given worm is not effective or this world
 	 *			does not have the given worm as one of its worms.
@@ -816,8 +829,19 @@ public class World {
 	void removeWorm(Worm worm) throws IllegalArgumentException{
 		if((worm == null) || (!this.hasAsWorm(worm)))
 			throw new IllegalArgumentException();
+		
+		int index = getWorms().indexOf(worm);
+		boolean wasCurrentWorm = (getCurrentWorm() == worm);
 		worms.remove(worm);
 		worm.terminate();
+		if(hasStarted()){
+			if(index <= currentWormIndex)
+				currentWormIndex--;
+			if(getNbWorms() > 0)
+				currentWormIndex %= getNbWorms();
+			if(wasCurrentWorm)
+				startNextTurn();
+		}
 	}
 
 	/**
@@ -891,12 +915,16 @@ public class World {
 	 *			| !canHaveAsProjectile(projectile)
 	 * @throws IllegalStateException
 	 * 			| (projectile != null) && projectile.hasWorld()
+	 * @throws IllegalStateException
+	 * 			| (projectile != null) && !hasStarted()
 	 */
 	@Raw
 	public void setProjectile(@Raw Projectile projectile) throws IllegalArgumentException,IllegalStateException {
 		if(!canHaveAsProjectile(projectile))
 			throw new IllegalArgumentException();
 		if(projectile != null && projectile.hasWorld())
+			throw new IllegalStateException();
+		if(projectile != null && !hasStarted())
 			throw new IllegalStateException();
 		
 		Projectile oldProjectile = this.projectile;
@@ -1228,4 +1256,164 @@ public class World {
 	}
 	
 	private final Random random;
+	
+	/**
+	 * Returns whether or not this world has started with the game.
+	 */
+	@Raw @Basic
+	public boolean hasStarted(){
+		return hasStarted;
+	}
+	
+	/**
+	 * Start the game
+	 * 
+	 * @throws IllegalStateException | hasStarted()
+	 */
+	public void start() throws IllegalStateException{
+		if(hasStarted())
+			throw new IllegalStateException();
+		hasStarted = true;
+		currentWormIndex = 0;
+	}
+	
+	private boolean hasStarted = false;
+	
+	/**
+	 * Checks if there are winners and if there are, set the winners and terminate this world.
+	 * 
+	 * @effect		| if(
+	 * 				|		getNbWorms() == 0 
+	 * 				|		|| (getNbWorms() != 0 && getWormAt(0).hasTeam() && for each worm in getWorms(): worm.getTeam == getWormAt(0).getTeam())
+	 * 				|		|| (getNbWorms() == 1 && !getWormAt(0).hasTeam())
+	 * 				| ) then terminate()
+	 * @post		| if(getNbWorms() == 0) then new.getWinners() == ""
+	 * @post		| if(getNbWorms() != 0 && getWormAt(0).hasTeam() && for each worm in getWorms(): worm.getTeam == getWormAt(0).getTeam()) then new.getWinners() == getWormAt(0).getTeam().getName()
+	 * @post		| if(getNbWorms() == 1 && !getWormAt(0).hasTeam()) then new.getWinners() == getWormAt(0).getName()
+	 * @throws IllegalStateException
+	 * 				| !hasStarted() || isTerminated()
+	 */
+	public void checkForWinners() throws IllegalStateException{
+		if(!hasStarted())
+			throw new IllegalStateException();
+		if(isTerminated())
+			throw new IllegalStateException();
+		
+		boolean hasEnded = false;
+		String winners = "";
+		
+		if(getNbWorms() == 0){
+			hasEnded = true;
+			winners = "";
+		}else if(getWormAt(0).hasTeam()){
+			Team teamOfWorm0 = getWormAt(0).getTeam();
+			//If no other worm will say the game hasn't ended, 
+			//the game has ended and the winners are the team of worm 0 (and thus the team of every worm in the game)
+			hasEnded = true;
+			winners = teamOfWorm0.getName();
+			for(Worm worm : getWorms()){
+				if(worm.getTeam() != teamOfWorm0){
+					hasEnded = false;
+					break;
+				}
+			}
+		}else{
+			if(getNbWorms() == 1){
+				hasEnded = true;
+				winners = getWormAt(0).getName();
+			}
+		}
+			
+		if(hasEnded){
+			this.winners = winners;
+			terminate();
+		}
+	}
+	
+	/**
+	 * Return the winners of this world
+	 * 
+	 * @throws IllegalStateException
+	 * 				| !isTerminated()
+	 */
+	@Raw @Basic
+	public String getWinners() throws IllegalStateException{
+		if(!isTerminated())
+			throw new IllegalStateException();
+		return winners;
+	}
+	
+	private String winners = "";
+	
+	/**
+	 * Returns the worm whose turn it currently is.
+	 * 
+	 * @return		| if(getNbWorms() == 0)	result == null
+	 * @return		| if(getNbWorms() > 0)
+	 * 				| 	then hasAsWorm(result)
+	 */
+	@Basic
+	public Worm getCurrentWorm(){
+		if(getNbWorms() == 0)
+			return null;
+		return getWormAt(currentWormIndex);
+	}
+	
+	/**
+	 * Start the next turn of a worm.
+	 * 
+	 * @effect		| checkForWinners()
+	 * @effect		| if(!new.isTerminated() && hasProjectile()) then removeProjectile()
+	 * @effect		| for each worm in getWorms():
+	 * 				|		if(worm.getHitPoints() == 0) then removeWorm(worm);
+	 * @post		| if(!new.isTerminated())
+	 * 				| then
+	 * 				|	let
+	 * 				|		indexOldCurrent = getWorms().indexOf(getCurrentWorm())
+	 * 				|		nbRemoved = count(worm in getWorms(): worm.getHitPoints()==0)
+	 * 				| 	in:
+	 * 				|		new.getCurrentWorm() == getWormAt((indexOldCurrent+1-nbRemoved)%getNbWorms())
+	 * 				|		(new new.getCurrentWorm()).getActionPoints() == new.getCurrentWorm().getMaxActionPoints()
+	 * 				|		(new new.getCurrentWorm()).getHitPoints() == new.getCurrentWorm().getHitPoints()+10
+	 * @throws IllegalStateException
+	 * 				| !hasStarted() || isTerminated() || getNbWorms() == 0
+	 */
+	public void startNextTurn() throws IllegalStateException{
+		if(!hasStarted())
+			throw new IllegalStateException();
+		if(isTerminated())
+			throw new IllegalStateException();
+		if(getNbWorms() == 0)
+			throw new IllegalStateException();
+
+		checkForWinners();
+		if(isTerminated)
+			return;
+		
+		//TODO Is total approach good enough here or does it need defensive approach?
+		if(hasProjectile())
+			removeProjectile();
+		
+		for(Worm worm : getWorms()){
+			if(worm.getHitPoints() == 0){
+				removeWorm(worm);
+			}
+		}
+		
+		++currentWormIndex;
+		currentWormIndex %=getNbWorms();
+		Worm current = getCurrentWorm();
+		current.replenishActionPoints();
+		current.increaseHitPoints(10);
+	}
+	
+	/**
+	 * The index of the worm whose turn it currently is.
+	 * 
+	 * @invar		| if(0 < getNbWorms())
+	 * 				|		then 0 <= currentWormIndex && currentWormIndex < getNbWorms()
+	 * 				| else
+	 * 				|		currentWormIndex == 0
+	 */
+	private int currentWormIndex = 0;
 }

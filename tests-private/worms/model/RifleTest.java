@@ -16,6 +16,7 @@ public class RifleTest {
 	public void setUp() throws Exception {
 		rifle = new Rifle();
 		world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
+		world.start();
 	}
 	
 	@Test

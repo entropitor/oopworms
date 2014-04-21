@@ -519,7 +519,7 @@ public class Worm extends MassiveEntity {
 	 *			| setActionPoints(getMaxActionPoints())		
 	 */
 	@Raw @Model
-	private void replenishActionPoints(){
+	protected void replenishActionPoints(){
 		this.setActionPoints(this.getMaxActionPoints());
 	}
 	
@@ -633,7 +633,7 @@ public class Worm extends MassiveEntity {
 	 * 			a decrease in HP.
 	 */
 	@Model
-	private void increaseHitPoints(int amount){
+	protected void increaseHitPoints(int amount){
 		if (amount > 0)
 			if ((Integer.MAX_VALUE - this.getHitPoints()) >= amount)
 				this.setHitPoints(this.getHitPoints() + amount);
@@ -952,12 +952,12 @@ public class Worm extends MassiveEntity {
 	 * Remove a weapon from the list of weapons for this worm.
 	 * 
 	 * @param weapon	The weapon to remove
-	 * @post			If the weapon is in the list of weapons, and the worm can survive with a weapon less, then the weapon is removed and all weapons further in the list or shifted to the right.
+	 * @post			If the weapon is in the list of weapons, and the worm can survive with a weapon less, then the weapon is removed and all weapons further in the list or shifted to the left.
 	 * 					| if(canHaveAsNbWeapons(getNbWeapons()-1) && hasWeapon(weapon))
 	 * 					| 		then !new.hasWeapon(weapon) && new.getNbWeapons() == getNbWeapons()-1
 	 * 					|		&& for each int index in getIndexOfWeapon(weapon)+1..getNbWeapons()-1: new.getWeaponAt(index-1) == getWeaponAt(index)
-	 * @post			If the weapon was the active weapon, the next weapon will be selected, if there's any.
-	 * 					| if(getSelectedWeapon() == weapon)
+	 * @post			If the weapon was the active weapon (and will be removed), the next weapon will be selected, if there's any.
+	 * 					| if(canHaveAsNbWeapons(getNbWeapons()-1) && getSelectedWeapon() == weapon)
 	 * 					|	if(getNbWeapons() > 1)
 	 * 					|		new.getSelectedWeapon() == getWeaponAt((getIndexOfWeapon(getSelectedWeapon)+1)%new.getNbWeapons())
 	 * 					|	else new.getSelectedWeapon() == null

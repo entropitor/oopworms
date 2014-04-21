@@ -18,6 +18,7 @@ public class BazookaProjectileTest {
 	public void setUp() throws Exception {
 		passableMap = new boolean[][]{{true,true},{false,true},{true,true}};
 		world = new World(20,30,passableMap,new Random());
+		world.start();
 		bazookaProjectile = new BazookaProjectile(world, 39);
 	}
 

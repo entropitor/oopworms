@@ -17,6 +17,7 @@ public class WormTest_Weapon {
 	public void setUp() throws Exception {
 		world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
 		jeffrey = new Worm(world, 15, 15, Math.PI/2, 1, "Jeffrey");
+		world.start();
 	}
 
 	@Test

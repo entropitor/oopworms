@@ -25,22 +25,26 @@ public class ProjectileTest_Jump {
 										{true,true,true,true}};
 		jumpWorld = new World(40,20,passableMap,new Random());
 		hidingWorm = new Worm(jumpWorld, 5, 5, Math.PI/2, 1, "I'm hiding from the flying projectiles");
+		jumpWorld.start();
 		projectileContactLocation = new BazookaProjectile(jumpWorld, 39);
 		projectileContactLocation.setPosition(new Position(12,10));
 		projectileContactLocation.setDirection(Math.PI/4);
 
 		jumpWorld2 = new World(40,20,passableMap,new Random());
+		jumpWorld2.start();
 		projectileOutOfWorld = new BazookaProjectile(jumpWorld2, 39);
 		projectileOutOfWorld.setPosition(new Position(12,10));
 		projectileOutOfWorld.setDirection(3*Math.PI/4);
 		
 		jumpWorld3 = new World(40,20,passableMap,new Random());
 		cannonFodder = new Worm(jumpWorld3, 6, 9, Math.PI/2, 3, "I'm gonna be hit soon");
+		jumpWorld3.start();
 		projectileHitWorm = new BazookaProjectile(jumpWorld3, 39);
 		projectileHitWorm.setPosition(new Position(12,10));
 		projectileHitWorm.setDirection(3*Math.PI/4);
 		
 		jumpWorld4 = new World(40,20,passableMap,new Random());
+		jumpWorld4.start();
 		projectileClose = new BazookaProjectile(jumpWorld4, 39);
 		projectileClose.setPosition(new Position(19.97549,5.70413));
 		projectileClose.setDirection(Math.PI/4);

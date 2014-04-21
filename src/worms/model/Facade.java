@@ -202,8 +202,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public Worm getCurrentWorm(World world) {
-		// TODO Auto-generated method stub
-		return null;
+		return world.getCurrentWorm();
 	}
 
 	@Override
@@ -272,9 +271,14 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public String getWinner(World world) {
-		// TODO Auto-generated method stub
-		return null;
+	public String getWinner(World world) throws ModelException{
+		try{
+			if(world.hasStarted() && !world.isTerminated())
+				world.checkForWinners();
+			return world.getWinners();
+		}catch(IllegalStateException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
@@ -324,8 +328,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean isGameFinished(World world) {
-		// TODO Auto-generated method stub
-		return false;
+		return world.isTerminated();
 	}
 
 	@Override
@@ -368,15 +371,21 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void startGame(World world) {
-		// TODO Auto-generated method stub
-		
+	public void startGame(World world) throws ModelException{
+		try{
+			world.start();
+		}catch(IllegalStateException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
 	public void startNextTurn(World world) {
-		// TODO Auto-generated method stub
-		
+		try{
+			world.startNextTurn();
+		}catch(IllegalStateException e){
+			throw new ModelException(e);
+		}
 	}
 
 }

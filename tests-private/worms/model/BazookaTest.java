@@ -15,6 +15,7 @@ public class BazookaTest {
 	@Before
 	public void setUp() throws Exception {
 		world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
+		world.start();
 		bazooka = new Bazooka();
 	}
 	
