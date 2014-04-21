@@ -916,7 +916,7 @@ public class World {
 	 * @throws IllegalStateException
 	 * 			| (projectile != null) && projectile.hasWorld()
 	 * @throws IllegalStateException
-	 * 			| (projectiel != null) && !hasStarted()
+	 * 			| (projectile != null) && !hasStarted()
 	 */
 	@Raw
 	public void setProjectile(@Raw Projectile projectile) throws IllegalArgumentException,IllegalStateException {
@@ -1346,7 +1346,7 @@ public class World {
 	private String winners = "";
 	
 	/**
-	 * Returns the worm who's turn it currently is.
+	 * Returns the worm whose turn it currently is.
 	 * 
 	 * @return		| if(getNbWorms() == 0)	result == null
 	 * @return		| if(getNbWorms() > 0)
@@ -1408,7 +1408,7 @@ public class World {
 	}
 	
 	/**
-	 * The index of the worm who's turn it currently is.
+	 * The index of the worm whose turn it currently is.
 	 * 
 	 * @invar		| if(0 < getNbWorms())
 	 * 				|		then 0 <= currentWormIndex && currentWormIndex < getNbWorms()
