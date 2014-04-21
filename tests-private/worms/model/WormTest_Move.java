@@ -1,9 +1,7 @@
 package worms.model;
 
 import static java.lang.Math.PI;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static worms.util.AssertUtil.assertFuzzyEquals;
 
 import java.util.Random;
@@ -13,18 +11,60 @@ import org.junit.Test;
 
 public class WormTest_Move {
 
+	private World world;
 	private Worm willy;
-	private Worm left,diagonal;
+	//private Worm left,diagonal;
+
+	private static boolean[][] strPassableMapToBool(String[] strMap){
+		boolean[][] result = new boolean[strMap.length][strMap[0].length()/2];
+		for (int r=0; r<strMap.length; r++){
+			for (int c=0; c<strMap[r].length()/2; c++){
+				result[r][c] = (!(strMap[r].charAt(2*c) == '#'));
+			}
+		}
+		return result;
+	}
+
+	/*
+	private static void checkAboveFunction(String[] strMap){
+		for (boolean[] row : strPassableMapToBool(strMap))
+		    System.out.println(Arrays.toString(row));
+	}*/
 
 	@Before
 	public void setup(){
-		World world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
-		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka");
-		left = new Worm(world, 0, 0, PI, 1, "Left");
-		diagonal = new Worm(world, 2, -3, PI/4, 1, "Diagonal");
+		String[] stairs =
+		{". . . . . . . . . . . . . ",
+		 ". . . . . . . . . . . . . ",
+		 ". . . . . . . . # . . . . ",
+		 ". . . . . . . # # . . . . ",
+		 ". . . . # # # # # . . . . ",
+		 "# # # # # # # # # # # # # "};
+		/*String[] pdf =
+		{". . . . . . ",
+		 ". # . # # . ",
+		 ". . . . # . ",
+		 ". . . . . . ",
+		 "# # # # . . "};*/
+		world = new World(110,60,strPassableMapToBool(stairs),new Random());
+		willy  = new Worm(world, 20, 20, PI/4, 10, "Willy Wonka");
+		// left = new Worm(world, 0, 0, PI, 1, "Left");
+		// diagonal = new Worm(world, 2, -3, PI/4, 1, "Diagonal");
+	}
+	
+	@Test
+	public void testIsPassablePosition_Strange(){
+		assertFalse(world.isPassablePosition(new Position(21,20), 10));
 	}
 
-	@Test
+	/*@Test
+	public void testMove(){
+		willy.move();
+		assertFuzzyEquals(25, willy.getXCoordinate());
+		assertFuzzyEquals(28.6603, willy.getYCoordinate());
+	}*/
+
+	/*@Test
 	public void testCanMove_TrueCase(){
 		assertTrue(left.canMove(1));
 	}
@@ -137,5 +177,5 @@ public class WormTest_Move {
 	@Test(expected=IllegalArgumentException.class)
 	public void testMoveWith_IllegalYOffsetCase() throws Exception{
 		diagonal.moveWith(-10, Double.NaN);
-	}
+	}*/
 }
