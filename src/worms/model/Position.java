@@ -91,6 +91,18 @@ public class Position {
 	}
 	
 	/**
+	 * Returns the coordinates as an array [x,y]
+	 * 
+	 * @return	The coordinates as an array of doubles.
+	 * 			| result[0] == getX()
+	 * 			| result[1] == getY()
+	 */
+	@Immutable
+	public double[] getAsArray(){
+		return new double[] {x,y};
+	}
+	
+	/**
 	 * Returns the position (x,y) metres from this position.
 	 * 
 	 * @param x		The given offset along the x-axis (in metres).

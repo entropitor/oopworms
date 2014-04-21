@@ -95,13 +95,18 @@ public abstract class MassiveEntity extends Entity {
 	 * 				| &&   new.getYCoordinate() == getJumpStep(getJumpTime()).getY()
 	 * @effect		After the position are set, everything that needs to be done after the jump will be done
 	 * 				| handleAfterJump()
+	 * @throws IllegalArgumentException
+	 * 				Thrown when the timestep is negative or not a valid number
+	 * 				| timestep < 0 || Double.isNaN(timeStep)
 	 * @throws IllegalStateException
 	 * 				Thrown when this entity can't jump from his current position.
 	 * 				| !canJump()
 	 * 				When the end of the jump would be on impassable terrain.
 	 * 				| !getWorld().isPassablePosition(endPosition, getRadius())
 	 */
-	public void jump(double timeStep) throws IllegalStateException{
+	public void jump(double timeStep) throws IllegalArgumentException,IllegalStateException{
+		if(timeStep < 0 || Double.isNaN(timeStep))
+			throw new IllegalArgumentException();
 		if(!canJump())
 			throw new IllegalStateException();
 		Position endPosition = getJumpStep(getJumpTime(timeStep));
