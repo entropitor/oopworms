@@ -17,6 +17,7 @@ public class ProjectileTest {
 	public void setUp() throws Exception {
 		passableMap = new boolean[][]{{true,true},{false,true},{true,true}};
 		world = new World(20,30,passableMap,new Random());
+		world.start();
 		projectile = new RifleProjectile(world, 39);
 	}
 

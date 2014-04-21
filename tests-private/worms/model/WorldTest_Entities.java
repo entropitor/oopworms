@@ -27,6 +27,7 @@ public class WorldTest_Entities {
 		zacherTorte = new Food(world);
 		chilly  = new Worm(world, 5, 5, 0.6, 35, "Henk Rijckaert");
 		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka");
+		world.start();
 		bullet = new RifleProjectile(world, 30);
 	}
 	

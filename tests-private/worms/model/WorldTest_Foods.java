@@ -22,6 +22,11 @@ public class WorldTest_Foods {
 		zacherTorte = new Food(world);
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void testAddFood_WorldHasStartedCase() throws Exception {
+		world.start();
+		new Food(world);
+	}
 
 	@Test
 	public void testGetNbFoods_SingleCase() {

@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class WorldTest_Projectile {
 	
-	World world, otherWorld;
+	World world, otherWorld, notStartedWorld;
 	boolean[][] passableMap;
 	Projectile bullet;
 
@@ -18,7 +18,15 @@ public class WorldTest_Projectile {
 		passableMap = new boolean[][]{{true,true},{false,true},{true,true}};
 		world = new World(20,30,passableMap,new Random());
 		otherWorld = new World(20,30,passableMap,new Random());
+		notStartedWorld = new World(20,30,passableMap,new Random());
+		world.start();
+		otherWorld.start();
 		bullet = new RifleProjectile(world, 30);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testSetProjectile_WorldNotStartedCase() throws Exception {
+		new RifleProjectile(notStartedWorld, 30);
 	}
 	
 	@Test
