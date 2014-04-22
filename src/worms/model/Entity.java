@@ -13,8 +13,8 @@ import static java.lang.Math.pow;
  * 			| canHaveAsRadius(getRadius())
  * @invar	This entity has a proper world.
  * 			| hasProperWorld()
- * @invar	This entity lies fully within its world.
- * 			| getWorld().isInsideWorldBoundaries(getPosition(), getRadius());
+ * @invar	If this entity is not terminated, it lies fully within its world.
+ * 			| isTerminated() || getWorld().isInsideWorldBoundaries(getPosition(), getRadius());
  */
 public abstract class Entity {
 	/**
