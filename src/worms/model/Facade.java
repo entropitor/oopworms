@@ -151,8 +151,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean canMove(Worm worm) {
-		// TODO Auto-generated method stub
-		return false;
+		return worm.canMove();
 	}
 
 	@Override
@@ -357,9 +356,12 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void move(Worm worm) {
-		// TODO Auto-generated method stub
-		
+	public void move(Worm worm) throws ModelException {
+		try {
+			worm.move();
+		} catch (IllegalStateException e) {
+			throw new ModelException(e);
+		}
 	}
 
 	@Override

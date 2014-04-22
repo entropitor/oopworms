@@ -2,12 +2,14 @@ package worms.model;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;
+import static java.lang.Math.atan2;
 import static java.lang.Math.ceil;
 import static java.lang.Math.cos;
 import static java.lang.Math.round;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.floor;
+
 import static worms.util.ModuloUtil.posMod;
 import static worms.util.Util.fuzzyGreaterThanOrEqualTo;
 import static worms.util.Util.fuzzyLessThanOrEqualTo;
@@ -186,40 +188,27 @@ public class Worm extends MassiveEntity {
 	}
 	
 	/**
-	 * Checks whether this worm has enough action points to move it the given number of steps.
+	 * Calculates the cost for a worm to move from its current position
+	 * to the given position.
 	 * 
-	 * @param nbSteps 	The number of steps this worm wants to move.
-	 * @return 			Return whether nbSteps is non-negative and the cost to move the given number of steps 
-	 * 					(in the direction of this worm) is smaller or equal to the current action points of this worm.
-	 * 					| result == (nbSteps >= 0 && getCostForMove(nbSteps,getDirection()) <= getActionPoints())
+	 * @param positionAfterMove
+	 * 						The position of this worm after the move.
+	 * @return				The result equals a fraction (distance/getRadius()) of the cost of 
+	 * 						a unit step in the current direction, rounded up to the next integer.
+	 * 						| let
+	 * 						|		distance = sqrt(getPosition().squaredDistance(positionAfterMove))
+	 * 								direction = posMod(atan2(positionAfterMove.getY()-getYCoordinate(),positionAfterMove.getX()-getXCoordinate()),2*PI)
+	 * 						| in:
+	 * 						| 		result == (int)(ceil((distance/getRadius())*getUnitStepCost(direction)))
 	 */
-	public boolean canMove(int nbSteps){
-		if(nbSteps < 0)
-			return false;
-		return getCostForMove(nbSteps,getDirection()) <= getActionPoints();
-	}
-	
-	/**
-	 * Calculates the cost for a worm to move nbSteps in a given direction.
-	 * 
-	 * @param nbSteps 		The number of steps in the movement.
-	 * @param direction		The direction in which the worm will move.
-	 * @return				The result equals nbSteps times the cost of a unit step in the current direction, rounded up to the next integer.
-	 * 						| result == (int)(ceil(nbSteps*getUnitStepCost(direction)))
-	 * @throws IllegalArgumentException 
-	 * 						Thrown when nbSteps is less than zero.
-	 * 						| nbSteps < 0
-	 * @throws IllegalArgumentException 
-	 * 						Thrown when the given direction is an invalid direction.
-	 * 						| !isValidDirection(direction)
-	 */
-	public static int getCostForMove(int nbSteps, double direction) throws IllegalArgumentException{
-		if(nbSteps < 0)
-			throw new IllegalArgumentException("Illegal number of steps");
-		if(!isValidDirection(direction))
-			throw new IllegalArgumentException("Illegal direction");
-		
-		return (int)(ceil(nbSteps*getUnitStepCost(direction)));
+	public int getCostForMove(Position positionAfterMove){
+		double distance = sqrt(getPosition().squaredDistance(positionAfterMove));
+		double direction = posMod(
+								atan2(
+									positionAfterMove.getY()-getYCoordinate(), 
+								 	positionAfterMove.getX()-getXCoordinate()),
+								 2*PI);
+		return (int)(ceil((distance/getRadius())*getUnitStepCost(direction)));
 	}
 	
 	/**
@@ -258,44 +247,255 @@ public class Worm extends MassiveEntity {
 	}
 	
 	/**
-	 * Moves this worm a given number of steps in the current direction.
+	 * Changes this worm's position based on its current position, 
+	 * orientation and the terrain.
 	 * 
-	 * @param nbSteps		The number of steps to move this worm.
-	 * @post				This worm has moved nbSteps in the current direction
-	 * 						| fuzzyEquals(new.getXCoordinate(), getXCoordinate()+nbSteps*cos(getDirection)) &&
-	 * 						| fuzzyEquals(new.getYCoordinate(), getYCoordinate()+nbSteps*sin(getDirection))
-	 * @post				The action points are decreased with the cost of the movement.
-	 * 						| new.getActionPoints() == getActionPoints()-getCostForMovement(nbSteps,getDirection())
-	 * @throws IllegalArgumentException
-	 * 						Thrown when nbSteps is less than zero
-	 * 						| nbSteps < 0
-	 * @throws IllegalStateException	
-	 * 						Thrown when this worm has not enough action points to move the given number of steps in the current direction.
-	 * 						| !canMove(nbSteps)
+	 * @post	The worm is in a contact location (a location that is passable 
+	 * 			for this worm and adjacent to impassable terrain for this worm) ...
+	 * 			| if(getWorld().isInsideWorldBoundaries(new.getPosition(), getRadius()))
+	 * 			| 	getWorld().getLocationType(new.getPosition(), getRadius()) == LocationType.CONTACT
+	 * @effect	... or has left the world.
+	 * 			| if(!getWorld().isInsideWorldBoundaries(new.getPosition(), getRadius()))
+	 * 			| 	getWorld().removeWorm(this)
+	 * @post	The worm's action points will be decreased.
+	 * 			| new.getActionPoints() < getActionPoints()
+	 * @post	If this worm's new position after the move is a contact location, the worm moves there.
+	 *			| if(canMove() && getWorld().getLocationType(getPositionAfterMove(), getRadius()) == LocationType.CONTACT)
+	 *			|	new.getPosition() == getPositionAfterMove()
+	 * @effect	If this worm's new position after the move is a passable location (but not a contact location), 
+	 *			the worm first moves there and then falls.
+	 *			| if(canMove() && getWorld().getLocationType(getPositionAfterMove(), getRadius()) == LocationType.PASSABLE)
+	 *			|	setPosition(getPositionAfterMove())
+	 *			|	fall()
+	 * @effect	The worm eats all food rations it touches after the move.
+	 * 			| checkForFood()
+	 * @effect	Incur an action point cost.
+	 * 			| decreaseActionPoints(getCostForMove(distance, direction));
+	 * @throws 	IllegalStateException
+	 * 			When the worm cannot move in its current state.
+	 * 			| !canMove()
 	 */
-	public void move(int nbSteps) throws IllegalStateException,IllegalArgumentException{
-		if(nbSteps < 0)
-			throw new IllegalArgumentException("Illegal number of steps");
-		if(!canMove(nbSteps))
-			throw new IllegalStateException("Has not enough action points to move.");
+	public void move() throws IllegalStateException{
+		if(!canMove())
+			throw new IllegalStateException();
 		
-		moveWith(nbSteps*cos(getDirection()),nbSteps*sin(getDirection()));
-		decreaseActionPoints(getCostForMove(nbSteps,getDirection()));
+		Position positionAfterMove = getPositionAfterMove();
+		if(!getWorld().isInsideWorldBoundaries(positionAfterMove, getRadius())){
+			getWorld().removeWorm(this);
+			return;
+		}
+		decreaseActionPoints(getCostForMove(positionAfterMove));
+		setPosition(positionAfterMove);
+		if(getWorld().getLocationType(positionAfterMove, getRadius()) == LocationType.PASSABLE)
+			fall();
+		checkForFood();
 	}
 	
 	/**
-	 * Moves this worm with the given number of metres along the x-axis and the given number of metres along the y-axis.
+	 * Tests whether this worm can move in its current state.
 	 * 
-	 * @param x		The number of metres to move along the x-axis
-	 * @param y		The number of metres to move along the y-axis
-	 * @effect		Move to the position with an offset of (x,y) metres
-	 * 				setPosition(getPosition().offset(x,y))
-	 * @throws IllegalArgumentException
-	 * 				Thrown when x or y is not a valid number
-	 * 				| Double.isNaN(x) || Double.isNaN(y)
+	 * @return	Whether the worm can move in its current direction, from its current position
+	 * 			and on the current terrain, and whether he has enough action points left to
+	 * 			perform the move.
+	 * 			| result == ((getPositionAfterMove() != getPosition()) && 
+	 *			|			 (getCostForMove(getPositionAfterMove()) <= getActionPoints()))
 	 */
-	public void moveWith(double x, double y) throws IllegalArgumentException{
-		setPosition(getPosition().offset(x,y));
+	public boolean canMove(){
+		Position positionAfterMove = getPositionAfterMove();
+		return ((!positionAfterMove.equals(getPosition())) && 
+				(getCostForMove(positionAfterMove) <= getActionPoints()));
+	}
+	
+	/**
+	 * Object storing a direction in which this worm could move,
+	 * the farthest legal distance this worm could move in that direction
+	 * and whether the position after the move would be a contact location.
+	 */
+	private class DirectionInfo{
+		public double direction;
+		public double distance;
+	}
+	
+	/**
+	 * Gets the position where the worm will be if a move operation were to be executed now.
+	 * 
+	 * @return	The new location is a CONTACT or a PASSABLE location (or equals the old location)
+	 * 			| getWorld().getLocationType(result, getRadius()).isPassable() || result == getPosition()
+	 * @return	The difference between this worms direction
+	 * 			and the direction of the move is not greater than 45° (0.7875 rad).
+	 * 			| let
+	 * 			| 	θ = getDirection()
+	 * 			|	s = posMod(atan2(result.getY()-getYCoordinate(), result.getX()-getXCoordinate()),2*PI)
+	 * 			| in
+	 * 			|	abs(θ-s) <= 0.7875 || abs(2*PI-θ) + abs(s) <= 0.7875 || abs(2*PI-s) + abs(θ) <= 0.7875
+	 * @return	The distance to the current position lies between 10% and 100% of the radius (both inclusive), if it doesn't equal the current position.
+	 * 			| if(result != getPosition())
+	 * 			|	then 0,1*getRadius() <= sqrt(result.squaredDistance(getPosition())) && sqrt(result.squaredDistance(getPosition())) <= getRadius()
+	 * @return	There also doesn't exist a location on the same line between the current position and the result of this method which is considered impassable terrain, if it doesn't equal the current position.
+	 * 			| if(result != getPosition())
+	 * 			| then
+	 * 			| !(for some position in Position:
+	 * 			|		getWorld().getLocationType(position, getRadius()) == LocationType.IMPASSABLE
+	 * 			|		&& 0.1*getRadius() <= position.squaredDistance(getPosition()) && position.squaredDistance(getPosition()) <= result.squaredDistance(getPosition())
+	 * 			|		&& posMod(atan2(postion.getY()-getYCoordinate(), position.getX()-getXCoordinate()),2*PI) == posMod(atan2(result.getY()-getYCoordinate(), result.getX()-getXCoordinate()),2*PI)
+	 * 			|	)
+	 * @return	The new position is the optimal position to move to for this worm in its current state, or the old position
+	 * 			(The divergence abs(θ-s) as defined above is minimised while
+	 * 			the travelled distance d is maximised, only considering contact locations when
+	 * 			at least one possible contact location is found.)
+	 * 			The different angles which are looked at are discrete with a step of 0.0175 radians.
+	 * 			This method uses the weigh(distance, divergence) function as the property to maximize.
+	 * 			| if(result != getPosition())
+	 * 			| then
+	 * 			| let
+	 * 			|	onlyConsideringContactLocation =
+	 * 			|		(
+	 * 			|			for some position in Position:
+	 *			|				let
+	 *			|					angle = posMod(atan2(postion.getY()-getYCoordinate(), position.getX()-getXCoordinate()),2*PI)
+	 *			|					distance = sqrt(position.squaredDistance(getPosition()))
+	 *			|				in:
+	 *			|				(
+	 * 			|					0,1*getRadius() <= distance && distance <= getRadius()
+	 * 			|					&& ! (
+	 * 			|							for some otherPosition in Position:
+	 * 			|								getWorld().getLocationType(otherPosition, getRadius()) == LocationType.IMPASSABLE
+	 * 			|								&& 0.1*getRadius() <= otherPosition.squaredDistance(getPosition()) && otherPosition.squaredDistance(getPosition()) <= distance
+	 * 			|								&& angle == posMod(atan2(otherPosition.getY()-getYCoordinate(), otherPosition.getX()-getXCoordinate()),2*PI)
+	 * 			|						)
+	 * 			|					&& (
+	 * 			|							abs(getDirection()-angle) <= 0.7875 || abs(2*PI-angle) + abs(getDirection()) <= 0.7875 || abs(2*PI-getDirection()) + abs(angle) <= 0.7875
+	 * 			|							&& (getDirection()-angle)%0.0175 == 0
+	 * 			|						)
+	 * 			|					&& getWorld().getLocationType(position, getRadius()) == LocationType.CONTACT
+	 *			|				)
+	 * 			|		)
+	 * 			| in
+	 * 			|	(
+	 * 			|		!(
+	 * 			|			for some position in Position:
+	 *			|				let
+	 * 			|					angle = posMod(atan2(postion.getY()-getYCoordinate(), position.getX()-getXCoordinate()),2*PI)
+	 *			|					distance = sqrt(position.squaredDistance(getPosition()))
+	 *			|				in:
+	 *			|				(
+	 * 			|					0,1*getRadius() <= distance && distance <= getRadius()
+	 * 			|					&& ! (
+	 * 			|							for some otherPosition in Position:
+	 * 			|								getWorld().getLocationType(otherPosition, getRadius()) == LocationType.IMPASSABLE
+	 * 			|								&& 0.1*getRadius() <= otherPosition.squaredDistance(getPosition()) && sqrt(otherPosition.squaredDistance(getPosition())) <= distance
+	 * 			|								&& angle == posMod(atan2(otherPostion.getY()-getYCoordinate(), otherPostion.getX()-getXCoordinate()),2*PI)
+	 * 			|						)
+	 * 			|					&& (
+	 * 			|							abs(getDirection()-angle) <= 0.7875 || abs(2*PI-angle) + abs(getDirection()) <= 0.7875 || abs(2*PI-getDirection()) + abs(angle) <= 0.7875
+	 * 			|							&& (getDirection()-angle)%0.0175 == 0
+	 * 			|						)
+	 *			|					&& getWorld().getLocationType(position, getRadius()).isPassable()
+	 * 			|					&& !onlyonlyConsideringContactLocation || getWorld().getLocationType(position, getRadius()) == LocationType.CONTACT
+	 * 			|					&& weigh(distance,angle-getDirection()) > weigh(sqrt(result.squaredDistance(getPosition())),posMod(atan2(result.getY()-getYCoordinate(), result.getX()-getXCoordinate()),2*PI))
+	 *			|					&& !(
+	 *			|							angle == posMod(atan2(result.getY()-getYCoordinate(), result.getX()-getXCoordinate()),2*PI)
+	 *			|							&& fuzzyEquals(distance, sqrt(result.squaredDistance(getPosition())), getRadius()/100)
+	 *			|						)
+	 *			|				)
+	 * 			|		)
+	 *			|		&& !onlyonlyConsideringContactLocation || getWorld().getLocationType(result, getRadius()) == LocationType.CONTACT
+	 *			|	)
+	 */
+	public Position getPositionAfterMove(){
+		List<DirectionInfo> directions = new ArrayList<DirectionInfo>();
+		double theta = getDirection();
+		double dStep = getRadius()/100; // probing distance step.
+		double r = getRadius();
+		
+		boolean positionFound = false;
+		boolean contactPositionFound = false;
+		
+		for(double s = theta-0.7875; s <= theta+0.7875; s += 0.0175){
+			DirectionInfo directionInfo = new DirectionInfo();
+			directionInfo.direction = s;
+			
+			double distance;
+			double furthestDistance = 0;
+			for(distance = getRadius()/10; distance <= r; distance += dStep){
+				Position probePosition = getPosition().offset((distance)*cos(s),(distance)*sin(s));
+				LocationType locType = getWorld().getLocationType(probePosition, getRadius());
+				if(locType.isPassable()) {					
+					if(!contactPositionFound || locType == LocationType.CONTACT){
+						furthestDistance = distance;
+						if(!contactPositionFound && locType == LocationType.CONTACT){
+							//Clear directions because it only contains non-contact positions.
+							directions.clear();
+							contactPositionFound = true;
+						}
+					}
+				} else 
+					break;
+			}
+			if(furthestDistance >= getRadius()/10){
+				positionFound = true;
+				directionInfo.distance = furthestDistance;
+				directions.add(directionInfo);
+			}
+		}
+		
+		if(positionFound)
+			return getOptimalPosition(directions);
+		else
+			return getPosition();
+	}
+	
+	/**
+	 * Given a set of (direction, distance) values, returns a position
+	 * for which the distance travelled is maximal while the divergence 
+	 * from the worm's current direction is minimal.
+	 * 
+	 * @param	distances
+	 * 			List of DirectionInfo objects.
+	 * @param	contactLocationFound
+	 * 			Whether a contact location was found among the entries in 'distances'.
+	 * @return	The position calculated from the (direction, distance) pair for which the
+	 * 			'weigh()' function is maximal. If it is specified that a contact location 
+	 * 			was found, only considers (direction, distance) pairs which are contact locations. 
+	 * 			| let
+	 * 			|	maxDirectionInfo = max(directionInfo in directions: weigh(directionInfo.distance, directionInfo.direction-getDirection())
+	 * 			|	maxDirection = maxDirectionInfo.direction
+	 * 			|	maxDistance = maxDirectionInfo.distance
+	 * 			| in
+	 * 			|	result == (getPosition().offset(maxDistance*cos(maxDirection),
+	 * 			|									maxDistance*sin(maxDirection)))
+	 */
+	private Position getOptimalPosition(List<DirectionInfo> directions){
+		double maxDirection = 0;
+		double maxDistance = 0;
+		double maxWeightedDistance = -Double.MAX_VALUE;
+		for(DirectionInfo directionInfo : directions) {
+			double direction = directionInfo.direction;
+			double distance = directionInfo.distance;
+			double divergence = direction-getDirection();
+			double weightedDistance = weigh(distance, divergence);
+			if(weightedDistance > maxWeightedDistance) {
+		    	 maxDistance = distance;
+		    	 maxDirection = direction;
+		    	 maxWeightedDistance = weightedDistance;
+		    }
+		}
+		return getPosition().offset(maxDistance*cos(maxDirection),maxDistance*sin(maxDirection));
+	}
+	
+	/**
+	 * Transforms the given distance under some function
+	 * so that distances with a bigger divergence weigh less.
+	 * 
+	 * @param	distance
+	 * @param	divergence
+	 * @return	The distance weighted so that distances with a bigger divergence weigh less.
+	 * 			| if((dist1 == dist2 && abs(div1) > abs(div2))
+	 * 			|	result1 < result2
+	 */
+	@Model
+	private double weigh(double distance, double divergence){
+		return distance-abs(divergence);
 	}
 	
 	/**
@@ -698,15 +898,19 @@ public class Worm extends MassiveEntity {
 	}
 	
 	/**
-	 * @post		The hit points of other worms are left untouched
-	 * 				| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() == worm.getHitPoints()
-	 * @post		The action points are set to zero.
-	 * 				| new.getActionPoints() == 0
+	 * @post	The hit points of other worms are left untouched
+	 * 			| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() == worm.getHitPoints()
+	 * @post	The action points are set to zero.
+	 * 			| new.getActionPoints() == 0
+	 * @effect	Eat food rations the worm now touches if the worm doesn't leave the world.
+	 * 			| if(!afterJumpRemove()) then checkForFood()
 	 */
 	@Override
 	public void handleAfterJump(){
 		decreaseActionPoints(getActionPoints());
 		super.handleAfterJump();
+		if(!isTerminated())
+			checkForFood();
 	}
 	
 	/**
@@ -1116,13 +1320,13 @@ public class Worm extends MassiveEntity {
 	/**
 	 * Lets the worm fall
 	 * 
-	 * @effect	Set the new position to the position after the fall.
-	 * 			| setPosition(findFallPosition())
+	 * @effect	Set the new position to the position after the fall and then check for food items it overlaps with
+	 * 			| setPosition(findFallPosition()); checkForFood()
 	 * @effect	Remove the worm from the world if it's no longer within the boundaries.
 	 * 			| if(!getWorld().isInsideWorldBoundaries(findFallPosition(), getRadius())) then getWorld().removeWorm(this);
 	 * @effect	Subtract 3 HP per metre fallen
 	 * 			| let
-	 * 			|		long damage = round(floor(3*sqrt(oldPos.squaredDistance(findFallPosition()))))
+	 * 			|		long damage = round(floor(3*sqrt(getPosition().squaredDistance(findFallPosition()))))
 	 * 			| in:
 	 * 			|		if(damage > Integer.MAX_VALUE) then decreaseHitPoints(Integer.MAX_VALUE)
 	 * 			|		else decreaseHitPoints((int) damage);
@@ -1140,6 +1344,8 @@ public class Worm extends MassiveEntity {
 		
 		if(!getWorld().isInsideWorldBoundaries(newPos, getRadius()))
 			getWorld().removeWorm(this);
+		else
+			checkForFood();
 		
 		double distance = sqrt(oldPos.squaredDistance(newPos));
 		long damage = round(floor(3*distance));
@@ -1198,5 +1404,44 @@ public class Worm extends MassiveEntity {
 		if(!getWorld().isPassablePosition(position, getRadius()*1.1))
 			return true;
 		return false;
+	}
+	
+	/**
+	 * Checks for food rations overlapping with this worm and eats them if found.
+	 * 
+	 * @effect	If this worm overlaps with one or more food rations, he eats them.
+	 * 			| for food in getWorld.getFoods():
+	 * 			| 	if(food.collidesWith(this)):
+	 *			|		eat(food);
+	 */
+	public void checkForFood(){
+		for (Food food : getWorld().getFoods())
+			if(food.collidesWith(this))
+				eat(food);
+	}
+	
+	/**
+	 * Makes this worm eat the given food ration, and by doing so, 
+	 * increases his radius by 10%. The eaten food ration is removed 
+	 * from the world.
+	 * 
+	 * @param	food
+	 * 			The food ration to be eaten.
+	 * @post	The worm's radius has increased by 10%.
+	 * 			| new.getRadius() == 1.1*getRadius()
+	 * @effect	The given food ration is removed from the world.
+	 * 			| getWorld().removeFood(food)
+	 * @effect	The worm will be removed from its world if it has grown to be
+	 * 			outside the world's boundaries.
+	 * 			| if(!getWorld().isInsideWorldBoundaries(getPosition(), new.getRadius()))
+	 * 			|	getWorld().removeWorm(this)
+	 * @note	The worm may, as a result of eating food, be placed at impassable terrain for this worm.
+	 * 			(Fatties may get stuck).
+	 */
+	public void eat(Food food){
+		setRadius(getRadius()*1.1);
+		getWorld().removeFood(food);
+		if(!getWorld().isInsideWorldBoundaries(getPosition(), getRadius()))
+			getWorld().removeWorm(this);
 	}
 }

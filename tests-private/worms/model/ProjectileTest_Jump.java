@@ -122,7 +122,6 @@ public class ProjectileTest_Jump {
 	
 	@Test
 	public void testGetJumpTime_ContactStartCase() {
-		System.out.println(projectileContactStart.getJumpTime(TIMESTEP));
 		assertFuzzyEquals(1.2569, projectileContactStart.getJumpTime(TIMESTEP));
 	}
 	
