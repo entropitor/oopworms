@@ -3,6 +3,7 @@ package worms.model;
 import static java.lang.Math.PI;
 import static org.junit.Assert.*;
 import static worms.util.AssertUtil.assertFuzzyEquals;
+import static worms.util.ModuloUtil.*;
 
 import java.util.Random;
 
@@ -58,18 +59,27 @@ public class WormTest_Move {
 		assertEquals(4448495, willy.getActionPoints());
 		assertTrue(willy.canMove());
 		willy.move();
-		assertFuzzyEquals(23.53, willy.getXCoordinate(), 1E-1);
+		assertFuzzyEquals(23.44, willy.getXCoordinate(), 1E-1);
 		assertFuzzyEquals(28.36, willy.getYCoordinate(), 1E-1);
+		assertEquals(4448495-4, willy.getActionPoints());
 	}
 	
 	@Test
-	public void testMove_Cannot(){
-		willy = new Worm(world, 18, 20, 5*PI/4, 10, "Willy Wonka");
-		assertFalse(willy.canMove());
+	public void testGetPositionAfterMove_SingleCase() {
+		willy = new Worm(world, 18, 20, PI/4, 10, "Willy Wonka");
+		Position result = willy.getPositionAfterMove();
+		double distance = Math.sqrt(result.squaredDistance(willy.getPosition()));
+		double s = posMod(Math.atan2(result.getY()-willy.getYCoordinate(), result.getX()-willy.getXCoordinate()),2*Math.PI);
+		double theta = willy.getDirection();
+		assertTrue(0.1*willy.getRadius() <= distance);
+		assertTrue(distance <= willy.getRadius());
+		assertTrue(Math.abs(theta-s) <= 0.7875 || Math.abs(2*PI-theta) + Math.abs(s) <= 0.7875 || Math.abs(2*PI-s) + Math.abs(theta) <= 0.7875);
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void testMove_Cannot() throws Exception{
+		willy = new Worm(world, 18, 20, 3*PI/2, 10, "Willy Wonka");
 		willy.move();
-		assertFuzzyEquals(18, willy.getXCoordinate(), 1E-1);
-		assertFuzzyEquals(20, willy.getYCoordinate(), 1E-1);
-		//assertEquals(, willy.getActionPoints());
 	}
 
 	/*@Test
