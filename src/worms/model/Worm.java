@@ -1326,7 +1326,7 @@ public class Worm extends MassiveEntity {
 	 * 			| if(!getWorld().isInsideWorldBoundaries(findFallPosition(), getRadius())) then getWorld().removeWorm(this);
 	 * @effect	Subtract 3 HP per metre fallen
 	 * 			| let
-	 * 			|		long damage = round(floor(3*sqrt(oldPos.squaredDistance(findFallPosition()))))
+	 * 			|		long damage = round(floor(3*sqrt(getPosition().squaredDistance(findFallPosition()))))
 	 * 			| in:
 	 * 			|		if(damage > Integer.MAX_VALUE) then decreaseHitPoints(Integer.MAX_VALUE)
 	 * 			|		else decreaseHitPoints((int) damage);
