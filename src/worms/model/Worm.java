@@ -264,7 +264,7 @@ public class Worm extends MassiveEntity {
 	 * @post	If this worm's new position after the move is a contact location, the worm moves there.
 	 *			| if(canMove() && getWorld().getLocationType(getPositionAfterMove(), getRadius()) == LocationType.CONTACT)
 	 *			|	new.getPosition() == getPositionAfterMove()
-	 * @effect	If this worm'ss new position after the move is a passable location (but not a contact location), 
+	 * @effect	If this worm's new position after the move is a passable location (but not a contact location), 
 	 *			the worm first moves there and then falls.
 	 *			| if(canMove() && getWorld().getLocationType(getPositionAfterMove(), getRadius()) == LocationType.PASSABLE)
 	 *			|	setPosition(getPositionAfterMove())
@@ -273,6 +273,9 @@ public class Worm extends MassiveEntity {
 	 * 			| checkForFood()
 	 * @effect	Incur an action point cost.
 	 * 			| decreaseActionPoints(getCostForMove(distance, direction));
+	 * @throws 	IllegalStateException
+	 * 			When the worm cannot move in its current state.
+	 * 			| !canMove()
 	 * 
 	 * (TODO: what if the worm is currently in an IMPASSABLE location.)
 	 */
@@ -349,15 +352,15 @@ public class Worm extends MassiveEntity {
 			
 			double distance;
 			boolean wasPreviousPositionContactLocation = false;
-			boolean imPassablePotitionFound = false;
+			boolean imPassablePositionFound = false;
 			
-			for(distance = 0; !imPassablePotitionFound && distance < r; distance += dStep){
+			for(distance = 0; !imPassablePositionFound && distance < r; distance += dStep){
 				Position probePosition = getPosition().offset((distance+dStep)*cos(s),(distance+dStep)*sin(s));
 				LocationType locType = getWorld().getLocationType(probePosition, getRadius());
 				if(locType.isPassable()) {
 					wasPreviousPositionContactLocation = (locType == LocationType.CONTACT);
 				} else {
-					imPassablePotitionFound = true;
+					imPassablePositionFound = true;
 				}
 			}
 			//FIX distance because 
@@ -433,51 +436,6 @@ public class Worm extends MassiveEntity {
 	private double weigh(double distance, double divergence){
 		return distance-abs(divergence);
 	}
-	
-	public void fall(){
-		
-	}
-	
-	// /**
-	//  * Moves this worm a given number of steps in the current direction.
-	//  * 
-	//  * @param nbSteps		The number of steps to move this worm.
-	//  * @post				This worm has moved nbSteps in the current direction
-	//  * 						| fuzzyEquals(new.getXCoordinate(), getXCoordinate()+nbSteps*cos(getDirection)) &&
-	//  * 						| fuzzyEquals(new.getYCoordinate(), getYCoordinate()+nbSteps*sin(getDirection))
-	//  * @post				The action points are decreased with the cost of the movement.
-	//  * 						| new.getActionPoints() == getActionPoints()-getCostForMovement(nbSteps,getDirection())
-	//  * @throws IllegalArgumentException
-	//  * 						Thrown when nbSteps is less than zero
-	//  * 						| nbSteps < 0
-	//  * @throws IllegalStateException	
-	//  * 						Thrown when this worm has not enough action points to move the given number of steps in the current direction.
-	//  * 						| !canMove(nbSteps)
-	//  */
-	// public void move(int nbSteps) throws IllegalStateException,IllegalArgumentException{
-	// 	if(nbSteps < 0)
-	// 		throw new IllegalArgumentException("Illegal number of steps");
-	// 	if(!canMove(nbSteps))
-	// 		throw new IllegalStateException("Has not enough action points to move.");
-		
-	// 	moveWith(nbSteps*cos(getDirection()),nbSteps*sin(getDirection()));
-	// 	decreaseActionPoints(getCostForMove(nbSteps,getDirection()));
-	// }
-	
-	// /**
-	//  * Moves this worm with the given number of metres along the x-axis and the given number of metres along the y-axis.
-	//  * 
-	//  * @param x		The number of metres to move along the x-axis
-	//  * @param y		The number of metres to move along the y-axis
-	//  * @effect		Move to the position with an offset of (x,y) metres
-	//  * 				setPosition(getPosition().offset(x,y))
-	//  * @throws IllegalArgumentException
-	//  * 				Thrown when x or y is not a valid number
-	//  * 				| Double.isNaN(x) || Double.isNaN(y)
-	//  */
-	// public void moveWith(double x, double y) throws IllegalArgumentException{
-	// 	setPosition(getPosition().offset(x,y));
-	// }
 	
 	/**
 	 * Returns the name of this worm.

@@ -48,20 +48,6 @@ public class WormTest_Move {
 		 ". . . . . . ",
 		 "# # # # . . "};*/
 		world = new World(110,60,strPassableMapToBool(stairs),new Random());
-		
-		// left = new Worm(world, 0, 0, PI, 1, "Left");
-		// diagonal = new Worm(world, 2, -3, PI/4, 1, "Diagonal");
-	}
-
-	@Test
-	public void testMove_Normal(){
-		willy = new Worm(world, 18, 20, PI/4, 10, "Willy Wonka");
-		assertEquals(4448495, willy.getActionPoints());
-		assertTrue(willy.canMove());
-		willy.move();
-		assertFuzzyEquals(23.44, willy.getXCoordinate(), 1E-1);
-		assertFuzzyEquals(28.36, willy.getYCoordinate(), 1E-1);
-		assertEquals(4448495-4, willy.getActionPoints());
 	}
 	
 	@Test
@@ -76,60 +62,21 @@ public class WormTest_Move {
 		assertTrue(Math.abs(theta-s) <= 0.7875 || Math.abs(2*PI-theta) + Math.abs(s) <= 0.7875 || Math.abs(2*PI-s) + Math.abs(theta) <= 0.7875);
 	}
 	
+	@Test
+	public void testMove_Normal(){
+		willy = new Worm(world, 18, 20, PI/4, 10, "Willy Wonka");
+		assertEquals(4448495, willy.getActionPoints());
+		assertTrue(willy.canMove());
+		willy.move();
+		assertFuzzyEquals(23.44, willy.getXCoordinate(), 1E-1);
+		assertFuzzyEquals(28.36, willy.getYCoordinate(), 1E-1);
+		assertEquals(4448495-4, willy.getActionPoints());
+	}
+	
 	@Test(expected=IllegalStateException.class)
 	public void testMove_Cannot() throws Exception{
 		willy = new Worm(world, 18, 20, 3*PI/2, 10, "Willy Wonka");
 		willy.move();
-	}
-
-	/*@Test
-	public void testCanMove_TrueCase(){
-		assertTrue(left.canMove(1));
-	}
-	
-	@Test
-	public void testCanMove_NegativeNbStepsCase(){
-		assertFalse(left.canMove(-1));
-	}
-	
-	@Test
-	public void testCanMove_FalseCase(){
-		assertFalse(left.canMove(4500));
-	}
-	
-	@Test
-	public void testGetCostForMove_RightDirection(){
-		assertEquals(Worm.getCostForMove(2, 0),2);
-	}
-	
-	@Test
-	public void testGetCostForMove_LeftDirection(){
-		assertEquals(Worm.getCostForMove(2, PI),2);
-	}
-	
-	@Test
-	public void testGetCostForMove_UpDirection(){
-		assertEquals(Worm.getCostForMove(2, PI/2),8);
-	}
-	
-	@Test
-	public void testGetCostForMove_DownDirection(){
-		assertEquals(Worm.getCostForMove(2, 3*PI/2),8);
-	}
-	
-	@Test
-	public void testGetCostForMove_RandomDirection(){
-		assertEquals(Worm.getCostForMove(4, 2),17);
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testGetCostForMove_NegativeNbSteps() throws Exception{
-		Worm.getCostForMove(-1, 0);
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testGetCostForMove_IllegalDirection() throws Exception{
-		Worm.getCostForMove(1, 7);
 	}
 	
 	@Test
@@ -161,39 +108,4 @@ public class WormTest_Move {
 	public void testGetUnitStepCost_IllegalDirection() throws Exception{
 		Worm.getUnitStepCost(7);
 	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testMove_NegativeNbSteps() throws Exception{
-		willy.move(-2);
-	}
-	
-	@Test(expected=IllegalStateException.class)
-	public void testMove_TooLargeNbSteps() throws Exception{
-		left.move(4500);
-	}
-	
-	@Test
-	public void testMove_NormalCase(){
-		diagonal.move(3);
-		assertFuzzyEquals(diagonal.getXCoordinate(),4.1213203);
-		assertFuzzyEquals(diagonal.getYCoordinate(),-0.8786796);
-		assertEquals(diagonal.getActionPoints(),diagonal.getMaxActionPoints()-11);
-	}
-	
-	@Test
-	public void testMoveWith_NormalCase(){
-		diagonal.moveWith(-2.14, 6.14);
-		assertFuzzyEquals(diagonal.getXCoordinate(),-0.14);
-		assertFuzzyEquals(diagonal.getYCoordinate(),3.14);
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testMoveWith_IllegalXOffsetCase() throws Exception{
-		diagonal.moveWith(Double.NaN,3);
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testMoveWith_IllegalYOffsetCase() throws Exception{
-		diagonal.moveWith(-10, Double.NaN);
-	}*/
 }
