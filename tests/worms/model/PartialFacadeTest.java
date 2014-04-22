@@ -1,15 +1,15 @@
 package worms.model;
 
-/*import static org.junit.Assert.*;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Before;*/
+import org.junit.Before;
 import org.junit.Test;
 
-/*import worms.model.Facade;
+import worms.model.Facade;
 import worms.model.Worm;
-import worms.util.Util;*/
+import worms.util.Util;
 
 public class PartialFacadeTest {
 	
@@ -18,7 +18,7 @@ public class PartialFacadeTest {
 		
 	}
 
-	/*private static final double EPS = Util.DEFAULT_EPSILON;
+	private static final double EPS = Util.DEFAULT_EPSILON;
 
 	private IFacade facade;
 
@@ -94,5 +94,5 @@ public class PartialFacadeTest {
 		facade.fall(worm);
 		assertEquals(1.5, facade.getX(worm), EPS);
 		assertEquals(1.5, facade.getY(worm), EPS);
-	}*/
+	}
 }
