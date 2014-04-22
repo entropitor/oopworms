@@ -12,12 +12,6 @@ import worms.model.Worm;
 import worms.util.Util;
 
 public class PartialFacadeTest {
-	
-	@Test
-	public void testCI() {
-		
-	}
-
 	private static final double EPS = Util.DEFAULT_EPSILON;
 
 	private IFacade facade;
