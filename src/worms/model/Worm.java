@@ -6,6 +6,8 @@ import static java.lang.Math.ceil;
 import static java.lang.Math.cos;
 import static java.lang.Math.round;
 import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.floor;
 import static worms.util.ModuloUtil.posMod;
 import static worms.util.Util.fuzzyGreaterThanOrEqualTo;
 import static worms.util.Util.fuzzyLessThanOrEqualTo;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import worms.util.MathUtil;
+import worms.util.Util;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Model;
@@ -1095,4 +1098,105 @@ public class Worm extends MassiveEntity {
 	 * The team of this worm, or null if this worm does not have a team.
 	 */
 	private Team team = null;
+	
+	/**
+	 * Checks whether or not this worm can fall
+	 * 
+	 * @return	False if the worm is terminated.
+	 * 			| if(isTerminated()) then result == false
+	 * @return	False if the given position is a contact location or impassable terrain. True if it's passable terrain
+	 * 			| result == getWorld().isPassablePosition(getPosition(), 1.1*getRadius())
+	 */
+	public boolean canFall(){
+		if(isTerminated())
+			return false;
+		return getWorld().isPassablePosition(getPosition(), 1.1*getRadius());
+	}
+	
+	/**
+	 * Lets the worm fall
+	 * 
+	 * @effect	Set the new position to the position after the fall.
+	 * 			| setPosition(findFallPosition())
+	 * @effect	Remove the worm from the world if it's no longer within the boundaries.
+	 * 			| if(!getWorld().isInsideWorldBoundaries(findFallPosition(), getRadius())) then getWorld().removeWorm(this);
+	 * @effect	Subtract 3 HP per metre fallen
+	 * 			| let
+	 * 			|		long damage = round(floor(3*sqrt(oldPos.squaredDistance(findFallPosition()))))
+	 * 			| in:
+	 * 			|		if(damage > Integer.MAX_VALUE) then decreaseHitPoints(Integer.MAX_VALUE)
+	 * 			|		else decreaseHitPoints((int) damage);
+	 * @throws IllegalStateException 
+	 * 			When this worm can't fall.
+	 * 			| !canFall()
+	 */
+	public void fall()throws IllegalStateException{
+		if(!canFall())
+			throw new IllegalStateException();
+
+		Position oldPos = getPosition();
+		Position newPos = findFallPosition();
+		setPosition(newPos);
+		
+		if(!getWorld().isInsideWorldBoundaries(newPos, getRadius()))
+			getWorld().removeWorm(this);
+		
+		double distance = sqrt(oldPos.squaredDistance(newPos));
+		long damage = round(floor(3*distance));
+		if(damage > Integer.MAX_VALUE)
+			decreaseHitPoints(Integer.MAX_VALUE);
+		else
+			decreaseHitPoints((int) damage);
+	}
+	
+	/**
+	 * Finds the first location that would block the falling of the worm.
+	 * 
+	 * @return	There's no position beneath this position that doesn't block the fall and has a larger y-coordinate than the result.
+	 * 			| for each pos in Position:
+	 * 			|		pos.getX() != getPosition().getX()
+	 * 			|		|| fuzzyGreatherThanOrEqualTo(pos.getY(),result.getY())
+	 * 			|		|| !blocksFall(pos)
+	 */
+	public Position findFallPosition(){
+		Position pos = getPosition();
+		if(blocksFall(pos))
+			return pos;
+		
+		double offset = getWorld().cellHeight();
+		pos.offset(0, -offset);
+		while(true){
+			if(blocksFall(pos))
+				break;
+			pos = pos.offset(0, -offset);
+		}
+		pos = pos.offset(0, offset);
+		
+		offset = Util.DEFAULT_EPSILON;
+		while(true){
+			if(blocksFall(pos))
+				break;
+			pos = pos.offset(0, -offset);
+		}
+		return pos;
+	}
+	
+	/**
+	 * Checks whether or not the given position would stop the fall of this worm.
+	 * 
+	 * @param position	The position to check.
+	 * @return	True if the position is not within the world boundaries.
+	 * 			| if(!getWorld().isInsideWorldBoundaries(position, getRadius())) then result == true
+	 * @return	True if the position is a contact location or impassable terrain for the given worm.
+	 * 			| if(!getWorld().isPassablePosition(position, getRadius()*1.1)) then result == true
+	 * @return	False in all other cases
+	 * 			| result == false
+	 */
+	public boolean blocksFall(Position position){
+		if(!getWorld().isInsideWorldBoundaries(position, getRadius()))
+			return true;
+		if(!getWorld().isPassablePosition(position, getRadius()*1.1))
+			return true;
+		return false;
+	}
 }

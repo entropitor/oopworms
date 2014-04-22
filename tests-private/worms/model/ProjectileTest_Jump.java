@@ -10,8 +10,8 @@ import org.junit.Test;
 
 public class ProjectileTest_Jump {
 
-	Projectile projectileOutOfWorld,projectileContactLocation,projectileHitWorm,projectileClose;
-	World jumpWorld,jumpWorld2,jumpWorld3,jumpWorld4;
+	Projectile projectileOutOfWorld,projectileContactLocation,projectileHitWorm,projectileClose,projectileContactStart;
+	World jumpWorld,jumpWorld2,jumpWorld3,jumpWorld4,jumpWorld5;
 	Worm cannonFodder,hidingWorm;
 	boolean[][] passableMap;
 	static final double TIMESTEP = 1e-4;
@@ -48,6 +48,12 @@ public class ProjectileTest_Jump {
 		projectileClose = new BazookaProjectile(jumpWorld4, 39);
 		projectileClose.setPosition(new Position(19.97549,5.70413));
 		projectileClose.setDirection(Math.PI/4);
+		
+		jumpWorld5 = new World(40,20,passableMap,new Random());
+		jumpWorld5.start();
+		projectileContactStart = new BazookaProjectile(jumpWorld5, 39);
+		projectileContactStart.setPosition(new Position(20.7671,8.0221));
+		projectileContactStart.setDirection(Math.PI/4);
 	}
 
 	@Test
@@ -80,6 +86,15 @@ public class ProjectileTest_Jump {
 		assertEquals(4448,hidingWorm.getHitPoints());
 	}
 	
+	@Test
+	public void testJump_ContactStartCase() {
+		projectileContactStart.jump(TIMESTEP);
+		assertFuzzyEquals(28.51414, projectileContactStart.getPosition().getX());
+		assertFuzzyEquals(8.02288, projectileContactStart.getPosition().getY());
+		assertTrue(projectileContactStart.isTerminated());
+		assertFalse(jumpWorld.hasAsEntity(projectileContactStart));
+	}
+	
 	@Test(expected = IllegalStateException.class)
 	public void testJump_CloseCase() throws Exception {
 		projectileClose.jump(TIMESTEP);
@@ -103,6 +118,12 @@ public class ProjectileTest_Jump {
 	@Test
 	public void testGetJumpTime_CloseCase() {
 		assertFuzzyEquals(0.002499, projectileClose.getJumpTime(TIMESTEP));
+	}
+	
+	@Test
+	public void testGetJumpTime_ContactStartCase() {
+		System.out.println(projectileContactStart.getJumpTime(TIMESTEP));
+		assertFuzzyEquals(1.2569, projectileContactStart.getJumpTime(TIMESTEP));
 	}
 	
 	@Test

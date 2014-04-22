@@ -3,6 +3,7 @@ package worms.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static worms.util.AssertUtil.assertFuzzyEquals;
 
 import java.util.Random;
@@ -11,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class WormTest_Jump {
-	Worm skippy,eiffelTower,jumperContact,jumperOutOfWorld,jumperClose,wormOnImpassableTerrain;
+	Worm skippy,eiffelTower,jumperContact,jumperOutOfWorld,jumperClose,wormOnImpassableTerrain,jumperContactStart;
 	World jumpWorld;
 	static final double TIMESTEP = 1e-4;
 	
@@ -32,6 +33,7 @@ public class WormTest_Jump {
 		jumperContact = new Worm(jumpWorld, 12, 10, Math.PI/4, 3, "Jumper");
 		jumperOutOfWorld = new Worm(jumpWorld, 7, 11, 3*Math.PI/4, 3, "Jumps Out Of The World");
 		jumperClose = new Worm(jumpWorld, 16, 2, Math.PI/4, 3, "Cannot Jump because impassable terrain");
+		jumperContactStart = new Worm(jumpWorld, 21.2835, 11.14219, Math.PI/4, 3, "Starts on contact location");
 	}
 
 	@Test
@@ -55,6 +57,14 @@ public class WormTest_Jump {
 	}
 	
 	@Test
+	public void testJump_ContactStartCase() {
+		jumperContactStart.jump(TIMESTEP);
+		assertEquals(0, jumperContactStart.getActionPoints());
+		assertFuzzyEquals(26.71,jumperContactStart.getPosition().getX());
+		assertFuzzyEquals(11.3,jumperContactStart.getPosition().getY());
+	}
+	
+	@Test
 	public void testGetJumpTime_ContactLocationCase(){
 		assertFuzzyEquals(1.04469, jumperContact.getJumpTime(TIMESTEP));
 	}
@@ -67,6 +77,16 @@ public class WormTest_Jump {
 	@Test
 	public void testGetJumpTime_CloseCase() {
 		assertFuzzyEquals(0.507499, jumperClose.getJumpTime(TIMESTEP));
+	}
+	
+	@Test
+	public void testGetJumpTime_ContactStartCase() {
+		assertFuzzyEquals(1.0366, jumperContactStart.getJumpTime(TIMESTEP));
+	}
+	
+	@Test
+	public void testCanJump_ContactStartCase() {
+		assertTrue(jumperContactStart.canJump());
 	}
 	
 	@Test(expected=IllegalStateException.class)

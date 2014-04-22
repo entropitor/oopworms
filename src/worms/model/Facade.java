@@ -146,8 +146,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean canFall(Worm worm) {
-		// TODO Auto-generated method stub
-		return false;
+		return worm.canFall();
 	}
 
 	@Override
@@ -190,9 +189,12 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void fall(Worm worm) {
-		// TODO Auto-generated method stub
-		
+	public void fall(Worm worm) throws ModelException{
+		try{
+			worm.fall();			
+		}catch(IllegalStateException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
