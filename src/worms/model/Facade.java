@@ -366,8 +366,12 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void shoot(Worm worm, int yield) {
-		worm.fire(yield);
+	public void shoot(Worm worm, int yield) throws ModelException{
+		try{
+			worm.fire(yield);			
+		}catch(IllegalStateException e){
+			throw new ModelException(e);
+		}
 	}
 
 	@Override

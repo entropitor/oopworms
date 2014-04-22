@@ -188,7 +188,7 @@ public class World {
 		if(nbCellRows() == 0 || nbCellColumns() == 0)
 			 return true;
 		
-		boolean[][] map = getPassableMap();
+		boolean[][] map = this.passableMap;
 		
 		//Get the rows in which the circle lies
 		int minRow = (int)floor(getCellRowCoordinate(pos.getY()+radius));
@@ -242,7 +242,7 @@ public class World {
 	 * 			|		result == getPassableMap()[0].length
 	 */
 	public int nbCellColumns(){
-		boolean[][] map = getPassableMap();
+		boolean[][] map = this.passableMap;
 		if(map.length == 0)
 			return 0;
 		return map[0].length;
@@ -254,7 +254,7 @@ public class World {
 	 * @return	| result == getPassableMap().length
 	 */
 	public int nbCellRows(){
-		return getPassableMap().length;
+		return this.passableMap.length;
 	}
 	
 	/**
