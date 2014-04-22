@@ -274,8 +274,6 @@ public class Worm extends MassiveEntity {
 	 * @throws 	IllegalStateException
 	 * 			When the worm cannot move in its current state.
 	 * 			| !canMove()
-	 * 
-	 * (TODO: what if the worm is currently in an IMPASSABLE location.)
 	 */
 	public void move() throws IllegalStateException{
 		if(!canMove())
