@@ -322,7 +322,7 @@ public class Worm extends MassiveEntity {
 	}
 	
 	/**
-	 * 
+	 * Gets the position where the worm will be if a move operation were to be executed now.
 	 * 
 	 * @return	The new location is a CONTACT or a PASSABLE location.
 	 * 			| getWorld().getLocationType(result, getRadius()).isPassable()
@@ -333,11 +333,72 @@ public class Worm extends MassiveEntity {
 	 * 			|	s = posMod(atan2(result.getY()-getYCoordinate(), result.getX()-getXCoordinate()),2*PI)
 	 * 			| in
 	 * 			|	abs(θ-s) <= 0.7875 || abs(2*PI-θ) + abs(s) <= 0.7875 || abs(2*PI-s) + abs(θ) <= 0.7875
+	 * @return	The distance to the current position lies between 10% and 100% of the radius (both inclusive)
+	 * 			| 0,1*getRadius() <= sqrt(result.squaredDistance(getPosition())) && sqrt(result.squaredDistance(getPosition())) <= getRadius()
+	 * @return	There also doesn't exist a location on the same line between the current position and the result of this method which is considered impassable terrain
+	 * 			| !(for some position in Position:
+	 * 			|		getWorld().getLocationType(position, getRadius()) == LocationType.IMPASSABLE
+	 * 			|		&& position.squaredDistance(getPosition()) <= result.squaredDistance(getPosition())
+	 * 			|		&& posMod(atan2(postion.getY()-getYCoordinate(), position.getX()-getXCoordinate()),2*PI) == posMod(atan2(result.getY()-getYCoordinate(), result.getX()-getXCoordinate()),2*PI)
+	 * 			|	)
 	 * @return	The new position is the optimal position to move to for this worm in its current state.
 	 * 			(The divergence abs(θ-s) as defined above is minimised while
 	 * 			the travelled distance d is maximised, only considering contact locations when
 	 * 			at least one possible contact location is found.)
-	 * 			| TODO
+	 * 			The different angles which are looked at are discrete with a step of 0.0175 radians.
+	 * 			This method uses the weigh(distance, divergence) function as the property to maximize.
+	 * 			| let
+	 * 			|	onlyConsideringContactLocation =
+	 * 			|		(
+	 * 			|			for some position in Position:
+	 *			|				let
+	 *			|					angle = posMod(atan2(postion.getY()-getYCoordinate(), position.getX()-getXCoordinate()),2*PI)
+	 *			|					distance = sqrt(position.squaredDistance(getPosition()))
+	 *			|				in:
+	 *			|				(
+	 * 			|					0,1*getRadius() <= distance && distance <= getRadius()
+	 * 			|					&& ! (
+	 * 			|							for some otherPosition in Position:
+	 * 			|								getWorld().getLocationType(otherPosition, getRadius()) == LocationType.IMPASSABLE
+	 * 			|								&& otherPosition.squaredDistance(getPosition()) <= distance
+	 * 			|								&& angle == posMod(atan2(otherPosition.getY()-getYCoordinate(), otherPosition.getX()-getXCoordinate()),2*PI)
+	 * 			|						)
+	 * 			|					&& (
+	 * 			|							abs(getDirection()-angle) <= 0.7875 || abs(2*PI-angle) + abs(getDirection()) <= 0.7875 || abs(2*PI-getDirection()) + abs(angle) <= 0.7875
+	 * 			|							&& (getDirection()-angle)%0.0175 == 0
+	 * 			|						)
+	 * 			|					&& getWorld().getLocationType(position, getRadius()) == LocationType.CONTACT
+	 *			|				)
+	 * 			|		)
+	 * 			| in
+	 * 			|		!(
+	 * 			|			for some position in Position:
+	 *			|				let
+	 * 			|					angle = posMod(atan2(postion.getY()-getYCoordinate(), position.getX()-getXCoordinate()),2*PI)
+	 *			|					distance = sqrt(position.squaredDistance(getPosition()))
+	 *			|				in:
+	 *			|				(
+	 * 			|					0,1*getRadius() <= distance && distance <= getRadius()
+	 * 			|					&& ! (
+	 * 			|							for some otherPosition in Position:
+	 * 			|								getWorld().getLocationType(otherPosition, getRadius()) == LocationType.IMPASSABLE
+	 * 			|								&& sqrt(otherPosition.squaredDistance(getPosition())) <= distance
+	 * 			|								&& angle == posMod(atan2(otherPostion.getY()-getYCoordinate(), otherPostion.getX()-getXCoordinate()),2*PI)
+	 * 			|						)
+	 * 			|					&& (
+	 * 			|							abs(getDirection()-angle) <= 0.7875 || abs(2*PI-angle) + abs(getDirection()) <= 0.7875 || abs(2*PI-getDirection()) + abs(angle) <= 0.7875
+	 * 			|							&& (getDirection()-angle)%0.0175 == 0
+	 * 			|						)
+	 *			|					&& getWorld().getLocationType(position, getRadius()).isPassable()
+	 * 			|					&& !onlyonlyConsideringContactLocation || getWorld().getLocationType(position, getRadius()) == LocationType.CONTACT
+	 * 			|					&& weigh(distance,angle-getDirection()) > weigh(sqrt(result.squaredDistance(getPosition())),posMod(atan2(result.getY()-getYCoordinate(), result.getX()-getXCoordinate()),2*PI))
+	 *			|					&& !(
+	 *			|							angle == posMod(atan2(result.getY()-getYCoordinate(), result.getX()-getXCoordinate()),2*PI)
+	 *			|							&& fuzzyEquals(distance, sqrt(result.squaredDistance(getPosition())), getRadius()/100)
+	 *			|						)
+	 *			|				)
+	 * 			|		)
+	 *			|		&& !onlyonlyConsideringContactLocation || getWorld().getLocationType(result, getRadius()) == LocationType.CONTACT
 	 */
 	public Position getPositionAfterMove(){
 		List<DirectionInfo> directions = new ArrayList<DirectionInfo>();
