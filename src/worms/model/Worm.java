@@ -1122,7 +1122,7 @@ public class Worm extends MassiveEntity {
 	 * 			| if(!getWorld().isInsideWorldBoundaries(findFallPosition(), getRadius())) then getWorld().removeWorm(this);
 	 * @effect	Subtract 3 HP per metre fallen
 	 * 			| let
-	 * 			|		long damgage = round(floor(3*sqrt(oldPos.squaredDistance(findFallPosition()))))
+	 * 			|		long damage = round(floor(3*sqrt(oldPos.squaredDistance(findFallPosition()))))
 	 * 			| in:
 	 * 			|		if(damage > Integer.MAX_VALUE) then decreaseHitPoints(Integer.MAX_VALUE)
 	 * 			|		else decreaseHitPoints((int) damage);
@@ -1150,7 +1150,7 @@ public class Worm extends MassiveEntity {
 	}
 	
 	/**
-	 * Find the first location that would block the falling of the worm.
+	 * Finds the first location that would block the falling of the worm.
 	 * 
 	 * @return	There's no position beneath this position that doesn't block the fall and has a larger y-coordinate than the result.
 	 * 			| for each pos in Position:
