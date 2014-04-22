@@ -45,7 +45,7 @@ public class WormTest_Direction {
 	
 	@Test
 	public void testIsValidDirection_Negative(){
-		assertFalse(Worm.isValidDirection(-2));
+		assertTrue(Worm.isValidDirection(-2));
 	}
 	
 	@Test

@@ -58,13 +58,13 @@ public abstract class MassiveEntity extends Entity {
 	 * Checks whether the given direction is a valid direction.
 	 * 
 	 * @param direction The direction to check
-	 * @return 	Whether or not direction is a valid number between 0 and 2*PI
-	 * 			| result == (!double.isNaN(direction) && 0 <= direction && direction < 2*PI)
+	 * @return 	Whether or not direction is a valid number between -2*PI and 2*PI
+	 * 			| result == (!double.isNaN(direction) && -2*PI <= direction && direction < 2*PI)
 	 */
 	public static boolean isValidDirection(double direction){
 		if(Double.isNaN(direction))
 			return false;
-		return 0 <= direction && direction < 2*PI;
+		return -2*PI <= direction && direction < 2*PI;
 	}
 	
 	/**
