@@ -80,6 +80,52 @@ public class WormTest_Move {
 	}
 	
 	@Test
+	public void testMove_FallAfterMove(){
+		String[] floatingIsland =
+		{". . . . . . . . . . . ",
+		 ". . . . . . # . . . . ",
+		 ". . . . . . . . . . . ",
+		 ". . . . . . . . . . . ",
+		 ". . . . . . . . . . . ",
+		 "# # # # # # # # # # # "};
+		world = new World(110,60,strPassableMapToBool(floatingIsland),new Random());
+		willy = new Worm(world, 81, 40, 0, 10, "Just hangin'");
+		assertEquals(4448495, willy.getActionPoints());
+		assertEquals(4448495, willy.getHitPoints());
+		assertTrue(willy.canMove());
+		Position afterMove = willy.getPositionAfterMove();
+		assertFuzzyEquals(91, afterMove.getX());
+		assertFuzzyEquals(40, afterMove.getY());
+		assertEquals(LocationType.PASSABLE, world.getLocationType(afterMove, willy.getRadius()));
+		willy.move();
+		assertFuzzyEquals(91, willy.getXCoordinate());
+		assertFuzzyEquals(21, willy.getYCoordinate());
+		assertEquals(4448495-1, willy.getActionPoints());
+		assertEquals(4448495-3*(40-21), willy.getHitPoints());
+	}
+
+	@Test
+	public void testMove_OutOfWorld(){
+		String[] floatingIsland =
+		{". . . . . . . . . . . ",
+		 ". . . . . . . # . . . ",
+		 ". . . . . . . . . . . ",
+		 ". . . . . . . . . . . ",
+		 ". . . . . . . . . . . ",
+		 "# # # # # # # # # # # "};
+		world = new World(110,60,strPassableMapToBool(floatingIsland),new Random());
+		willy = new Worm(world, 91, 40, 0, 10, "I'll be back");
+		assertTrue(willy.canMove());
+		Position afterMove = willy.getPositionAfterMove();
+		assertFuzzyEquals(101, afterMove.getX());
+		assertFuzzyEquals(40, afterMove.getY());
+		assertFalse(world.isInsideWorldBoundaries(afterMove, willy.getRadius()));
+		willy.move();
+		assertTrue(willy.isTerminated());
+		assertFalse(world.hasAsWorm(willy));
+	}
+	
+	@Test
 	public void testGetUnitStepCost_RightDirection(){
 		assertFuzzyEquals(Worm.getUnitStepCost(0),1);
 	}
