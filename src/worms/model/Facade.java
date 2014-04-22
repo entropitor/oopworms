@@ -3,6 +3,8 @@ package worms.model;
 import java.util.Collection;
 import java.util.Random;
 
+import worms.util.ModuloUtil;
+
 public class Facade implements IFacade {
 
 	/*@Override
@@ -178,6 +180,7 @@ public class Facade implements IFacade {
 	@Override
 	public Worm createWorm(World world, double x, double y, double direction,
 			double radius, String name) throws ModelException{
+		direction = ModuloUtil.posMod(direction, 2*Math.PI);
 		if(!Worm.isValidDirection(direction))
 			throw new ModelException("Not a valid direction.");
 		try {
