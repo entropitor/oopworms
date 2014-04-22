@@ -72,7 +72,7 @@ public class WormTest_Fall {
 		wormContactEnd.fall();
 		assertEquals(4448-14,wormContactEnd.getHitPoints());
 		assertFuzzyEquals(3.56, wormContactEnd.getPosition().getX());
-		assertFuzzyEquals(11.1, wormContactEnd.getPosition().getY());
+		assertFuzzyEquals(11, wormContactEnd.getPosition().getY());
 	}
 	
 	@Test
@@ -93,14 +93,14 @@ public class WormTest_Fall {
 	public void testFindFallPosition_ContactStartCase() {
 		Position fallPosition = wormContactStart.findFallPosition();
 		assertFuzzyEquals(4.12, fallPosition.getX());
-		assertFuzzyEquals(11.04, fallPosition.getY());
+		assertFuzzyEquals(11, fallPosition.getY());
 	}
 	
 	@Test
 	public void testFindFallPosition_ContactEndCase() {
 		Position fallPosition = wormContactEnd.findFallPosition();
 		assertFuzzyEquals(3.56, fallPosition.getX());
-		assertFuzzyEquals(10+1.1, fallPosition.getY());
+		assertFuzzyEquals(10+1, fallPosition.getY());
 	}
 	
 	@Test
@@ -115,7 +115,7 @@ public class WormTest_Fall {
 	
 	@Test
 	public void testBlocksFall_ContactCase() {
-		assertTrue(wormContactEnd.blocksFall(new Position(4.74, 11.05)));
+		assertFalse(wormContactEnd.blocksFall(new Position(4.74, 11.05)));
 	}
 	
 	@Test
