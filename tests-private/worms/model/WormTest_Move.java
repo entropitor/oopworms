@@ -34,12 +34,12 @@ public class WormTest_Move {
 	@Before
 	public void setup(){
 		String[] stairs =
-		{". . . . . . . . . . . . . ",
-		 ". . . . . . . . . . . . . ",
-		 ". . . . . . . . # . . . . ",
-		 ". . . . . . . # # . . . . ",
-		 ". . . . # # # # # . . . . ",
-		 "# # # # # # # # # # # # # "};
+		{". . . . . . . . . . . ",
+		 ". . . . . . . . . . . ",
+		 ". . . . . . . # . . . ",
+		 ". . . . . . # # . . . ",
+		 ". . . # # # # # . . . ",
+		 "# # # # # # # # # # # "};
 		/*String[] pdf =
 		{". . . . . . ",
 		 ". # . # # . ",
@@ -47,22 +47,30 @@ public class WormTest_Move {
 		 ". . . . . . ",
 		 "# # # # . . "};*/
 		world = new World(110,60,strPassableMapToBool(stairs),new Random());
-		willy  = new Worm(world, 20, 20, PI/4, 10, "Willy Wonka");
+		
 		// left = new Worm(world, 0, 0, PI, 1, "Left");
 		// diagonal = new Worm(world, 2, -3, PI/4, 1, "Diagonal");
 	}
+
+	@Test
+	public void testMove_Normal(){
+		willy = new Worm(world, 18, 20, PI/4, 10, "Willy Wonka");
+		assertEquals(4448495, willy.getActionPoints());
+		assertTrue(willy.canMove());
+		willy.move();
+		assertFuzzyEquals(23.53, willy.getXCoordinate(), 1E-1);
+		assertFuzzyEquals(28.36, willy.getYCoordinate(), 1E-1);
+	}
 	
 	@Test
-	public void testIsPassablePosition_Strange(){
-		assertFalse(world.isPassablePosition(new Position(21,20), 10));
-	}
-
-	/*@Test
-	public void testMove(){
+	public void testMove_Cannot(){
+		willy = new Worm(world, 18, 20, 5*PI/4, 10, "Willy Wonka");
+		assertFalse(willy.canMove());
 		willy.move();
-		assertFuzzyEquals(25, willy.getXCoordinate());
-		assertFuzzyEquals(28.6603, willy.getYCoordinate());
-	}*/
+		assertFuzzyEquals(18, willy.getXCoordinate(), 1E-1);
+		assertFuzzyEquals(20, willy.getYCoordinate(), 1E-1);
+		//assertEquals(, willy.getActionPoints());
+	}
 
 	/*@Test
 	public void testCanMove_TrueCase(){
