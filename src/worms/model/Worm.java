@@ -1322,8 +1322,8 @@ public class Worm extends MassiveEntity {
 	/**
 	 * Lets the worm fall
 	 * 
-	 * @effect	Set the new position to the position after the fall.
-	 * 			| setPosition(findFallPosition())
+	 * @effect	Set the new position to the position after the fall and then check for food items it overlaps with
+	 * 			| setPosition(findFallPosition()); checkForFood()
 	 * @effect	Remove the worm from the world if it's no longer within the boundaries.
 	 * 			| if(!getWorld().isInsideWorldBoundaries(findFallPosition(), getRadius())) then getWorld().removeWorm(this);
 	 * @effect	Subtract 3 HP per metre fallen
@@ -1346,6 +1346,8 @@ public class Worm extends MassiveEntity {
 		
 		if(!getWorld().isInsideWorldBoundaries(newPos, getRadius()))
 			getWorld().removeWorm(this);
+		else
+			checkForFood();
 		
 		double distance = sqrt(oldPos.squaredDistance(newPos));
 		long damage = round(floor(3*distance));
