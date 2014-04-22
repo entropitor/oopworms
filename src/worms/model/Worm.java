@@ -16,9 +16,7 @@ import static worms.util.Util.fuzzyLessThanOrEqualTo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import worms.util.MathUtil;
@@ -318,7 +316,6 @@ public class Worm extends MassiveEntity {
 	private class DirectionInfo{
 		public double direction;
 		public double distance;
-		public boolean contactLocation;
 	}
 	
 	/**
@@ -405,38 +402,44 @@ public class Worm extends MassiveEntity {
 		double theta = getDirection();
 		double dStep = getRadius()/100; // probing distance step.
 		double r = getRadius();
+		
 		boolean positionFound = false;
 		boolean contactPositionFound = false;
+		
 		for(double s = theta-0.7875; s <= theta+0.7875; s += 0.0175){
 			DirectionInfo directionInfo = new DirectionInfo();
 			directionInfo.direction = s;
 			
 			double distance;
-			boolean wasPreviousPositionContactLocation = false;
-			boolean imPassablePositionFound = false;
-			
-			for(distance = 0; !imPassablePositionFound && distance < r; distance += dStep){
-				Position probePosition = getPosition().offset((distance+dStep)*cos(s),(distance+dStep)*sin(s));
+			double furthestDistance = 0;
+			for(distance = 0; distance <= r; distance += dStep){
+				Position probePosition = getPosition().offset((distance)*cos(s),(distance)*sin(s));
 				LocationType locType = getWorld().getLocationType(probePosition, getRadius());
 				if(locType.isPassable()) {
-					wasPreviousPositionContactLocation = (locType == LocationType.CONTACT);
-				} else {
-					imPassablePositionFound = true;
-				}
+					//If not yet in zone where worm can end, just continue.
+					if(distance < getRadius()/10)
+						continue;
+					
+					if(!contactPositionFound || locType == LocationType.CONTACT){
+						furthestDistance = distance;
+						if(!contactPositionFound && locType == LocationType.CONTACT){
+							//Clear directions because it only contains non-contact positions.
+							directions.clear();
+							contactPositionFound = true;
+						}
+					}
+				} else 
+					break;
 			}
-			//FIX distance because 
-			distance -= dStep;
-			if(distance > getRadius()/10){
+			if(furthestDistance >= getRadius()/10){
 				positionFound = true;
-				directionInfo.distance = distance;
-				directionInfo.contactLocation = wasPreviousPositionContactLocation;
+				directionInfo.distance = furthestDistance;
 				directions.add(directionInfo);
-				if (wasPreviousPositionContactLocation)
-					contactPositionFound = true;
 			}
 		}
+		
 		if(positionFound)
-			return getOptimalPosition(directions, contactPositionFound);
+			return getOptimalPosition(directions);
 		else
 			return getPosition();
 	}
@@ -454,31 +457,27 @@ public class Worm extends MassiveEntity {
 	 * 			'weigh()' function is maximal. If it is specified that a contact location 
 	 * 			was found, only considers (direction, distance) pairs which are contact locations. 
 	 * 			| let
-	 *  		|	filteredDirections = filter(direction in directions: !contactLocationFound || direction.contactLocation)
-	 * 			|	maxDirectionInfo = max(directionInfo in filteredDirections: weigh(directionInfo.distance, directionInfo.direction-getDirection())
+	 * 			|	maxDirectionInfo = max(directionInfo in directions: weigh(directionInfo.distance, directionInfo.direction-getDirection())
 	 * 			|	maxDirection = maxDirectionInfo.direction
 	 * 			|	maxDistance = maxDirectionInfo.distance
 	 * 			| in
 	 * 			|	result == (getPosition().offset(maxDistance*cos(maxDirection),
 	 * 			|									maxDistance*sin(maxDirection)))
 	 */
-	@Model
-	private Position getOptimalPosition(List<DirectionInfo> directions, boolean contactLocationFound){
+	private Position getOptimalPosition(List<DirectionInfo> directions){
 		double maxDirection = 0;
 		double maxDistance = 0;
 		double maxWeightedDistance = -Double.MAX_VALUE;
 		for(DirectionInfo directionInfo : directions) {
-			if(!contactLocationFound || directionInfo.contactLocation) {
-				double direction = directionInfo.direction;
-				double distance = directionInfo.distance;
-				double divergence = direction-getDirection();
-				double weightedDistance = weigh(distance, divergence);
-				if(weightedDistance > maxWeightedDistance) {
-			    	 maxDistance = distance;
-			    	 maxDirection = direction;
-			    	 maxWeightedDistance = weightedDistance;
-			    }
-			}
+			double direction = directionInfo.direction;
+			double distance = directionInfo.distance;
+			double divergence = direction-getDirection();
+			double weightedDistance = weigh(distance, divergence);
+			if(weightedDistance > maxWeightedDistance) {
+		    	 maxDistance = distance;
+		    	 maxDirection = direction;
+		    	 maxWeightedDistance = weightedDistance;
+		    }
 		}
 		return getPosition().offset(maxDistance*cos(maxDirection),maxDistance*sin(maxDirection));
 	}
