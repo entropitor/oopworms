@@ -158,12 +158,16 @@ public class Team {
 	 * Checks whether or not the given name is a valid name for a team.
 	 * 
 	 * @param name The name to check.
+	 * @return	The null reference is not a valid name
+	 * 			| if(name == null) then result == false
 	 * @return	Whether or not the name is at least 2 characters long, starts with an uppercase letter and only contains valid characters.
 	 * 			|	result == (name.length() >= 2 && Character.isUpperCase(name.charAt(0)) 
 	 * 			|				&& for all Character c in name:
 	 * 			|						isValidCharacterForName(c))
 	 */
 	public static boolean isValidName(String name){
+		if(name == null)
+			return false;
 		if(name.length() < 2)
 			return false;
 		if(!Character.isUpperCase(name.charAt(0)))
