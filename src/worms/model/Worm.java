@@ -365,7 +365,7 @@ public class Worm extends MassiveEntity {
 			}
 			//FIX distance because 
 			distance -= dStep;
-			if(distance > 0){
+			if(distance > dStep){
 				positionFound = true;
 				directionInfo.distance = distance;
 				directionInfo.contactLocation = wasPreviousPositionContactLocation;
