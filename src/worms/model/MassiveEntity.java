@@ -135,10 +135,10 @@ public abstract class MassiveEntity extends Entity {
 	 * @post	The hitpoints of every worm in this world are left untouched or are decreased.
 	 * 			| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() <= worm.getHitPoints()
 	 * @effect	The entity will be removed from the world if it should be removed from the world.
-	 * 			| if(afterJumpRemove()) then getWorld().removeAsEntity(this);
+	 * 			| if(afterJumpRemove() || new.afterJumpRemove()) then getWorld().removeAsEntity(this);
 	 * @post	Food rations may have been eaten.
 	 * 			| for each food in getWorld().getFoods():
-	 * 			|	new.getWorld().hasAsFood(food) || (new food).isTerminated()
+	 * 			|	(new getWorld()).hasAsFood(food) || (new food).isTerminated()
 	 * @post	This MassiveEntity may have become even more bigger.
 	 * 			| new.getRadius() >= getRadius()
 	 */

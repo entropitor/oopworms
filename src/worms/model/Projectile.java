@@ -107,8 +107,10 @@ public abstract class Projectile extends MassiveEntity {
 	 * 				|		then (new worm).getHitPoints() == worm.getHitPoints()
 	 * @post		No food rations have been touched.
 	 * 				| for each food in getFoods(): new.hasAsFood(food)
-	 * @post 		The radisu of this projectile is left untouched.
+	 * @post 		The radius of this projectile is left untouched.
 	 * 				| new.getRadius() == getRadius()
+	 * @post		The hitpoints of every worm in this world are left untouched.
+ +	 * 				| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() == worm.getHitPoints()
 	 */
 	@Override
 	public void handleAfterJump(){
