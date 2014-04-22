@@ -294,6 +294,8 @@ public class Worm extends MassiveEntity {
 	/**
 	 * Tests whether this worm can move in its current state.
 	 * 
+	 * @return	False if this worm is terminated.
+	 * 			| if(isTerminated()) then result == false
 	 * @return	Whether the worm can move in its current direction, from its current position
 	 * 			and on the current terrain, and whether he has enough action points left to
 	 * 			perform the move.
@@ -301,6 +303,8 @@ public class Worm extends MassiveEntity {
 	 *			|			 (getCostForMove(getPositionAfterMove()) <= getActionPoints()))
 	 */
 	public boolean canMove(){
+		if(isTerminated())
+			return false;
 		Position positionAfterMove = getPositionAfterMove();
 		return ((!positionAfterMove.equals(getPosition())) && 
 				(getCostForMove(positionAfterMove) <= getActionPoints()));
