@@ -54,7 +54,7 @@ public class WormTest_Fall {
 		wormOutOfWorld.fall();
 		assertTrue(wormOutOfWorld.isTerminated());
 		assertFalse(world.hasAsEntity(wormOutOfWorld));
-		assertEquals(4448-70,wormOutOfWorld.getHitPoints());
+		assertEquals(4448-69,wormOutOfWorld.getHitPoints());
 	}
 	
 	@Test(expected = IllegalStateException.class)
@@ -70,7 +70,7 @@ public class WormTest_Fall {
 	@Test
 	public void testFall_ContactEndCase() {
 		wormContactEnd.fall();
-		assertEquals(4448-14,wormContactEnd.getHitPoints());
+		assertEquals(4448-12,wormContactEnd.getHitPoints());
 		assertFuzzyEquals(3.56, wormContactEnd.getPosition().getX());
 		assertFuzzyEquals(11, wormContactEnd.getPosition().getY());
 	}

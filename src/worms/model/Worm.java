@@ -1324,7 +1324,7 @@ public class Worm extends MassiveEntity {
 			checkForFood();
 		
 		double distance = sqrt(oldPos.squaredDistance(newPos));
-		long damage = round(floor(3*distance));
+		long damage = round(3*floor(distance));
 		if(damage > Integer.MAX_VALUE)
 			decreaseHitPoints(Integer.MAX_VALUE);
 		else
