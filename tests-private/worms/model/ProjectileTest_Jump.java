@@ -95,8 +95,9 @@ public class ProjectileTest_Jump {
 		assertFalse(jumpWorld.hasAsEntity(projectileContactStart));
 	}
 	
-	@Test(expected = IllegalStateException.class)
-	public void testJump_CloseCase() throws Exception {
+	@Test
+	public void testJump_CloseCase(){
+		//Shouldn't throw exception!
 		projectileClose.jump(TIMESTEP);
 	}
 
@@ -127,7 +128,7 @@ public class ProjectileTest_Jump {
 	
 	@Test
 	public void testafterJumpRemove_OnlyCaseAndTrue() {
-		assertTrue(projectileContactLocation.afterJumpRemove());
+		assertTrue(projectileContactLocation.afterJumpRemove(projectileContactLocation.getPosition()));
 	}
 
 }

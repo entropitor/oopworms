@@ -119,7 +119,7 @@ public abstract class Projectile extends MassiveEntity {
 				worm.decreaseHitPoints(getDamage());
 			}
 		}
-		if(afterJumpRemove())
+		if(afterJumpRemove(getPosition()))
 			getWorld().removeProjectile();
 	}
 	
@@ -127,7 +127,7 @@ public abstract class Projectile extends MassiveEntity {
 	 * @return		| result == true
 	 */
 	@Override
-	public boolean afterJumpRemove(){
+	public boolean afterJumpRemove(Position pos){
 		return true;
 	}
 	

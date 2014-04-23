@@ -8,6 +8,8 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
+import worms.util.Util;
+
 public class WormTest_Weapon {
 	
 	Worm jeffrey;
@@ -16,7 +18,7 @@ public class WormTest_Weapon {
 	@Before
 	public void setUp() throws Exception {
 		world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
-		jeffrey = new Worm(world, 15, 15, Math.PI/2, 1, "Jeffrey");
+		jeffrey = new Worm(world, 15, 15, 1.5, 2, "Jeffrey");
 		world.start();
 	}
 
@@ -28,14 +30,16 @@ public class WormTest_Weapon {
 		
 		assertTrue(world.hasProjectile());
 		Projectile projectile = world.getProjectile();
+		
+		double distance = 2+0.0209401+Util.DEFAULT_EPSILON;
 
+		assertFalse(projectile.collidesWith(jeffrey));
 		assertTrue(projectile instanceof BazookaProjectile);
 		assertEquals(34, projectile.getPropulsionYield());
-		assertFuzzyEquals(Math.pow(1+0.0209401,2), projectile.getPosition().squaredDistance(jeffrey.getPosition()));
-		assertFalse(projectile.collidesWith(jeffrey));
-		assertFuzzyEquals(projectile.getDirection(), Math.PI/2);
-		assertFuzzyEquals(15+Math.cos(Math.PI/2)*1.0209401, projectile.getPosition().getX());
-		assertFuzzyEquals(15+Math.sin(Math.PI/2)*1.0209401, projectile.getPosition().getY());
+		assertFuzzyEquals(Math.pow(distance,2), projectile.getPosition().squaredDistance(jeffrey.getPosition()));
+		assertFuzzyEquals(projectile.getDirection(), 1.5);
+		assertFuzzyEquals(15+Math.cos(1.5)*distance, projectile.getPosition().getX());
+		assertFuzzyEquals(15+Math.sin(1.5)*distance, projectile.getPosition().getY());
 		assertEquals(world, projectile.getWorld());
 	}
 	
@@ -49,13 +53,15 @@ public class WormTest_Weapon {
 		assertTrue(world.hasProjectile());
 		Projectile projectile = world.getProjectile();
 		
+		double distance = 2+0.00673915734+Util.DEFAULT_EPSILON;
+
+		assertFalse(projectile.collidesWith(jeffrey));
 		assertTrue(projectile instanceof RifleProjectile);
 		assertEquals(34, projectile.getPropulsionYield());
-		assertFuzzyEquals(Math.pow(1+0.00673915734,2), projectile.getPosition().squaredDistance(jeffrey.getPosition()));
-		assertFalse(projectile.collidesWith(jeffrey));
-		assertFuzzyEquals(projectile.getDirection(), Math.PI/2);
-		assertFuzzyEquals(15+Math.cos(Math.PI/2)*1.006739, projectile.getPosition().getX());
-		assertFuzzyEquals(15+Math.sin(Math.PI/2)*1.006739, projectile.getPosition().getY());
+		assertFuzzyEquals(Math.pow(distance,2), projectile.getPosition().squaredDistance(jeffrey.getPosition()));
+		assertFuzzyEquals(projectile.getDirection(), 1.5);
+		assertFuzzyEquals(15+Math.cos(1.5)*distance, projectile.getPosition().getX());
+		assertFuzzyEquals(15+Math.sin(1.5)*distance, projectile.getPosition().getY());
 		assertEquals(world, projectile.getWorld());
 	}
 	
