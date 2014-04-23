@@ -217,6 +217,7 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 		RoundRectangle2D actionBar = new RoundRectangle2D.Double(x
 				- ACTION_BAR_WIDTH / 2, y + spriteHeight / 2, ACTION_BAR_WIDTH,
 				ACTION_BAR_HEIGHT, 5, 5);
+		currentGraphics.drawString(actionPoints+" AP", (int)x-40, (int)y-40);
 		currentGraphics.setColor(BAR_OUTLINE_COLOR);
 		currentGraphics.draw(actionBar);
 	}
@@ -239,6 +240,7 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 		RoundRectangle2D hitpointsBar = new RoundRectangle2D.Double(x
 				- ACTION_BAR_WIDTH / 2, y + spriteHeight / 2
 				+ ACTION_BAR_HEIGHT, ACTION_BAR_WIDTH, ACTION_BAR_HEIGHT, 5, 5);
+		currentGraphics.drawString(hitPoints+" HP", (int)x+40, (int)y-40);
 		currentGraphics.setColor(BAR_OUTLINE_COLOR);
 		currentGraphics.draw(hitpointsBar);
 	}
