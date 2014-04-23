@@ -938,10 +938,10 @@ public class Worm extends MassiveEntity {
 	 *					| 	projectile == (new getWorld()).getProjectile() &&
 	 *					| 	projectilesPosition == (new projectile).getPosition())
 	 *					| in
-	 * 					| 	fuzzyEquals(projectilesPosition.squaredDistance(getPosition()),pow(getRadius()+(new projectile).getRadius(),2))
+	 * 					| 	fuzzyEquals(projectilesPosition.squaredDistance(getPosition()),pow(Util.DEFAULT_EPSILON+getRadius()+(new projectile).getRadius(),2))
 	 * 					| 	&& !(new projectile).collidesWith(this)
-	 * 					| 	&& fuzzyEquals(projectilesPosition.getX(), getPosition().getX()+cos(getDirection())*(getRadius()+(new projectile).getRadius()))
-	 * 					| 	&& fuzzyEquals(projectilesPosition.getY(), getPosition().getY()+sin(getDirection())*(getRadius()+(new projectile).getRadius()))
+	 * 					| 	&& fuzzyEquals(projectilesPosition.getX(), getPosition().getX()+cos(getDirection())*(Util.DEFAULT_EPSILON+getRadius()+(new projectile).getRadius()))
+	 * 					| 	&& fuzzyEquals(projectilesPosition.getY(), getPosition().getY()+sin(getDirection())*(Util.DEFAULT_EPSILON+getRadius()+(new projectile).getRadius()))
 	 * @post			The new projectile's direction is set to the direction of this worm.
 	 * 					| fuzzyEquals((new (new getWorld()).getProjectile()).getDirection(),getDirection())
 	 * @throws	IllegalStateException
@@ -978,7 +978,7 @@ public class Worm extends MassiveEntity {
 		
 		Projectile projectile = getSelectedWeapon().getNewProjectile(getWorld(), yield);
 		projectile.setDirection(getDirection());
-		double distance = getRadius()+projectile.getRadius();
+		double distance = getRadius()+projectile.getRadius()+Util.DEFAULT_EPSILON;
 		Position pos = getPosition().offset(distance*cos(getDirection()),distance*sin(getDirection()));
 		projectile.setPosition(pos);
 		
