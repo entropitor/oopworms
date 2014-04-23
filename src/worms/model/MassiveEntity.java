@@ -101,8 +101,8 @@ public abstract class MassiveEntity extends Entity {
 	 * @throws IllegalStateException
 	 * 				Thrown when this entity can't jump from his current position.
 	 * 				| !canJump()
-	 * 				When the end of the jump would be on impassable terrain.
-	 * 				| !getWorld().isPassablePosition(endPosition, getRadius())
+	 * 				When the end of the jump would be on impassable terrain and wouldn't be removed.
+	 * 				| !afterJumpRemove(getJumpStep(getJumpTime(timeStep))) && !getWorld().isPassablePosition(getJumpStep(getJumpTime(timeStep)), getRadius())
 	 */
 	public void jump(double timeStep) throws IllegalArgumentException,IllegalStateException{
 		if(timeStep < 0 || Double.isNaN(timeStep))
@@ -110,7 +110,7 @@ public abstract class MassiveEntity extends Entity {
 		if(!canJump())
 			throw new IllegalStateException();
 		Position endPosition = getJumpStep(getJumpTime(timeStep));
-		if(!getWorld().isPassablePosition(endPosition, getRadius()))
+		if(!afterJumpRemove(endPosition) && !getWorld().isPassablePosition(endPosition, getRadius()))
 			throw new IllegalStateException();
 		setPosition(endPosition);
 		handleAfterJump();
@@ -118,13 +118,14 @@ public abstract class MassiveEntity extends Entity {
 	
 	/**
 	 * Checks whether or not the entity should be removed from the world
-	 * if this is the location where he just landed from a jump.
+	 * if pos is the location where he just landed from a jump.
 	 * 
-	 * @return	True if the entity doesn't lie in the world anymore.
-	 * 			| if(!getWorld().isInsideWorldBoundaries(getPosition(), getRadius())) then result == true
+	 * @param pos	The location to check
+	 * @return	True if the entity at position pos doesn't lie in the world anymore
+	 * 			| if(!getWorld().isInsideWorldBoundaries(pos, getRadius())) then result == true
 	 */
-	public boolean afterJumpRemove(){
-		if(!getWorld().isInsideWorldBoundaries(getPosition(), getRadius()))
+	public boolean afterJumpRemove(Position pos){
+		if(!getWorld().isInsideWorldBoundaries(pos, getRadius()))
 			return true;
 		return false;
 	}
@@ -135,7 +136,7 @@ public abstract class MassiveEntity extends Entity {
 	 * @post	The hitpoints of every worm in this world are left untouched or are decreased.
 	 * 			| for each worm in getWorld().getWorms(): (new worm).gitHitPoints() <= worm.getHitPoints()
 	 * @effect	The entity will be removed from the world if it should be removed from the world.
-	 * 			| if(afterJumpRemove() || new.afterJumpRemove()) then getWorld().removeAsEntity(this);
+	 * 			| if(afterJumpRemove(getPosition()) || new.afterJumpRemove(getPosition())) then getWorld().removeAsEntity(this);
 	 * @post	Food rations may have been eaten.
 	 * 			| for each food in getWorld().getFoods():
 	 * 			|	(new getWorld()).hasAsFood(food) || (new food).isTerminated()
@@ -143,7 +144,7 @@ public abstract class MassiveEntity extends Entity {
 	 * 			| new.getRadius() >= getRadius()
 	 */
 	public void handleAfterJump(){
-		if(afterJumpRemove())
+		if(afterJumpRemove(getPosition()))
 			getWorld().removeAsEntity(this);
 	}
 	

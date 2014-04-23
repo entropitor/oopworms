@@ -127,7 +127,7 @@ public class ProjectileTest_Jump {
 	
 	@Test
 	public void testafterJumpRemove_OnlyCaseAndTrue() {
-		assertTrue(projectileContactLocation.afterJumpRemove());
+		assertTrue(projectileContactLocation.afterJumpRemove(projectileContactLocation.getPosition()));
 	}
 
 }

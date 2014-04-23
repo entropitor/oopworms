@@ -862,15 +862,15 @@ public class Worm extends MassiveEntity {
 	
 	/** 
 	 * @return	False if the entity lies in the world.
-	 * 			| if(getWorld().isInsideWorldBoundaries(getPosition(), getRadius())) then result == false
+	 * 			| if(getWorld().isInsideWorldBoundaries(pos, getRadius())) then result == false
 	 * @note	This return-clause should only be used if all other return-clauses (of super-method) can't determine the result of this method!
 	 */
 	@Override
-	public boolean afterJumpRemove(){
+	public boolean afterJumpRemove(Position pos){
 		//Implied in super
 		/*if(getWorld().isInsideWorldBoundaries(getPosition(), getRadius()))
 			return false;*/
-		return super.afterJumpRemove();
+		return super.afterJumpRemove(pos);
 	}
 	
 	/**
