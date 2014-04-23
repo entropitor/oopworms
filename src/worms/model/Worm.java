@@ -1360,6 +1360,8 @@ public class Worm extends MassiveEntity {
 				break;
 			pos = pos.offset(0, -offset);
 		}
+		if(!getWorld().isPassablePosition(pos, getRadius()))
+			pos = pos.offset(0, offset);
 		return pos;
 	}
 	
