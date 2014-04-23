@@ -94,6 +94,12 @@ public class ProjectileTest_Jump {
 		assertTrue(projectileContactStart.isTerminated());
 		assertFalse(jumpWorld.hasAsEntity(projectileContactStart));
 	}
+	
+	@Test
+	public void testJump_CloseCase(){
+		//Shouldn't throw exception!
+		projectileClose.jump(TIMESTEP);
+	}
 
 	@Test
 	public void testGetJumpTime_HitWormCase() {
