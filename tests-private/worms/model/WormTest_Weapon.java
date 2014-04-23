@@ -21,20 +21,41 @@ public class WormTest_Weapon {
 	}
 
 	@Test
-	public void testFire_LegalCase() {
+	public void testFireBazooka_LegalCase() {
 		assertTrue(jeffrey.getSelectedWeapon() instanceof Bazooka);
 		
 		jeffrey.fire(34);
 		
 		assertTrue(world.hasProjectile());
 		Projectile projectile = world.getProjectile();
-		
+
+		assertTrue(projectile instanceof BazookaProjectile);
 		assertEquals(34, projectile.getPropulsionYield());
 		assertFuzzyEquals(Math.pow(1+0.0209401,2), projectile.getPosition().squaredDistance(jeffrey.getPosition()));
 		assertFalse(projectile.collidesWith(jeffrey));
 		assertFuzzyEquals(projectile.getDirection(), Math.PI/2);
 		assertFuzzyEquals(15+Math.cos(Math.PI/2)*1.0209401, projectile.getPosition().getX());
 		assertFuzzyEquals(15+Math.sin(Math.PI/2)*1.0209401, projectile.getPosition().getY());
+		assertEquals(world, projectile.getWorld());
+	}
+	
+	@Test
+	public void testFireRifle_LegalCase() {
+		jeffrey.selectNextWeapon();
+		assertTrue(jeffrey.getSelectedWeapon() instanceof Rifle);
+		
+		jeffrey.fire(34);
+		
+		assertTrue(world.hasProjectile());
+		Projectile projectile = world.getProjectile();
+		
+		assertTrue(projectile instanceof RifleProjectile);
+		assertEquals(34, projectile.getPropulsionYield());
+		assertFuzzyEquals(Math.pow(1+0.00673915734,2), projectile.getPosition().squaredDistance(jeffrey.getPosition()));
+		assertFalse(projectile.collidesWith(jeffrey));
+		assertFuzzyEquals(projectile.getDirection(), Math.PI/2);
+		assertFuzzyEquals(15+Math.cos(Math.PI/2)*1.006739, projectile.getPosition().getX());
+		assertFuzzyEquals(15+Math.sin(Math.PI/2)*1.006739, projectile.getPosition().getY());
 		assertEquals(world, projectile.getWorld());
 	}
 	
