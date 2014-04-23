@@ -259,14 +259,8 @@ public class Worm extends MassiveEntity {
 	 * 			| 	getWorld().removeWorm(this)
 	 * @post	The worm's action points will be decreased.
 	 * 			| new.getActionPoints() < getActionPoints()
-	 * @post	If this worm's new position after the move is a contact location, the worm moves there.
-	 *			| if(canMove() && getWorld().getLocationType(getPositionAfterMove(), getRadius()) == LocationType.CONTACT)
-	 *			|	new.getPosition() == getPositionAfterMove()
-	 * @effect	If this worm's new position after the move is a passable location (but not a contact location), 
-	 *			the worm first moves there and then falls.
-	 *			| if(canMove() && getWorld().getLocationType(getPositionAfterMove(), getRadius()) == LocationType.PASSABLE)
-	 *			|	setPosition(getPositionAfterMove())
-	 *			|	fall()
+	 * @post	The worm moves to the location after the move
+	 *			| new.getPosition() == getPositionAfterMove()
 	 * @effect	The worm eats all food rations it touches after the move.
 	 * 			| checkForFood()
 	 * @effect	Incur an action point cost.
@@ -286,8 +280,6 @@ public class Worm extends MassiveEntity {
 		}
 		decreaseActionPoints(getCostForMove(positionAfterMove));
 		setPosition(positionAfterMove);
-		if(getWorld().getLocationType(positionAfterMove, getRadius()) == LocationType.PASSABLE)
-			fall();
 		checkForFood();
 	}
 	
@@ -345,36 +337,11 @@ public class Worm extends MassiveEntity {
 	 * 			|	)
 	 * @return	The new position is the optimal position to move to for this worm in its current state, or the old position
 	 * 			(The divergence abs(θ-s) as defined above is minimised while
-	 * 			the travelled distance d is maximised, only considering contact locations when
-	 * 			at least one possible contact location is found.)
+	 * 			the travelled distance d is maximised)
 	 * 			The different angles which are looked at are discrete with a step of 0.0175 radians.
 	 * 			This method uses the weigh(distance, divergence) function as the property to maximize.
 	 * 			| if(result != getPosition())
 	 * 			| then
-	 * 			| let
-	 * 			|	onlyConsideringContactLocation =
-	 * 			|		(
-	 * 			|			for some position in Position:
-	 *			|				let
-	 *			|					angle = posMod(atan2(postion.getY()-getYCoordinate(), position.getX()-getXCoordinate()),2*PI)
-	 *			|					distance = sqrt(position.squaredDistance(getPosition()))
-	 *			|				in:
-	 *			|				(
-	 * 			|					0,1*getRadius() <= distance && distance <= getRadius()
-	 * 			|					&& ! (
-	 * 			|							for some otherPosition in Position:
-	 * 			|								getWorld().getLocationType(otherPosition, getRadius()) == LocationType.IMPASSABLE
-	 * 			|								&& 0.1*getRadius() <= otherPosition.squaredDistance(getPosition()) && otherPosition.squaredDistance(getPosition()) <= distance
-	 * 			|								&& angle == posMod(atan2(otherPosition.getY()-getYCoordinate(), otherPosition.getX()-getXCoordinate()),2*PI)
-	 * 			|						)
-	 * 			|					&& (
-	 * 			|							abs(getDirection()-angle) <= 0.7875 || abs(2*PI-angle) + abs(getDirection()) <= 0.7875 || abs(2*PI-getDirection()) + abs(angle) <= 0.7875
-	 * 			|							&& (getDirection()-angle)%0.0175 == 0
-	 * 			|						)
-	 * 			|					&& getWorld().getLocationType(position, getRadius()) == LocationType.CONTACT
-	 *			|				)
-	 * 			|		)
-	 * 			| in
 	 * 			|	(
 	 * 			|		!(
 	 * 			|			for some position in Position:
@@ -395,7 +362,6 @@ public class Worm extends MassiveEntity {
 	 * 			|							&& (getDirection()-angle)%0.0175 == 0
 	 * 			|						)
 	 *			|					&& getWorld().getLocationType(position, getRadius()).isPassable()
-	 * 			|					&& !onlyonlyConsideringContactLocation || getWorld().getLocationType(position, getRadius()) == LocationType.CONTACT
 	 * 			|					&& weigh(distance,angle-getDirection()) > weigh(sqrt(result.squaredDistance(getPosition())),posMod(atan2(result.getY()-getYCoordinate(), result.getX()-getXCoordinate()),2*PI))
 	 *			|					&& !(
 	 *			|							angle == posMod(atan2(result.getY()-getYCoordinate(), result.getX()-getXCoordinate()),2*PI)
@@ -409,11 +375,10 @@ public class Worm extends MassiveEntity {
 	public Position getPositionAfterMove(){
 		List<DirectionInfo> directions = new ArrayList<DirectionInfo>();
 		double theta = getDirection();
-		double dStep = getRadius()/100; // probing distance step.
+		double dStep; // probing distance step.
 		double r = getRadius();
 		
 		boolean positionFound = false;
-		boolean contactPositionFound = false;
 		
 		for(double s = theta-0.7875; s <= theta+0.7875; s += 0.0175){
 			DirectionInfo directionInfo = new DirectionInfo();
@@ -421,18 +386,21 @@ public class Worm extends MassiveEntity {
 			
 			double distance;
 			double furthestDistance = 0;
+			dStep = getRadius()/10;
 			for(distance = getRadius()/10; distance <= r; distance += dStep){
 				Position probePosition = getPosition().offset((distance)*cos(s),(distance)*sin(s));
 				LocationType locType = getWorld().getLocationType(probePosition, getRadius());
-				if(locType.isPassable()) {					
-					if(!contactPositionFound || locType == LocationType.CONTACT){
-						furthestDistance = distance;
-						if(!contactPositionFound && locType == LocationType.CONTACT){
-							//Clear directions because it only contains non-contact positions.
-							directions.clear();
-							contactPositionFound = true;
-						}
-					}
+				if(locType.isPassable()) {
+					furthestDistance = distance;
+				} else 
+					break;
+			}
+			dStep = Util.DEFAULT_EPSILON;
+			for(distance = furthestDistance; distance <= r; distance += dStep){
+				Position probePosition = getPosition().offset((distance)*cos(s),(distance)*sin(s));
+				LocationType locType = getWorld().getLocationType(probePosition, getRadius());
+				if(locType.isPassable()) {
+					furthestDistance = distance;
 				} else 
 					break;
 			}
@@ -1401,15 +1369,15 @@ public class Worm extends MassiveEntity {
 	 * @param position	The position to check.
 	 * @return	True if the position is not within the world boundaries.
 	 * 			| if(!getWorld().isInsideWorldBoundaries(position, getRadius())) then result == true
-	 * @return	True if the position is a contact location or impassable terrain for the given worm.
-	 * 			| if(!getWorld().isPassablePosition(position, getRadius()*1.1)) then result == true
+	 * @return	True if the position is impassable terrain for the given worm.
+	 * 			| if(!getWorld().isPassablePosition(position, getRadius())) then result == true
 	 * @return	False in all other cases
 	 * 			| result == false
 	 */
 	public boolean blocksFall(Position position){
 		if(!getWorld().isInsideWorldBoundaries(position, getRadius()))
 			return true;
-		if(!getWorld().isPassablePosition(position, getRadius()*1.1))
+		if(!getWorld().isPassablePosition(position, getRadius()))
 			return true;
 		return false;
 	}
