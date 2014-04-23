@@ -1149,9 +1149,9 @@ public class World {
 		new Worm(this, pos.getX(), pos.getY(), direction, radius, name, team);
 	}
 	
-	private final static String[] firstNames = new String[]{"Willy","Beowulf","Chilly","Leonal","Denzel","Wallis","Jeffrey","Tomas","Jens"};
-	private final static String[] aliasNames = new String[]{"The Terminator","CannonFodder","Trojan Horse"};
-	private final static String[] lastNames = new String[]{"Smith","Johnson","Williams","Jones","Brown","Claes","Fiers"};
+	private final static String[] firstNames = new String[]{"Willy","Beowulf","Chilly","Leonal","Denzel","Wallis","Jeffrey","Tomas","Jens","Erik"};
+	private final static String[] aliasNames = new String[]{"The Terminator","CannonFodder","Trojan Horse","TDD FTW", "The Monk", "The Mantis"};
+	private final static String[] lastNames = new String[]{"Smith","Johnson","Williams","Jones","Brown","Claes","Fiers","Willy","Steegmans"};
 	
 	
 	/**
