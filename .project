@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>1314-Worms-Part2</name>
+	<name>1314-Worms-Part3</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -14,4 +14,21 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>resources/images</name>
+			<type>2</type>
+			<locationURI>PROJECT_LOC/images</locationURI>
+		</link>
+		<link>
+			<name>resources/levels</name>
+			<type>2</type>
+			<locationURI>PROJECT_LOC/levels</locationURI>
+		</link>
+		<link>
+			<name>resources/programs</name>
+			<type>2</type>
+			<locationURI>PROJECT_LOC/programs</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

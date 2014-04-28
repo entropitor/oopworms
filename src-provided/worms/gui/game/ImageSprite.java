@@ -3,10 +3,12 @@ package worms.gui.game;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
+
+import worms.gui.GUIUtils;
 
 public abstract class ImageSprite<T> extends Sprite<T> {
 
@@ -51,7 +53,7 @@ public abstract class ImageSprite<T> extends Sprite<T> {
 		if (newScale == this.scale) {
 			return;
 		}
-		
+
 		this.scale = newScale;
 		if (newScale != 1.0) {
 			this.scaledImage = toBufferedImage(originalImage.getScaledInstance(
@@ -86,7 +88,10 @@ public abstract class ImageSprite<T> extends Sprite<T> {
 
 	protected BufferedImage loadImage(String filename) {
 		try {
-			return ImageIO.read(new File(filename));
+			InputStream inputStream = GUIUtils.openResource(filename);
+			BufferedImage result = ImageIO.read(inputStream);
+			inputStream.close();
+			return result;
 		} catch (IOException e) {
 			throw new RuntimeException(
 					"Could not read file '" + filename + "'", e);
@@ -119,7 +124,7 @@ public abstract class ImageSprite<T> extends Sprite<T> {
 		BufferedImage result = new BufferedImage(img.getWidth(null),
 				img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
-		Graphics2D resultGraphics = result.createGraphics(); 
+		Graphics2D resultGraphics = result.createGraphics();
 		resultGraphics.drawImage(img, 0, 0, null);
 		resultGraphics.dispose();
 

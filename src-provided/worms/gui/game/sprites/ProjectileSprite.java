@@ -2,7 +2,9 @@ package worms.gui.game.sprites;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import worms.gui.GUIUtils;
 import worms.gui.game.PlayGameScreen;
@@ -46,8 +48,8 @@ public class ProjectileSprite extends Sprite<Projectile> {
 		}
 	}
 
-	private final LimitedQueue<double[]> lastLocations = new LimitedQueue<double[]>(
-			NB_HISTORY);
+	private final List<double[]> lastLocations = Collections.synchronizedList(new LimitedQueue<double[]>(
+			NB_HISTORY));
 
 	public ProjectileSprite(PlayGameScreen screen, Projectile projectile) {
 		super(screen);
@@ -55,7 +57,7 @@ public class ProjectileSprite extends Sprite<Projectile> {
 	}
 
 	@Override
-	public void draw(Graphics2D g) {
+	public synchronized void draw(Graphics2D g) {
 		for (int i = 0; i < lastLocations.size(); i++) {
 			double[] loc = lastLocations.get(i);
 			g.setColor(colors[i]);
@@ -74,7 +76,7 @@ public class ProjectileSprite extends Sprite<Projectile> {
 		return projectile;
 	}
 
-	public void setSize(double sizeInPixels) {
+	public synchronized void setSize(double sizeInPixels) {
 		this.sizeInPixels = Math.min(MAX_DISPLAY_SIZE,
 				Math.max(MIN_DISPLAY_SIZE, DISPLAY_SCALE * sizeInPixels));
 	}
@@ -95,7 +97,7 @@ public class ProjectileSprite extends Sprite<Projectile> {
 	}
 
 	@Override
-	public void setCenterLocation(double x, double y) {
+	public synchronized void setCenterLocation(double x, double y) {
 		super.setCenterLocation(x, y);
 		if (!lastLocations.isEmpty()) {
 			// do some averaving to show some intermediate positions for
@@ -107,7 +109,8 @@ public class ProjectileSprite extends Sprite<Projectile> {
 				lastLocations.add(new double[] { (c1[0] + c2[0]) / 2,
 						(c1[1] + c2[1]) / 2 });
 			}
-			double[] prev = lastLocations.removeLast();
+			double[] prev = lastLocations.get(lastLocations.size() - 1);
+			lastLocations.remove(prev);
 
 			for (int i = 0; i < NB_HISTORY; i++) {
 				if (prev != null) {

@@ -43,8 +43,7 @@ public class TurningMode extends InputMode<PlayGameScreen> {
 		WormSprite sprite = getScreen().getSelectedWormSprite();
 		if (sprite != null) {
 			double[] wormXY = sprite.getCenterLocation();
-			double currentOrientation = getScreen().getFacade().getOrientation(
-					getScreen().getSelectedWorm());
+			double currentOrientation = sprite.getOrientation();
 			this.angle = Math.PI
 					- currentOrientation
 					+ Math.atan2((e.getY() - wormXY[1]), (wormXY[0] - e.getX()));
@@ -109,7 +108,9 @@ public class TurningMode extends InputMode<PlayGameScreen> {
 	@Override
 	public void paintOverlay(Graphics2D g) {
 		super.paintOverlay(g);
-		getScreen().drawTurnAngleIndicator(g,
-				getScreen().getSelectedWormSprite(), getCurrentAngle());
+		WormSprite sprite = getScreen().getSelectedWormSprite();
+		if (sprite != null) {
+			getScreen().drawTurnAngleIndicator(g, sprite, getCurrentAngle());
+		}
 	}
 }

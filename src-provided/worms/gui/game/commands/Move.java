@@ -2,7 +2,6 @@ package worms.gui.game.commands;
 
 import worms.gui.GUIConstants;
 import worms.gui.game.PlayGameScreen;
-import worms.gui.game.Sprite;
 import worms.gui.game.sprites.WormSprite;
 import worms.gui.messages.MessageType;
 import worms.model.IFacade;
@@ -16,7 +15,6 @@ public class Move extends Command {
 
 	private double finalX;
 	private double finalY;
-	private boolean finished;
 
 	private boolean isFalling;
 	private double fallingStartTime = -1;
@@ -30,10 +28,6 @@ public class Move extends Command {
 
 	public Worm getWorm() {
 		return worm;
-	}
-
-	protected Sprite<Worm> getSprite() {
-		return getScreen().getWormSprite(worm);
 	}
 
 	@Override
@@ -52,14 +46,19 @@ public class Move extends Command {
 	@Override
 	protected void doUpdate(double dt) {
 		WormSprite sprite = getScreen().getWormSprite(getWorm());
-		if (getElapsedTime() < getDuration()) {
-			double t = getElapsedTime() / getDuration();
-			t = t * t * (3 - 2 * t); // smooth-step interpolation
-			double x = (1.0 - t) * startX + t * finalX;
-			double y = (1.0 - t) * startY + t * finalY;
-			sprite.setCenterLocation(x, y);
+		if (sprite != null) {
+			sprite.setIsMoving(true);
+			if (getElapsedTime() < getDuration()) {
+				double t = getElapsedTime() / getDuration();
+				t = t * t * (3 - 2 * t); // smooth-step interpolation
+				double x = (1.0 - t) * startX + t * finalX;
+				double y = (1.0 - t) * startY + t * finalY;
+				sprite.setCenterLocation(x, y);
+			} else {
+				fall(dt);
+			}
 		} else {
-			fall(dt);
+			cancelExecution();
 		}
 	}
 
@@ -83,19 +82,24 @@ public class Move extends Command {
 	}
 
 	protected void updateFalling() {
-		double duration = getScreen().screenToWorldDistance(
-				Math.abs(finalY - startY))
-				/ GUIConstants.FALL_VELOCITY;
-		double timeElapsedFalling = getElapsedTime() - fallingStartTime;
-		if (timeElapsedFalling <= duration) {
-			double t = timeElapsedFalling / duration;
-			t = t * t;
-			double x = (1.0 - t) * startX + t * finalX;
-			double y = (1.0 - t) * startY + t * finalY;
-			getSprite().setCenterLocation(x, y);
+		WormSprite sprite = getScreen().getWormSprite(worm);
+		if (sprite != null) {
+			double duration = getScreen().screenToWorldDistance(
+					Math.abs(finalY - startY))
+					/ GUIConstants.FALL_VELOCITY;
+			double timeElapsedFalling = getElapsedTime() - fallingStartTime;
+			if (timeElapsedFalling <= duration) {
+				double t = timeElapsedFalling / duration;
+				t = t * t;
+				double x = (1.0 - t) * startX + t * finalX;
+				double y = (1.0 - t) * startY + t * finalY;
+				sprite.setCenterLocation(x, y);
+			} else {
+				sprite.setCenterLocation(finalX, finalY);
+				completeExecution();
+			}
 		} else {
-			getSprite().setCenterLocation(finalX, finalY);
-			finished = true;
+			cancelExecution();
 		}
 	}
 
@@ -118,18 +122,30 @@ public class Move extends Command {
 				}
 			}
 		} else {
-			finished = true;
+			completeExecution();
 		}
-		getSprite().setCenterLocation(startX, startY);
+		WormSprite sprite = getScreen().getWormSprite(worm);
+		if (sprite != null) {
+			sprite.setCenterLocation(startX, startY);
+		} else {
+			cancelExecution();
+		}
 	}
-
+	
 	@Override
-	protected boolean isExecutionCompleted() {
-		return finished;
+	protected void afterExecutionCompleted() {
+		WormSprite sprite = getScreen().getWormSprite(getWorm());
+		if (sprite != null) {
+			sprite.setIsMoving(false);
+		}
 	}
 
 	@Override
 	protected void afterExecutionCancelled() {
+		WormSprite sprite = getScreen().getWormSprite(getWorm());
+		if (sprite != null) {
+			sprite.setIsMoving(false);
+		}
 		getScreen().addMessage("This worm cannot move like that :(",
 				MessageType.ERROR);
 	}
@@ -144,7 +160,7 @@ public class Move extends Command {
 			this.finalY = getScreen().getScreenY(getFacade().getY(getWorm()));
 		} catch (ModelException e) {
 			e.printStackTrace();
-			afterExecutionCancelled();
+			cancelExecution();
 		}
 	}
 

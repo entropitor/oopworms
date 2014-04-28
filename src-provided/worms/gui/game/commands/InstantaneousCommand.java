@@ -7,16 +7,11 @@ public abstract class InstantaneousCommand extends Command {
 	protected InstantaneousCommand(IFacade facade, PlayGameScreen screen) {
 		super(facade, screen);
 	}
-
-	@Override
-	protected final boolean isExecutionCompleted() {
-		return true;
-	}
 	
 	@Override
 	protected void afterExecutionStarted() {
-		afterExecutionCompleted();
-		getScreen().updateSprites();
+		completeExecution();
+		getScreen().update();
 	}
 
 	@Override

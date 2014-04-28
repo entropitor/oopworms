@@ -1,11 +1,12 @@
 package worms.gui;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Random;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import worms.gui.game.commands.Command;
-import worms.gui.game.commands.CommandProcessor;
 import worms.model.IFacade;
 import worms.model.World;
 import worms.model.Worm;
@@ -14,7 +15,9 @@ public class GameState {
 
 	private final Random random;
 	private final IFacade facade;
-	private final CommandProcessor commandProcessor = new CommandProcessor();
+
+	private final BlockingQueue<Double> timeDelta = new LinkedBlockingQueue<Double>(
+			1);
 
 	private World world;
 
@@ -26,7 +29,7 @@ public class GameState {
 		this.level = level;
 	}
 
-	public void createWorld() {
+	public synchronized void createWorld() {
 		level.load();
 		world = facade.createWorld(level.getWorldWidth(),
 				level.getWorldHeight(), level.getPassableMap(), random);
@@ -37,27 +40,44 @@ public class GameState {
 	}
 
 	public Collection<Worm> getWorms() {
-		return getFacade().getWorms(world);
+		return getFacade().getWorms(getWorld());
 	}
 
-	public void evolve(double timeDelta) {
-		commandProcessor.advanceCommandQueue(timeDelta);
+	public void evolve(double dt) {
+		timeDelta.clear(); // nobody was waiting for the previous tick, so
+		// clear it
+		timeDelta.offer(dt);
 	}
 
-	public void enqueueCommand(Command cmd) {
-		commandProcessor.enqueueCommand(cmd);
+	public boolean executeImmediately(Command cmd) {
+		cmd.startExecution();
+		while (!cmd.isTerminated()) {
+			try {
+				Double dt = timeDelta.poll(1000 / GUIConstants.FRAMERATE,
+						TimeUnit.MILLISECONDS); // blocks, but allows repainting
+												// if necessary
+				if (dt != null) {
+					cmd.update(dt);
+				}
+				cmd.getScreen().repaint(); // repaint while executing command
+											// (which might block GUI thread)
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		return cmd.isExecutionCompleted();
 	}
 
 	public Level getLevel() {
 		return level;
 	}
 
-	public World getWorld() {
+	public synchronized World getWorld() {
 		return world;
 	}
 
-	public List<Command> getEnqueuedCommands() {
-		return commandProcessor.getCommandStack();
+	public Random getRandom() {
+		return random;
 	}
 
 }

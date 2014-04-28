@@ -3,6 +3,7 @@ package worms.gui;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
+import java.util.StringTokenizer;
 
 public class ErrorScreen extends Screen {
 
@@ -12,7 +13,7 @@ public class ErrorScreen extends Screen {
 		super(gui);
 		this.message = message;
 	}
-	
+
 	@Override
 	public void screenStarted() {
 	}
@@ -34,7 +35,14 @@ public class ErrorScreen extends Screen {
 		g.setColor(Color.RED);
 		GUIUtils.drawCenteredString((Graphics2D) g, "An error has occurred",
 				getScreenWidth(), 20);
-		GUIUtils.drawCenteredString((Graphics2D) g, message, getScreenWidth(), 50);
+		StringTokenizer tok = new StringTokenizer(message, "\n");
+		int y = 50;
+		while (tok.hasMoreElements()) {
+			String line = tok.nextToken();
+			GUIUtils.drawCenteredString((Graphics2D) g, line, getScreenWidth(),
+					y);
+			y += (g.getFont().getSize() * 7) / 5;
+		}
 	}
 
 }

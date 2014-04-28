@@ -5,6 +5,13 @@ import java.awt.Image;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 
 import worms.util.Util;
 
@@ -51,5 +58,37 @@ public class GUIUtils {
 				(double) screenWidth / image.getWidth());
 		return image.getScaledInstance((int) (ratio * image.getWidth()),
 				(int) (ratio * image.getHeight()), hints);
+	}
+
+	public static InputStream openResource(String filename) throws IOException {
+		URL url = toURL(filename);
+		return openResource(url);
+	}
+
+	public static InputStream openResource(URL url) throws IOException {
+		InputStream result;
+
+		URLConnection conn = url.openConnection();
+		result = conn.getInputStream();
+
+		return result;
+	}
+
+	public static URL toURL(String filename) throws FileNotFoundException {
+		URL url = GUIUtils.class.getResource("/" + filename);
+		if (url == null) {
+			try {
+				File file = new File(filename);
+				if (file.exists()) {
+					url = new File(filename).toURI().toURL();
+				} else {
+					throw new FileNotFoundException("File not found: " + filename);
+				}
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		return url;
 	}
 }

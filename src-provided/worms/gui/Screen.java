@@ -1,12 +1,13 @@
 package worms.gui;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import worms.gui.messages.Message;
 import worms.gui.messages.MessageDisplay;
@@ -18,18 +19,18 @@ public abstract class Screen {
 	private MessageDisplay messageDisplay = new MessageDisplay();
 
 	private final WormsGUI gui;
-	private final Component contents;
+	private final JComponent contents;
 	private final MessagePainter messagePainter;
 
 	protected Screen(WormsGUI gui) {
 		this.gui = gui;
-		
+
 		this.contents = createContents();
 		contents.setFocusable(true);
 		contents.setFocusTraversalKeysEnabled(false);
-		
+
 		this.messagePainter = createMessagePainter();
-		
+
 		switchInputMode(createDefaultInputMode());
 	}
 
@@ -37,16 +38,16 @@ public abstract class Screen {
 		return new MessagePainter(this);
 	}
 
-	public Component getContents() {
+	public JComponent getContents() {
 		return contents;
 	}
 
-	protected Component createContents() {
+	protected JComponent createContents() {
 		@SuppressWarnings("serial")
-		Component result = new JPanel() {
+		JComponent result = new JPanel() {
 			@Override
-			public void paint(Graphics g) {
-				super.paint(g);
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g);
 				Graphics2D graphics = (Graphics2D) g;
 				graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 						RenderingHints.VALUE_ANTIALIAS_ON);
@@ -55,7 +56,9 @@ public abstract class Screen {
 
 				Screen.this.paintMessage(graphics);
 
-				getCurrentInputMode().paintOverlay(graphics);
+				InputMode<? extends Screen> inputMode = getCurrentInputMode();
+				if (inputMode != null)
+					inputMode.paintOverlay(graphics);
 			}
 		};
 		result.setBackground(Color.BLACK);
@@ -100,7 +103,7 @@ public abstract class Screen {
 
 	public void addMessage(String message, MessageType type) {
 		messageDisplay.addMessage(message, type);
-		getContents().repaint();
+		repaint();
 	}
 
 	public void screenStarted() {
@@ -115,12 +118,16 @@ public abstract class Screen {
 	}
 
 	public void repaint() {
-		getContents().repaint();
+		if (SwingUtilities.isEventDispatchThread()) {
+			getContents().paintImmediately(getContents().getVisibleRect());
+		} else {
+			getContents().repaint();
+		}
+
 	}
 
 	public void screenStopped() {
 		switchInputMode(null);
 	}
-
 
 }

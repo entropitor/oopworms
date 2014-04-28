@@ -40,27 +40,27 @@ public abstract class Sprite<T> {
 	 */
 	public abstract double getWidth(Graphics2D g);
 
-	public double[] getCenterLocation() {
+	public synchronized double[] getCenterLocation() {
 		return new double[] { getCenterX(), getCenterY() };
 	}
 
-	public void setCenterLocation(double x, double y) {
+	public synchronized void setCenterLocation(double x, double y) {
 		this.x = x;
 		this.y = y;
 	}
 
-	public double getCenterX() {
+	public synchronized double getCenterX() {
 		return x;
 	}
 
-	public double getCenterY() {
+	public synchronized double getCenterY() {
 		return y;
 	}
 
 	/**
 	 * Update attributes of this sprite with values from the object
 	 */
-	public void update() {		
+	public synchronized void update() {		
 	}
 
 }

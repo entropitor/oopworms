@@ -3,17 +3,18 @@ package worms.gui;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
 public class Level {
 
-	private static final String LEVEL_FILE_EXTENSION = ".lvl";
 	private static final String LEVELS_DIRECTORY = "levels";
 
 	private static class LoadException extends RuntimeException {
@@ -26,8 +27,39 @@ public class Level {
 
 	}
 
+	private static class LevelFile implements Comparable<LevelFile> {
+		private final URL url;
+		private final String name;
+
+		public LevelFile(String name, URL url) {
+			this.name = name;
+			this.url = url;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public URL getURL() {
+			return url;
+		}
+
+		public InputStream getInputStream() {
+			try {
+				return getURL().openStream();
+			} catch (IOException e) {
+				return null;
+			}
+		}
+
+		@Override
+		public int compareTo(LevelFile o) {
+			return getName().compareTo(o.getName());
+		}
+	}
+
 	public static Level[] getAvailableLevels() {
-		File[] files = getLevelFiles();
+		LevelFile[] files = getLevelFiles();
 		Level[] levels = new Level[files.length];
 		for (int i = 0; i < files.length; i++) {
 			levels[i] = new Level(files[i]);
@@ -35,28 +67,52 @@ public class Level {
 		return levels;
 	}
 
-	private static File[] getLevelFiles() {
-		File levelsDir = new File(LEVELS_DIRECTORY);
-		if (!levelsDir.exists() || !levelsDir.isDirectory()) {
-			throw new RuntimeException("levels directory not found");
+	private static LevelFile[] getLevelFiles() {
+		InputStream levelsListFile;
+		try {
+			levelsListFile = GUIUtils.openResource(LEVELS_DIRECTORY
+					+ "/levels.txt");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			return new LevelFile[0];
 		}
-		File[] levelFiles = levelsDir.listFiles(new FilenameFilter() {
 
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.endsWith(LEVEL_FILE_EXTENSION);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				levelsListFile));
+		List<LevelFile> levelURLs = new ArrayList<LevelFile>();
+
+		try {
+			String line = reader.readLine();
+			while (line != null) {
+				line = line.trim();
+				if (!line.isEmpty() && line.toLowerCase().endsWith(".lvl")) {
+					URL url = GUIUtils.toURL(LEVELS_DIRECTORY + "/" + line);
+					levelURLs.add(new LevelFile(line, url));
+				}
+				line = reader.readLine();
 			}
-		});
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new LevelFile[0];
+		} finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				// don't care
+			}
+		}
+		LevelFile[] levelFiles = levelURLs.toArray(new LevelFile[levelURLs
+				.size()]);
 		Arrays.sort(levelFiles);
 		return levelFiles;
 	}
 
-	private final File file;
+	private final LevelFile file;
 	private BufferedImage mapImage;
 
 	private double scale;
 
-	public Level(File file) {
+	public Level(LevelFile file) {
 		this.file = file;
 	}
 
@@ -66,18 +122,19 @@ public class Level {
 
 	public void load() {
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(file));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					file.getInputStream()));
 			readFile(reader);
 			reader.close();
 		} catch (Exception e) {
 			throw new LoadException("Could not load world from file "
-					+ file.getAbsolutePath(), e);
+					+ file.getName(), e);
 		}
 	}
 
 	protected void readFile(BufferedReader reader) throws IOException {
-		this.mapImage = ImageIO.read(new File(file.getParentFile(),
-				readAsKeyVal(reader, "map")));
+		this.mapImage = ImageIO.read(GUIUtils.openResource(LEVELS_DIRECTORY
+				+ "/" + readAsKeyVal(reader, "map")));
 		try {
 			double height = Double.parseDouble(readAsKeyVal(reader, "height"));
 			this.scale = height / mapImage.getHeight();
@@ -137,8 +194,8 @@ public class Level {
 
 	public boolean[][] getPassableMap() {
 		final boolean[][] result = new boolean[getMapHeight()][getMapWidth()];
-		final byte[] bytes = ((DataBufferByte) mapImage.getRaster().getDataBuffer())
-				.getData();
+		final byte[] bytes = ((DataBufferByte) mapImage.getRaster()
+				.getDataBuffer()).getData();
 		final int w = getMapWidth();
 		final int h = getMapHeight();
 		for (int row = 0; row < h; row++) {

@@ -13,17 +13,14 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import worms.gui.AbstractPainter;
-import worms.gui.GUIConstants;
 import worms.gui.GUIUtils;
 import worms.gui.GameState;
 import worms.gui.Level;
 import worms.gui.game.sprites.FoodSprite;
 import worms.gui.game.sprites.ProjectileSprite;
 import worms.gui.game.sprites.WormSprite;
-import worms.model.IFacade;
 import worms.model.ModelException;
 import worms.model.World;
-import worms.model.Worm;
 
 public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 
@@ -63,7 +60,6 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 	protected static final Color JUMP_MARKER_COLOR = Color.GRAY;
 
 	protected static final int JUMP_MARKER_SIZE = 1;
-	protected static final double JUMP_MARKER_TIME_DISTANCE = 0.1; // worm-seconds
 	protected static final double DIRECTION_INDICATOR_SIZE = 10;
 
 	protected Graphics2D currentGraphics;
@@ -83,10 +79,6 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 
 	protected GameState getState() {
 		return getScreen().getGameState();
-	}
-
-	protected IFacade getFacade() {
-		return getState().getFacade();
 	}
 
 	protected World getWorld() {
@@ -162,7 +154,7 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 
 	protected void drawName(WormSprite sprite) {
 		final double voffset = sprite.getHeight(currentGraphics) / 2;
-		String name = getFacade().getName(sprite.getWorm());
+		String name = sprite.getName();
 
 		if (name == null) {
 			name = "(null)";
@@ -170,7 +162,7 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 
 		String teamName = null;
 		try {
-			teamName = getFacade().getTeamName(sprite.getWorm());
+			teamName = sprite.getTeamName();
 		} catch (ModelException e) {
 			// no team
 		}
@@ -204,9 +196,8 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 		double y = sprite.getCenterY();
 		double spriteHeight = sprite.getHeight(currentGraphics);
 
-		double actionPoints = getFacade().getActionPoints(sprite.getWorm());
-		double maxActionPoints = getFacade().getMaxActionPoints(
-				sprite.getWorm());
+		double actionPoints = sprite.getActionPoints();
+		double maxActionPoints = sprite.getMaxActionPoints();
 
 		RoundRectangle2D actionBarFill = new RoundRectangle2D.Double(x
 				- ACTION_BAR_WIDTH / 2, y + spriteHeight / 2, actionPoints
@@ -217,7 +208,6 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 		RoundRectangle2D actionBar = new RoundRectangle2D.Double(x
 				- ACTION_BAR_WIDTH / 2, y + spriteHeight / 2, ACTION_BAR_WIDTH,
 				ACTION_BAR_HEIGHT, 5, 5);
-		currentGraphics.drawString(actionPoints+" AP", (int)x-40, (int)y-40);
 		currentGraphics.setColor(BAR_OUTLINE_COLOR);
 		currentGraphics.draw(actionBar);
 	}
@@ -227,8 +217,8 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 		double y = sprite.getCenterY();
 		double spriteHeight = sprite.getHeight(currentGraphics);
 
-		double hitPoints = getFacade().getHitPoints(sprite.getWorm());
-		double maxHitPoints = getFacade().getMaxHitPoints(sprite.getWorm());
+		double hitPoints = sprite.getHitPoints();
+		double maxHitPoints = sprite.getMaxHitPoints();
 
 		RoundRectangle2D hitpointsBarFill = new RoundRectangle2D.Double(x
 				- ACTION_BAR_WIDTH / 2, y + spriteHeight / 2
@@ -240,7 +230,6 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 		RoundRectangle2D hitpointsBar = new RoundRectangle2D.Double(x
 				- ACTION_BAR_WIDTH / 2, y + spriteHeight / 2
 				+ ACTION_BAR_HEIGHT, ACTION_BAR_WIDTH, ACTION_BAR_HEIGHT, 5, 5);
-		currentGraphics.drawString(hitPoints+" HP", (int)x+40, (int)y-40);
 		currentGraphics.setColor(BAR_OUTLINE_COLOR);
 		currentGraphics.draw(hitpointsBar);
 	}
@@ -251,9 +240,7 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 		double spriteHeight = Math.max(sprite.getWidth(currentGraphics),
 				sprite.getHeight(currentGraphics));
 
-		Worm worm = sprite.getWorm();
-		if (getFacade().isImpassable(getWorld(), getFacade().getX(worm),
-				getFacade().getY(worm), getFacade().getRadius(worm))) {
+		if (sprite.isAtImpassableTerrain()) {
 			currentGraphics.setColor(SELECTION_IMPASSABLE_FILL_COLOR);
 		} else {
 			currentGraphics.setColor(SELECTION_FILL_COLOR);
@@ -269,8 +256,7 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 		double distance = Math.max(sprite.getWidth(currentGraphics),
 				sprite.getHeight(currentGraphics)) / 2;
 		distance += DIRECTION_INDICATOR_SIZE / 2;
-		double direction = GUIUtils.restrictDirection(getFacade()
-				.getOrientation(sprite.getWorm()));
+		double direction = GUIUtils.restrictDirection(sprite.getOrientation());
 
 		currentGraphics.setColor(DIRECTION_MARKER_COLOR);
 
@@ -291,14 +277,18 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 		double distance = Math.max(sprite.getWidth(graphics),
 				sprite.getHeight(graphics)) / 2;
 		distance += DIRECTION_INDICATOR_SIZE / 2;
-		double direction = GUIUtils.restrictDirection(getFacade()
-				.getOrientation(sprite.getWorm()) + angle);
+		double direction = GUIUtils.restrictDirection(sprite.getOrientation()
+				+ angle);
 
+		/*
+		 can't do this when getting information from sprite
 		if (getFacade().canTurn(sprite.getWorm(), angle)) {
 			graphics.setColor(TURN_ANGLE_MARKER_COLOR);
 		} else {
 			graphics.setColor(INVALID_TURN_ANGLE_MARKER_COLOR);
 		}
+		*/
+		graphics.setColor(TURN_ANGLE_MARKER_COLOR);
 
 		Shape directionIndicator = new Ellipse2D.Double(x + distance
 				* Math.cos(direction) - DIRECTION_INDICATOR_SIZE / 2,
@@ -308,13 +298,9 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 	}
 
 	protected void drawJumpMarkers(WormSprite sprite) {
-		try {
-			double time = getFacade().getJumpTime(sprite.getWorm(),
-					GUIConstants.JUMP_TIME_STEP);
-			int n = 1 + (int) (time / JUMP_MARKER_TIME_DISTANCE);
-			for (int i = 1; i <= n; i++) {
-				double dt = i * time / n;
-				double[] xy = getFacade().getJumpStep(sprite.getWorm(), dt);
+		double[][] xys = sprite.getJumpSteps();
+		if (xys != null) {
+			for (double[] xy : xys) {
 				if (xy != null) {
 					double jumpX = getScreenX(xy[0]);
 					double jumpY = getScreenY(xy[1]);
@@ -322,8 +308,6 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 							JUMP_MARKER_COLOR);
 				}
 			}
-		} catch (ModelException e) {
-			// cannot jump; draw nothing
 		}
 	}
 
@@ -346,7 +330,7 @@ public class PlayGameScreenPainter extends AbstractPainter<PlayGameScreen> {
 
 	public void drawShootingInfo(Graphics2D currentGraphics, WormSprite sprite,
 			double propulsionFraction) {
-		String weaponName = getFacade().getSelectedWeapon(sprite.getWorm());
+		String weaponName = sprite.getSelectedWeapon();
 
 		if (weaponName == null) {
 			// no weapon selected, so nothing to draw

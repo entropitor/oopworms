@@ -1,15 +1,13 @@
 package worms.gui.game;
 
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.swing.Timer;
 
 import worms.gui.GUIConstants;
 import worms.gui.GUIUtils;
@@ -18,13 +16,6 @@ import worms.gui.InputMode;
 import worms.gui.Level;
 import worms.gui.Screen;
 import worms.gui.WormsGUI;
-import worms.gui.game.commands.Jump;
-import worms.gui.game.commands.Move;
-import worms.gui.game.commands.Rename;
-import worms.gui.game.commands.SelectNextWeapon;
-import worms.gui.game.commands.SelectNextWorm;
-import worms.gui.game.commands.Shoot;
-import worms.gui.game.commands.Turn;
 import worms.gui.game.modes.DefaultInputMode;
 import worms.gui.game.modes.EnteringNameMode;
 import worms.gui.game.modes.GameOverMode;
@@ -34,7 +25,6 @@ import worms.gui.game.sprites.WormSprite;
 import worms.gui.messages.MessageType;
 import worms.model.Food;
 import worms.model.IFacade;
-import worms.model.ModelException;
 import worms.model.World;
 import worms.model.Worm;
 
@@ -44,11 +34,23 @@ public class PlayGameScreen extends Screen {
 	private final GameState gameState;
 
 	private final Set<Sprite<?>> sprites = new HashSet<Sprite<?>>();
+	private final DefaultActionHandler userActionHandler;
+	private final IActionHandler programActionHandler;
 
 	public PlayGameScreen(WormsGUI gui, GameState state) {
 		super(gui);
 		this.gameState = state;
 		this.painter = createPainter();
+		this.userActionHandler = createUserActionHandler();
+		this.programActionHandler = createProgramActionHandler();
+	}
+
+	protected DefaultActionHandler createUserActionHandler() {
+		return new DefaultActionHandler(this, true);
+	}
+
+	protected IActionHandler createProgramActionHandler() {
+		return new DefaultActionHandler(this, false);
 	}
 
 	@Override
@@ -63,30 +65,32 @@ public class PlayGameScreen extends Screen {
 
 	final AtomicLong lastUpdateTimestamp = new AtomicLong();
 
-	final Timer timer = new Timer(1000 / GUIConstants.FRAMERATE,
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					long now = System.currentTimeMillis();
-					long delta = now - lastUpdateTimestamp.getAndSet(now);
-					double dt = delta / 1000.0 * GUIConstants.TIME_SCALE;
-					gameState.evolve(dt);
-					repaint();
-				}
-			});
+	final TimerTask gameLoop = new TimerTask() {
+
+		@Override
+		public void run() {
+			long now = System.currentTimeMillis();
+			long delta = now - lastUpdateTimestamp.getAndSet(now);
+			double dt = delta / 1000.0 * GUIConstants.TIME_SCALE;
+			gameState.evolve(dt);
+			repaint();
+		}
+	};
+	private Worm currentWorm;
 
 	private void runGameLoop() {
+		Timer timer = new Timer();
 		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
-				timer.stop();
+				gameLoop.cancel();
 				e.printStackTrace();
 				getGUI().showError(
 						e.getClass().getName() + ": " + e.getMessage());
 			}
 		});
 		lastUpdateTimestamp.set(System.currentTimeMillis());
-		timer.start();
+		timer.scheduleAtFixedRate(gameLoop, 0, 1000 / GUIConstants.FRAMERATE);
 	}
 
 	public void gameFinished() {
@@ -95,16 +99,17 @@ public class PlayGameScreen extends Screen {
 						+ getFacade().getWinner(getWorld())
 						+ "\n\nPress 'R' to start another game, or 'ESC' to quit.",
 				MessageType.NORMAL);
-		timer.stop();
+		gameLoop.cancel();
 		switchInputMode(new GameOverMode(this, getCurrentInputMode()));
 	}
 
-	public void updateSprites() {
+	public synchronized void update() {
 		removeInactiveSprites();
 		addNewSprites();
 		for (Sprite<?> sprite : sprites) {
 			sprite.update();
 		}
+		currentWorm = getFacade().getCurrentWorm(getWorld());
 	}
 
 	protected void removeInactiveSprites() {
@@ -146,20 +151,11 @@ public class PlayGameScreen extends Screen {
 
 	private void createFoodSprite(Food food) {
 		FoodSprite sprite = new FoodSprite(this, food);
-		double x = getScreenX(getFacade().getX(food));
-		double y = getScreenY(getFacade().getY(food));
-		sprite.setRadius(getFacade().getRadius(food));
-		sprite.setCenterLocation(x, y);
 		addSprite(sprite);
 	}
 
 	private void createWormSprite(Worm worm) {
-		double x = getScreenX(getFacade().getX(worm));
-		double y = getScreenY(getFacade().getY(worm));
 		WormSprite sprite = new WormSprite(this, worm);
-		sprite.setCenterLocation(x, y);
-		sprite.setDirection(getFacade().getOrientation(worm));
-		sprite.setRadius(getFacade().getRadius(worm));
 		addSprite(sprite);
 	}
 
@@ -206,8 +202,7 @@ public class PlayGameScreen extends Screen {
 		Worm worm = getSelectedWorm();
 
 		if (worm != null) {
-			getGameState().enqueueCommand(
-					new SelectNextWeapon(getFacade(), worm, this));
+			userActionHandler.toggleWeapon(worm);
 		}
 	}
 
@@ -215,13 +210,7 @@ public class PlayGameScreen extends Screen {
 		Worm worm = getSelectedWorm();
 
 		if (worm != null) {
-			String weapon = getFacade().getSelectedWeapon(worm);
-			if (weapon != null) {
-				getGameState().enqueueCommand(
-						new Shoot(getFacade(), worm, propulsion, this));
-			} else {
-				addMessage("No weapon selected", MessageType.ERROR);
-			}
+			userActionHandler.fire(worm, propulsion);
 		}
 	}
 
@@ -229,14 +218,14 @@ public class PlayGameScreen extends Screen {
 		Worm worm = getSelectedWorm();
 
 		if (worm != null) {
-			getGameState().enqueueCommand(new Move(getFacade(), worm, this));
+			userActionHandler.move(worm);
 		}
 	}
 
 	public void jump() {
 		Worm worm = getSelectedWorm();
 		if (worm != null) {
-			getGameState().enqueueCommand(new Jump(getFacade(), worm, this));
+			userActionHandler.jump(worm);
 		}
 
 	}
@@ -246,8 +235,7 @@ public class PlayGameScreen extends Screen {
 		angle = GUIUtils.restrictAngle(angle, -Math.PI);
 
 		if (worm != null) {
-			getGameState().enqueueCommand(
-					new Turn(getFacade(), worm, angle, this));
+			userActionHandler.turn(worm, angle);
 		}
 	}
 
@@ -255,13 +243,12 @@ public class PlayGameScreen extends Screen {
 		Worm worm = getSelectedWorm();
 
 		if (worm != null) {
-			getGameState().enqueueCommand(
-					new Rename(getFacade(), worm, newName, this));
+			userActionHandler.changeName(worm, newName);
 		}
 	}
 
-	public Worm getSelectedWorm() {
-		return getFacade().getCurrentWorm(getWorld());
+	public synchronized Worm getSelectedWorm() {
+		return currentWorm;
 	}
 
 	@Override
@@ -407,34 +394,30 @@ public class PlayGameScreen extends Screen {
 				getCurrentInputMode(), new EnteringNameMode.Callback() {
 					@Override
 					public void onNameEntered(String newName) {
-						try {
-							getFacade().addEmptyTeam(getWorld(), newName);
-							addMessage("Team " + newName + " created.",
-									MessageType.NORMAL);
-						} catch (ModelException e) {
-							addMessage("Could not create team " + newName
-									+ ": " + e.getMessage(), MessageType.ERROR);
-						}
+						userActionHandler.addEmptyTeam(newName);
 					}
 				}));
 	}
 
-	public void addWorm() {
-		getFacade().addNewWorm(getWorld());
-		updateSprites();
+	public void addPlayerControlledWorm() {
+		userActionHandler.addNewWorm(false);
+	}
+
+	public void addComputerControlledWorm() {
+		userActionHandler.addNewWorm(true);
+
 	}
 
 	public void addFood() {
-		getFacade().addNewFood(getWorld());
-		updateSprites();
+		userActionHandler.addNewFood();
 	}
 
 	public void startGame() {
-		getFacade().startGame(getWorld());
+		userActionHandler.startGame();
+	}
+
+	public void gameStarted() {
 		switchInputMode(new DefaultInputMode(this, getCurrentInputMode()));
-		if (getFacade().isGameFinished(getWorld())) {
-			gameFinished();
-		}
 	}
 
 	public void renameWorm() {
@@ -464,11 +447,7 @@ public class PlayGameScreen extends Screen {
 	}
 
 	public void selectNextWorm() {
-		getGameState().enqueueCommand(new SelectNextWorm(getFacade(), this));
-	}
-
-	public void startNextTurn() {
-		getFacade().startNextTurn(getWorld());
+		userActionHandler.selectNextWorm();
 	}
 
 	public void selectWorm(Worm worm) {
@@ -477,5 +456,8 @@ public class PlayGameScreen extends Screen {
 		}
 	}
 
+	public IActionHandler getProgramActionHandler() {
+		return programActionHandler;
+	}
 
 }

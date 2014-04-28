@@ -16,7 +16,7 @@ public class SelectNextWorm extends InstantaneousCommand {
 
 	@Override
 	protected void doStartExecution() {
-		getScreen().startNextTurn();
+		getFacade().startNextTurn(getWorld());
 	}
 
 }

@@ -3,6 +3,9 @@ package worms.model;
 import java.util.Collection;
 import java.util.Random;
 
+import worms.gui.game.IActionHandler;
+import worms.model.programs.ParseOutcome;
+
 /**
  * Implement this interface to connect your code to the user interface.
  * 
@@ -20,6 +23,7 @@ import java.util.Random;
  * <li>a class <code>Worm</code> for representing a worm</li>
  * <li>a class <code>Food</code> for representing a food ration</li>
  * <li>a class <code>Projectile</code> for representing a projectile</li>
+ * <li>a class <code>Program</code> for representing a program</li>
  * <li>a class <code>Facade</code> that implements this interface (<code>IFacade</code>).</li>
  * </ul>
  * 
@@ -78,8 +82,9 @@ public interface IFacade {
 	 * The new worm must be placed at a random adjacent location.
 	 * The new worm can have an arbitrary (but valid) radius and direction.
 	 * The new worm may (but isn't required to) have joined a team.
+	 * The worm must behave according to the provided program, or is controlled by the player if the given program is null.
 	 */
-	void addNewWorm(World world);
+	void addNewWorm(World world, Program program);
 
 	/**
 	 * Returns whether or not the given worm can fall down
@@ -149,9 +154,11 @@ public interface IFacade {
 	 * The radius of the new worm (in meter)
 	 * @param name
 	 * The name of the new worm
+	 * @param program
+	 * The program that defines this worm's behavior, or null if this worm is controlled by the player
 	 */
 	Worm createWorm(World world, double x, double y, double direction,
-			double radius, String name);
+			double radius, String name, Program program);
 
 	/**
 	 * Makes the given worm fall down until it rests on impassable terrain again.
@@ -449,4 +456,39 @@ public interface IFacade {
 	 * Turns the given worm by the given angle.
 	 */
 	void turn(Worm worm, double angle);
+	
+	/**
+	 * Try to parse the given program.
+	 * You can use an instance of the worms.model.programs.ProgramParser.
+	 * 
+	 * When the program is executed, the execution of an action statement
+	 * must call the corresponding method of the given action handler.
+	 * This executes the action as if a human player has initiated it, and
+	 * will eventually call the corresponding method on the facade. 
+	 * 
+	 * @param programText The program text to parse
+	 * @param handler The action handler on which to execute commands
+	 * 
+	 * @return the outcome of parsing the program, which can be a success or a failure.
+	 * You can create a ParseOutcome object by means of its two static methods, success and failure. 
+	 */
+	ParseOutcome<?> parseProgram(String programText, IActionHandler handler);
+	
+	/**
+	 * Returns whether or not the given worm is controlled by a program. 
+	 * 
+	 * @return true if the given worm is controlled by a program, false otherwise
+	 */
+	public boolean hasProgram(Worm worm);
+	
+	/**
+	 * Returns whether or not the given program is well-formed.
+	 * A program is well-formed if a for-each statement does not (directly or
+	 * indirectly) contain one or more action statements.
+	 * 
+	 * @param program The program to check
+	 * 
+	 * @return true if the program is well-formed; false otherwise 
+	 */
+	public boolean isWellFormed(Program program);
 }

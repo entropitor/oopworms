@@ -11,6 +11,7 @@ public abstract class Command {
 
 	private double elapsedTime;
 	private boolean cancelled = false;
+	private boolean completed = false;
 	private boolean started = false;
 
 	protected Command(IFacade facade, PlayGameScreen screen) {
@@ -18,7 +19,7 @@ public abstract class Command {
 		this.screen = screen;
 	}
 
-	protected PlayGameScreen getScreen() {
+	public PlayGameScreen getScreen() {
 		return screen;
 	}
 
@@ -32,8 +33,8 @@ public abstract class Command {
 
 	public final void startExecution() {
 		if (canStart()) {
+			started = true;			
 			doStartExecution();
-			started = true;
 			afterExecutionStarted();
 		} else {
 			cancelExecution();
@@ -45,15 +46,17 @@ public abstract class Command {
 		afterExecutionCancelled();
 	}
 
+	protected final void completeExecution() {
+		completed = true;
+		afterExecutionCompleted();
+	}
+
 	public final void update(double dt) {
 		if (!isTerminated()) {
 			elapsedTime += dt;
 			doUpdate(dt);
-			if (cancelled) {
-				afterExecutionCancelled();
-			} else if (isTerminated()) {
-				afterExecutionCompleted();
-				getScreen().updateSprites();
+			if (isTerminated()) {
+				getScreen().update();				
 				if (getFacade().isGameFinished(getWorld())) {
 					getScreen().gameFinished();
 				}
@@ -80,13 +83,24 @@ public abstract class Command {
 	 * either by cancellation or by successful completion.
 	 */
 	public final boolean isTerminated() {
-		return cancelled || (hasBeenStarted() && isExecutionCompleted());
+		return isExecutionCancelled()
+				|| (hasBeenStarted() && isExecutionCompleted());
 	}
 
 	/**
-	 * Returns whether or not the execution of the command has been completed successfully.
+	 * Returns whether or not the execution of the command has been cancelled.
 	 */
-	protected abstract boolean isExecutionCompleted();
+	public final boolean isExecutionCancelled() {
+		return cancelled;
+	}
+
+	/**
+	 * Returns whether or not the execution of the command has been completed
+	 * successfully.
+	 */
+	public final boolean isExecutionCompleted() {
+		return completed;
+	}
 
 	/**
 	 * Returns whether or not the execution of the command can start
@@ -118,7 +132,7 @@ public abstract class Command {
 
 	/**
 	 * Update the execution of the command by the given time interval
-	 *  
+	 * 
 	 * @param dt
 	 */
 	protected abstract void doUpdate(double dt);
@@ -131,4 +145,5 @@ public abstract class Command {
 						+ String.format("%.2f", getElapsedTime()) + "s)"
 						: "queued)");
 	}
+
 }

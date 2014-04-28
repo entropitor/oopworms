@@ -22,6 +22,9 @@ public class Worms {
 				options.randomSeed = randomSeed;
 			} else if ("-clickselect".equals(arg)) {
 				options.enableClickToSelect = true;
+			} else if ("-program".equals(arg)) {
+				String program = args[++i];
+				options.programFile = program;
 			}
 		}
 
