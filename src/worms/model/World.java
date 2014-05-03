@@ -1114,6 +1114,8 @@ public class World {
 	 * The new worm can have an arbitrary (but valid) radius and direction. 
 	 * The new worm may (but isn't required to) have joined a team.
 	 * 
+	 * @param program
+	 * 			The program for the new worm.
 	 * @post	| getNbWorms()+1 == new.getNbWorms()
 	 * @post	| let 
 	 * 			|		worm = new.getWormAt(getNbWorms())
@@ -1125,11 +1127,12 @@ public class World {
 	 * 			|		&& Position.isValidPosition((new worm).getPosition())
 	 * 			|		&& isInsideWorldBoundaries((new worm).getPosition(), (new worm).getRadius()) && getLocationType((new worm).getPosition(), (new worm).getRadius()) == LocationType.CONTACT
 	 * 			|		&& (new worm).getWorld() == this
+	 * @post	| (new new.getWormAt(getNbWorms())).getProgram() == program
 	 * @throws IllegalStateException
 	 * 			When no valid position for the worm can be found. See the throws IllegalStateException clause of {@link World#findContactLocation(Position, double)} for a formal condition
 	 * 			(with startPosition = a position returned from {@link World#getRandomPerimeterLocation()}, and as radius the radius of the worm that was randomly decided on.)
 	 */
-	public void addNewWorm() throws IllegalStateException{
+	public void addNewWorm(Program program) throws IllegalStateException{
 		Random random = getRandom();
 		double direction = random.nextDouble()*2*PI;
 		double radius = 0.25+random.nextDouble()*min(getWidth(),getHeight())/50;
@@ -1146,7 +1149,7 @@ public class World {
 		
 		Position pos = findContactLocation(getRandomPerimeterLocation(),radius);
 		
-		new Worm(this, pos.getX(), pos.getY(), direction, radius, name, team);
+		new Worm(this, pos.getX(), pos.getY(), direction, radius, name, team, program);
 	}
 	
 	private final static String[] firstNames = new String[]{"Willy","Beowulf","Chilly","Leonal","Denzel","Wallis","Jeffrey","Tomas","Jens","Erik"};

@@ -34,6 +34,7 @@ public class WormTest_Constructor {
 		assertTrue(world.hasAsEntity(worm));
 		assertTrue(worm.getWeaponAt(0) instanceof Bazooka || worm.getWeaponAt(1) instanceof Bazooka);
 		assertTrue(worm.getWeaponAt(0) instanceof Rifle || worm.getWeaponAt(1) instanceof Rifle);
+		assertFalse(worm.hasProgram());
 	}
 	
 	@Test(expected = IllegalArgumentException.class)

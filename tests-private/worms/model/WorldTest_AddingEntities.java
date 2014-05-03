@@ -58,7 +58,7 @@ public class WorldTest_AddingEntities {
 	
 	@Test
 	public void testAddNewWorm() {
-		world.addNewWorm();
+		world.addNewWorm(null);
 		Worm worm = world.getWormAt(0);
 		assertTrue(Worm.isValidName(worm.getName()));
 		assertTrue(Worm.isValidDirection(worm.getDirection()));

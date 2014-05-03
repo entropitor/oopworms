@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import worms.gui.game.IActionHandler;
@@ -96,7 +97,7 @@ public class PartialFacadeTest {
 				Util.fuzzyBetween(1.5, 1.55, facade.getY(worm), EPS));
 	};
 	
-	@Test
+	@Test @Ignore
 	public void testProgram() {
 		IActionHandler handler = new SimpleActionHandler(facade);
 		World world = facade.createWorld(100.0, 100.0, new boolean[][] { {true}, {false} }, random);
