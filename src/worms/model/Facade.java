@@ -3,6 +3,8 @@ package worms.model;
 import java.util.Collection;
 import java.util.Random;
 
+import worms.gui.game.IActionHandler;
+import worms.model.programs.ParseOutcome;
 import worms.util.ModuloUtil;
 
 public class Facade implements IFacade {
@@ -138,15 +140,6 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void addNewWorm(World world) throws ModelException{
-		try{
-			world.addNewWorm();
-		}catch(IllegalStateException e){
-			throw new ModelException(e);
-		}
-	}
-
-	@Override
 	public boolean canFall(Worm worm) {
 		return worm.canFall();
 	}
@@ -173,19 +166,6 @@ public class Facade implements IFacade {
 		try {
 			return new World(width, height, passableMap, random);
 		} catch (IllegalArgumentException e) {
-			throw new ModelException(e);
-		}
-	}
-
-	@Override
-	public Worm createWorm(World world, double x, double y, double direction,
-			double radius, String name) throws ModelException{
-		direction = ModuloUtil.posMod(direction, 2*Math.PI);
-		if(!Worm.isValidDirection(direction))
-			throw new ModelException("Not a valid direction.");
-		try {
-			return new Worm(world, x, y, direction, radius, name);
-		} catch (IllegalArgumentException|NullPointerException|IllegalStateException e) {
 			throw new ModelException(e);
 		}
 	}
@@ -397,6 +377,60 @@ public class Facade implements IFacade {
 		}catch(IllegalStateException e){
 			throw new ModelException(e);
 		}
+	}
+
+	@Override
+	public void addNewWorm(World world, Program program) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/*@Override
+	public void addNewWorm(World world) throws ModelException{
+		try{
+			world.addNewWorm();
+		}catch(IllegalStateException e){
+			throw new ModelException(e);
+		}
+	}*/
+
+	@Override
+	public Worm createWorm(World world, double x, double y, double direction,
+			double radius, String name, Program program) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	/*@Override
+	public Worm createWorm(World world, double x, double y, double direction,
+			double radius, String name) throws ModelException{
+		direction = ModuloUtil.posMod(direction, 2*Math.PI);
+		if(!Worm.isValidDirection(direction))
+			throw new ModelException("Not a valid direction.");
+		try {
+			return new Worm(world, x, y, direction, radius, name);
+		} catch (IllegalArgumentException|NullPointerException|IllegalStateException e) {
+			throw new ModelException(e);
+		}
+	}*/
+
+	@Override
+	public ParseOutcome<?> parseProgram(String programText,
+			IActionHandler handler) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean hasProgram(Worm worm) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isWellFormed(Program program) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

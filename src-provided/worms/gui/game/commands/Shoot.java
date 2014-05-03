@@ -61,7 +61,7 @@ public class Shoot extends Command {
 	}
 
 	@Override
-	protected boolean isExecutionCompleted() {
+	public boolean isExecutionCompleted() {
 		return finished;
 	}
 

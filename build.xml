@@ -99,7 +99,7 @@
         </jar>
     </target>
 
-    <target name="docs" depends="compile">
+    <target name="docs">
         <javadoc packagenames="src" sourcepath="${src.dir}" destdir="${docs.dir}" charset="${encoding}" encoding="${encoding}" docencoding="${encoding}"  classpath="${taglet.jar};${lib.dir}/test/junit.jar">
             <taglet name="${taglet.package}.EffectTaglet" path="${taglet.jar}"/>
             <taglet name="${taglet.package}.InvarTaglet" path="${taglet.jar}"/>

@@ -98,7 +98,7 @@ public abstract class Command {
 	 * Returns whether or not the execution of the command has been completed
 	 * successfully.
 	 */
-	public final boolean isExecutionCompleted() {
+	public boolean isExecutionCompleted() {
 		return completed;
 	}
 
