@@ -71,7 +71,7 @@
             <formatter type="xml"/>
 
             <batchtest fork="no" todir="${report.dir}">
-                <fileset dir="${test.given.dir}"/>
+                <fileset dir="${test.given.dir}" excludes="**/SimpleActionHandler.java"/>
                 <fileset dir="${test.own.dir}"/>
             </batchtest>
         </junit>

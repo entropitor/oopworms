@@ -42,21 +42,37 @@ import be.kuleuven.cs.som.annotate.Raw;
  * 			| canHaveAsNbWeapons(getNbWeapons())
  * @invar	The worm has a proper team.
  *			| hasProperTeam()
+ * @invar	The worm has a proper program.
+ * 			| hasProperProgram()
  */
 public class Worm extends MassiveEntity {
 
 	/**
-	 * Creates a new worm without a team.
+	 * Creates a new worm without a team and without a program.
 	 *
-	 * @see 	#Worm(World, double, double, double, double, String, Team) 
+	 * @see 	#Worm(World, double, double, double, double, String, Team, Program) 
 	 * 			The overloaded constructor for info on parameters and effects.
 	 *
-	 * @effect	Create a new worm with the given params and no team.
-	 *			| this(world, x, y, direction, radius, name, null);
+	 * @effect	Create a new worm with the given params and no team nor program.
+	 *			| this(world, x, y, direction, radius, name, null, null);
 	 */
 	@Raw
 	public Worm(World world, double x, double y, double direction, double radius, String name) throws IllegalArgumentException,NullPointerException{
-		this(world, x, y, direction, radius, name, null);
+		this(world, x, y, direction, radius, name, null, null);
+	}
+	
+	/**
+	 * Creates a new worm without a program.
+	 *
+	 * @see 	#Worm(World, double, double, double, double, String, Team, Program) 
+	 * 			The overloaded constructor for info on parameters and effects.
+	 *
+	 * @effect	Create a new worm with the given params and no program.
+	 *			| this(world, x, y, direction, radius, name, team, null);
+	 */
+	@Raw
+	public Worm(World world, double x, double y, double direction, double radius, String name, Team team) throws IllegalArgumentException,NullPointerException{
+		this(world, x, y, direction, radius, name, team, null);
 	}
 
 	/**
@@ -75,6 +91,10 @@ public class Worm extends MassiveEntity {
 	 * 			The radius of the new worm (in metres)
 	 * @param name
 	 * 			The name of the new worm
+	 * @param Team
+	 * 			The team of this worm.
+	 * @param program
+	 * 			The program for this worm (or null if there's no program)
 	 * @effect	Set the x- and y-coordinate
 	 * 			| setPosition(new Position(x,y))
 	 * @effect	Set the direction to the given direction
@@ -95,12 +115,14 @@ public class Worm extends MassiveEntity {
 	 * 			| addWeapon(new Rifle())
 	 * @effect	Add the worm to the given team
 	 * 			| setTeam(team)
+	 * @effect	Set the program to the given program
+	 * 			| setProgram(program)
 	 * @throws	NullPointerException
 	 * 			The given world is not effective.
 	 * 			| world == null
 	 */
 	@Raw
-	public Worm(World world, double x, double y, double direction, double radius, String name, Team team)
+	public Worm(World world, double x, double y, double direction, double radius, String name, Team team, Program program)
 			throws IllegalArgumentException,IllegalStateException,NullPointerException{
 		setPosition(new Position(x,y));
 		setDirection(direction);
@@ -111,8 +133,63 @@ public class Worm extends MassiveEntity {
 		world.addWorm(this);
 		addWeapon(new Bazooka());
 		addWeapon(new Rifle());
-		setTeam(team);
+		setTeam(team);		
+		setProgram(program);
 	}
+	
+	/**
+	 * Gets the program for this worm.
+	 */
+	@Raw @Basic
+	public Program getProgram(){
+		return program;
+	}
+	
+	/**
+	 * Checks whether or not this worm has a program.
+	 * 
+	 * @return	Whether or not the program equals the null reference
+	 * 			| result == (getProgram() != null)
+	 */
+	@Raw
+	public boolean hasProgram(){
+		return (getProgram() != null);
+	}
+	
+	/**
+	 * Checks whether or not this worm has a proper program.
+	 * 
+	 * @return	True if this worm doesn't have a program 
+	 * 			and else whether or not the program references this worm.
+	 * 			| result == (!hasProgram() || getProgram().getWorm() == this)
+	 */
+	@Raw
+	public boolean hasProperProgram(){
+		return !hasProgram() || getProgram().getWorm() == this;
+	}
+	
+	/**
+	 * @param program
+	 * @post	The program for this worm equals a clone of the given program
+	 * 			| if(program == null)
+	 * 			|		new.getProgram() == null
+	 * 			| else
+	 * 			|		new.getProgram() == ( @effect program.clone() )
+	 * @post	The worm of the cloned program (if not null) equals this worm.
+	 * 			| if(program != null)
+	 * 			|		(new new.getProgram()).getWorm() == this
+	 */
+	@Raw @Model
+	private void setProgram(Program program){		
+		//Clone program so 2 worms can't share the same state of a program.
+		if(program != null){
+			this.program = program.clone();
+			this.program.setWorm(this);
+		} else
+			this.program = null;
+	}
+	
+	private Program program;
 	
 	/**
 	 * Checks whether the given angle is a valid angle to turn a Worm over.
