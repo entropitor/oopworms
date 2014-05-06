@@ -85,21 +85,5 @@ public class WorldTest_AddingEntities {
 			assertEquals(worldFood, food.getWorld());
 		}
 	}
-	
-	@Test
-	public void testFindContactLocation_LegalCase() {
-		Position pos = world.findContactLocation(new Position(0,30), 1);
-		assertFuzzyEquals(5.93529, pos.getX());
-		assertFuzzyEquals(21.0970, pos.getY());
-		assertTrue(world.isInsideWorldBoundaries(pos, 1));
-		assertEquals(LocationType.CONTACT, world.getLocationType(pos, 1));
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void testFindContactLocation_IllegalCase() throws Exception {
-		//ATTENTION: if this test fails it might be because the order of 'random' numbers are changed.
-		//ATTENTION: this test is a black box test and needs to be updated if FindContactLocation uses a different method.
-		world.findContactLocation(new Position(0,15), 1);
-	}
 
 }

@@ -1129,8 +1129,8 @@ public class World {
 	 * 			|		&& (new worm).getWorld() == this
 	 * @post	| (new new.getWormAt(getNbWorms())).getProgram() == program
 	 * @throws IllegalStateException
-	 * 			When no valid position for the worm can be found. See the throws IllegalStateException clause of {@link World#findContactLocation(Position, double)} for a formal condition
-	 * 			(with startPosition = a position returned from {@link World#getRandomPerimeterLocation()}, and as radius the radius of the worm that was randomly decided on.)
+	 * 			When no valid position for the worm can be found. 
+	 * 			| false ? true
 	 */
 	public void addNewWorm(Program program) throws IllegalStateException{
 		Random random = getRandom();
@@ -1147,7 +1147,7 @@ public class World {
 			team = new ArrayList<Team>(getTeams()).get(teamIndex);
 		}
 		
-		Position pos = findContactLocation(getRandomPerimeterLocation(),radius);
+		Position pos = findContactLocation(radius);
 		
 		new Worm(this, pos.getX(), pos.getY(), direction, radius, name, team, program);
 	}
@@ -1162,11 +1162,14 @@ public class World {
 	 * The food will be placed at a random adjacent location.
 	 * 
 	 * @effect	Create a food object, add it to this world and set the position to a random contact location.
-	 * 			| let food = new Food(this) in food.setPosition(findContactLocation(getRandomPerimeterLocation(), food.getRadius()))
+	 * 			| let food = new Food(this) in food.setPosition(findContactLocation(food.getRadius()))
+	 * @throws IllegalStateException
+	 * 			When no valid position for the food item can be found. 
+	 * 			| false ? true
 	 */
 	public void addNewFood() throws IllegalStateException{
 		Food food = new Food(this);
-		Position pos = findContactLocation(getRandomPerimeterLocation(), food.getRadius());
+		Position pos = findContactLocation(food.getRadius());
 		food.setPosition(pos);
 	}
 	
@@ -1193,28 +1196,18 @@ public class World {
 	}
 	
 	/**
-	 * Find a contact location starting from the given startPosition
+	 * Find a contact location somewhere in the world
 	 * 
-	 * @param startPosition
-	 * 				The position to start looking from
 	 * @param radius	
 	 * 				The radius of the entity for which to look.
 	 * @return		| isInsideWorldBoundaries(result, radius) && getLocationType(result, radius) == LocationType.CONTACT
 	 * @throws IllegalStateException
-	 * 				When no proper location can be found:
-	 * 				In the current implementation this method will look on a straight line towards the middle of the map at points with a distance of 0.1*radius between them,
-	 * 				if all of them are either partially outside of the world boundaries or aren't contact locations, than this method will throw the IllegalStateException
-	 * 				However this implementation can change in the future and build applications on the 2nd part of this condition. 
-	 * 				| let 
-	 * 				|		theta = Math.atan2(pos.getY()-centerOfMap.getY(),pos.getX()-centerOfMap.getX())
-	 * 				|		centerOfMap = new Position(getWidth()/2, getHeight()/2)
-	 * 				| in
-	 * 				|		for each i in 0..Math.floor(Math.sqrt(centerOfMap.squaredDistance(startPosition))/(radius*0.1)):
-	 * 				|				let pos = startPosition.offset(-i*radius*0.1*cos(theta), -i*radius*0.1*sin(theta))
-	 * 				|				in  !(isInsideWorldBoundaries(pos, radius) && getLocationType(pos, radius) == LocationType.CONTACT)
+	 * 				When no proper location can be found
+	 * 				| false ? true
 	 * 				
 	 */
-	public Position findContactLocation(Position startPosition, double radius) throws IllegalStateException{
+	public Position findContactLocation(double radius) throws IllegalStateException{
+		Position startPosition = getRandomPerimeterLocation();
 		Position centerOfMap = new Position(getWidth()/2, getHeight()/2);
 		double theta = Math.atan2(startPosition.getY()-centerOfMap.getY(),startPosition.getX()-centerOfMap.getX());
 		
