@@ -8,8 +8,8 @@ import java.util.Map;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
 import worms.gui.game.IActionHandler;
-import worms.model.programs.Statement;
-import worms.model.programs.Type;
+import worms.model.programs.statements.Statement;
+import worms.model.programs.types.Type;
 
 /**
  * A class representing a program with global variables, a main statement and a worm.

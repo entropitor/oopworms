@@ -4,12 +4,12 @@ import java.util.Collection;
 import java.util.Random;
 
 import worms.gui.game.IActionHandler;
-import worms.model.programs.Expression;
 import worms.model.programs.ParseOutcome;
 import worms.model.programs.ProgramFactoryImpl;
 import worms.model.programs.ProgramParser;
-import worms.model.programs.Statement;
-import worms.model.programs.Type;
+import worms.model.programs.expressions.Expression;
+import worms.model.programs.statements.Statement;
+import worms.model.programs.types.Type;
 import worms.util.ModuloUtil;
 
 public class Facade implements IFacade {

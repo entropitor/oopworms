@@ -2,6 +2,10 @@ package worms.model.programs;
 
 import java.util.List;
 
+import worms.model.programs.expressions.Expression;
+import worms.model.programs.statements.Statement;
+import worms.model.programs.types.Type;
+
 public class ProgramFactoryImpl implements worms.model.programs.ProgramFactory<Expression, Statement, Type> {
 
 	@Override
