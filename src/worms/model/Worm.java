@@ -1448,15 +1448,15 @@ public class Worm extends MassiveEntity {
 	 * @param position	The position to check.
 	 * @return	True if the position is not within the world boundaries.
 	 * 			| if(!getWorld().isInsideWorldBoundaries(position, getRadius())) then result == true
-	 * @return	True if the position is impassable terrain for the given worm.
-	 * 			| if(!getWorld().isPassablePosition(position, getRadius())) then result == true
+	 * @return	True if the position is a contact location or impassable terrain for the given worm.
+ 	 * 			| if(!getWorld().isPassablePosition(position, getRadius()*1.1)) then result == true
 	 * @return	False in all other cases
 	 * 			| result == false
 	 */
 	public boolean blocksFall(Position position){
 		if(!getWorld().isInsideWorldBoundaries(position, getRadius()))
 			return true;
-		if(!getWorld().isPassablePosition(position, getRadius()))
+		if(!getWorld().isPassablePosition(position, getRadius()*1.1))
 			return true;
 		return false;
 	}
