@@ -136,6 +136,9 @@ public class WormsParserMyListener<E, S, T> implements WormsParserListener {
 			E e = ExpressionOfExpr(action.expr());
 			return (factory.createTurn(line, column, e));
 		}
+		if (action.MOVE() != null) {
+			return factory.createMove(line, column);
+		}
 
 		assert (false);
 		return (null);
