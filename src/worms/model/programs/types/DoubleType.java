@@ -12,6 +12,10 @@ public class DoubleType implements Type {
 	public Double getValue() {
 		return value;
 	}
+	
+	public double getDoubleValue(){
+		return value.doubleValue();
+	}
 
 	@Override
 	public Type setValue(Object value) throws ClassCastException{

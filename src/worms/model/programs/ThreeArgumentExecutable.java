@@ -3,34 +3,38 @@ package worms.model.programs;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
 
-public abstract class ThreeArgumentExecutable extends TwoArgumentExecutable {
+public abstract class ThreeArgumentExecutable<F extends Executable,S extends Executable,T extends Executable> extends ArgumentExecutable {
 
-	@Override
-	public boolean hasAsSubExecutable(Executable executable) {
-		//FIXME tests
-		if(super.hasAsSubExecutable(executable))
-			return true;
-		if(executable == getThirdArgument())
-			return true;
-		return false;
+	//FIXME test
+	public ThreeArgumentExecutable(F firstArgument, S secondArgument, T thirdArgument) throws IllegalArgumentException{
+		if(!canHaveAsSubExecutable(firstArgument) || ! canHaveAsSubExecutable(secondArgument) || !canHaveAsSubExecutable(thirdArgument))
+			throw new IllegalArgumentException();
+		this.firstArgument = firstArgument;
+		this.secondArgument = secondArgument;
+		this.thirdArgument = thirdArgument;
 	}
 	
 	@Basic @Raw
-	public Executable getThirdArgument() {
+	public F getFirstArgument() {
+		return firstArgument;
+	}
+	private F firstArgument;
+	
+	@Basic @Raw
+	public S getSecondArgument() {
+		return secondArgument;
+	}
+	private S secondArgument;
+	
+	@Basic @Raw
+	public T getThirdArgument() {
 		return thirdArgument;
 	}
+	private T thirdArgument;
 	
-	@Raw
-	void setThirdArgument(Executable argument) throws IllegalArgumentException{
-		//FIXME tests
-		if(!canHaveAsSubExecutable(argument))
-			throw new IllegalArgumentException();
-		this.thirdArgument = argument;
-	}
-	private Executable thirdArgument;
-	
-	public int getNbArguments(){
-		//FIXME tests
-		return 3;
+	@Override @Raw
+	public Executable[] getSubExecutables(){
+		//FIXME test
+		return new Executable[]{firstArgument,secondArgument,thirdArgument};
 	}
 }

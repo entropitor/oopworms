@@ -3,34 +3,31 @@ package worms.model.programs;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
 
-public abstract class TwoArgumentExecutable extends OneArgumentExecutable{
+public abstract class TwoArgumentExecutable<F extends Executable,S extends Executable> extends ArgumentExecutable{
 
-	@Override
-	public boolean hasAsSubExecutable(Executable executable) {
-		//FIXME tests
-		if(super.hasAsSubExecutable(executable))
-			return true;
-		if(executable == getSecondArgument())
-			return true;
-		return false;
+	//FIXME test
+	public TwoArgumentExecutable(F firstArgument, S secondArgument) throws IllegalArgumentException{
+		if(!canHaveAsSubExecutable(firstArgument) || ! canHaveAsSubExecutable(secondArgument))
+			throw new IllegalArgumentException();
+		this.firstArgument = firstArgument;
+		this.secondArgument = secondArgument;
 	}
 	
 	@Basic @Raw
-	public Executable getSecondArgument() {
+	public F getFirstArgument() {
+		return firstArgument;
+	}
+	private F firstArgument;
+	
+	@Basic @Raw
+	public S getSecondArgument() {
 		return secondArgument;
 	}
+	private S secondArgument;
 	
-	@Raw
-	void setSecondArgument(Executable argument) throws IllegalArgumentException{
-		//FIXME tests
-		if(!canHaveAsSubExecutable(argument))
-			throw new IllegalArgumentException();
-		this.secondArgument = argument;
-	}
-	private Executable secondArgument;
-	
-	public int getNbArguments(){
-		//FIXME tests
-		return 2;
+	@Override @Raw
+	public Executable[] getSubExecutables(){
+		//FIXME test
+		return new Executable[]{firstArgument,secondArgument};
 	}
 }
