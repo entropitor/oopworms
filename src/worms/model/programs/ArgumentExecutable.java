@@ -17,7 +17,11 @@ public abstract class ArgumentExecutable implements Executable{
 	
 	public boolean canHaveAsSubExecutable(Executable executable){
 		//FIXME test
-		return executable != null && !hasAsSubExecutable(executable);
+		if(executable == null)
+			return false;
+		if(!(executable instanceof ArgumentExecutable))
+			return true;
+		return !((ArgumentExecutable)executable).hasAsSubExecutable(this);
 	}
 	
 	//FIXME test
