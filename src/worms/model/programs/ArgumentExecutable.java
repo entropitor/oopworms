@@ -17,8 +17,18 @@ public abstract class ArgumentExecutable implements Executable{
 	
 	public boolean canHaveAsSubExecutable(Executable executable){
 		//FIXME test
+		//Null reference not allowed
 		if(executable == null)
 			return false;
+
+		//No action-statments in for-each statement (seems like it shouldn't be checked)
+		//if(this instanceof ForEachStatement && executable instanceof ActionStatement)
+		//	return false;
+		
+		//No loops in executables
+		if(executable == this)
+			return false;
+		//If executable doesn't have subexecutables => OK!
 		if(!(executable instanceof ArgumentExecutable))
 			return true;
 		return !((ArgumentExecutable)executable).hasAsSubExecutable(this);
