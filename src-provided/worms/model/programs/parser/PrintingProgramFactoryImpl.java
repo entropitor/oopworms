@@ -192,11 +192,16 @@ public class PrintingProgramFactoryImpl implements
 		return new PrintingObject(new Object() {
 		}.getClass().getEnclosingMethod().getName(), e);
 	}
-
+	
 	@Override
 	public PrintingObject createVariableAccess(int line, int column, String name) {
+		return null; // we use the other method
+	}
+
+	@Override
+	public PrintingObject createVariableAccess(int line, int column, String name, PrintingObject type) {
 		return new PrintingObject(new Object() {
-		}.getClass().getEnclosingMethod().getName(), name);
+		}.getClass().getEnclosingMethod().getName(), name, type);
 	}
 
 	@Override
