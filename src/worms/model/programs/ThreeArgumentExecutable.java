@@ -35,6 +35,6 @@ public abstract class ThreeArgumentExecutable<F extends Executable,S extends Exe
 	@Override @Raw
 	public Executable[] getSubExecutables(){
 		//FIXME test
-		return new Executable[]{firstArgument,secondArgument,thirdArgument};
+		return new Executable[]{getFirstArgument(),getSecondArgument(),getThirdArgument()};
 	}
 }

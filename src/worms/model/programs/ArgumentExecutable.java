@@ -6,17 +6,22 @@ public abstract class ArgumentExecutable implements Executable{
 	
 	@Raw
 	public boolean hasAsSubExecutable(Executable executable){
-		//FIXME test
 		if(executable == this)
 			return true;
-		for(Executable argument : getSubExecutables())
-			if(argument instanceof ArgumentExecutable && ((ArgumentExecutable) argument).hasAsSubExecutable(executable))
-				return true;
+		for(Executable argument : getSubExecutables()){
+			if(argument instanceof ArgumentExecutable){
+				if(((ArgumentExecutable) argument).hasAsSubExecutable(executable))
+					return true;
+			} else {
+				if(executable == argument)
+					return true;
+			}
+				
+		}
 		return false;
 	}
 	
 	public boolean canHaveAsSubExecutable(Executable executable){
-		//FIXME test
 		//Null reference not allowed
 		if(executable == null)
 			return false;

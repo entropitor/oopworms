@@ -28,6 +28,6 @@ public abstract class TwoArgumentExecutable<F extends Executable,S extends Execu
 	@Override @Raw
 	public Executable[] getSubExecutables(){
 		//FIXME test
-		return new Executable[]{firstArgument,secondArgument};
+		return new Executable[]{getFirstArgument(),getSecondArgument()};
 	}
 }

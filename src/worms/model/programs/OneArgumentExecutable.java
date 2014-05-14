@@ -21,6 +21,6 @@ public abstract class OneArgumentExecutable<F extends Executable> extends Argume
 	@Override @Raw
 	public Executable[] getSubExecutables(){
 		//FIXME test
-		return new Executable[]{firstArgument};
+		return new Executable[]{getFirstArgument()};
 	}
 }
