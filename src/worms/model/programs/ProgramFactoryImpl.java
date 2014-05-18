@@ -2,12 +2,16 @@ package worms.model.programs;
 
 import java.util.List;
 
+import worms.model.programs.expressions.*;
+import worms.model.programs.statements.*;
+import worms.model.programs.types.*;
+
 public class ProgramFactoryImpl implements worms.model.programs.ProgramFactory<Expression, Statement, Type> {
 
 	@Override
 	public Expression createDoubleLiteral(int line, int column, double d) {
 		// TODO Auto-generated method stub
-		return null;
+		return new DoubleLiteralExpression(d);
 	}
 
 	@Override
@@ -172,7 +176,9 @@ public class ProgramFactoryImpl implements worms.model.programs.ProgramFactory<E
 	public Expression createAdd(int line, int column, Expression e1,
 			Expression e2) {
 		// TODO Auto-generated method stub
-		return null;
+		// TODO not sure if this is allowed (just casting) or if we need to throw ModelException,
+		//		just adding this one already as an example (for now).
+		return new AddExpression((DoubleExpression) e1, (DoubleExpression) e2);
 	}
 
 	@Override

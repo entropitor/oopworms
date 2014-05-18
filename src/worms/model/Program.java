@@ -8,8 +8,10 @@ import java.util.Map;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
 import worms.gui.game.IActionHandler;
-import worms.model.programs.Statement;
-import worms.model.programs.Type;
+import worms.model.programs.ArgumentExecutable;
+import worms.model.programs.Executable;
+import worms.model.programs.statements.Statement;
+import worms.model.programs.types.Type;
 
 /**
  * A class representing a program with global variables, a main statement and a worm.
@@ -65,6 +67,14 @@ public class Program implements Cloneable{
 	@Raw @Basic
 	public Statement getMainStatement(){
 		return mainStatement;
+	}
+	public boolean hasAsSubExecutable(Executable executable){
+		//FIXME test
+		if(getMainStatement() instanceof ArgumentExecutable){
+			return ((ArgumentExecutable)getMainStatement()).hasAsSubExecutable(executable);
+		}else{
+			return getMainStatement() == executable;
+		}
 	}
 	private Statement mainStatement;
 	
