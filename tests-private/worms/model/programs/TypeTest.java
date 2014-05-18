@@ -8,7 +8,6 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
-import worms.model.Entity;
 import worms.model.Food;
 import worms.model.World;
 import worms.model.Worm;

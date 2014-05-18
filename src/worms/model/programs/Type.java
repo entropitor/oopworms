@@ -41,6 +41,9 @@ public abstract class Type<C> {
 	
 	@Override
 	public int hashCode() {
-		return getValue().hashCode();
+		if (getValue() == null)
+			return 0;
+		else
+			return getValue().hashCode();
 	}
 }
