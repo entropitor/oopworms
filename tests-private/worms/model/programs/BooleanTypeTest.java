@@ -8,23 +8,23 @@ public class BooleanTypeTest {
 
 	@Test
 	public void testBooleanType() {
-		BooleanType bool = new BooleanType(BooleanType.Value.TRUE);
-		assertEquals(BooleanType.Value.TRUE, bool.getValue());
+		BooleanType bool = new BooleanType(true);
+		assertEquals(true, bool.getValue());
 	}
 
 	@Test
 	public void testGetNewTypeOfSameClass() {
-		BooleanType bool = new BooleanType(BooleanType.Value.TRUE);
-		BooleanType newBool = bool.getNewTypeOfSameClass(BooleanType.Value.FALSE);
+		BooleanType bool = new BooleanType(true);
+		BooleanType newBool = bool.getNewTypeOfSameClass(false);
 		assertFalse(newBool.equals(bool));
-		assertEquals(BooleanType.Value.FALSE, newBool.getValue());
+		assertEquals(false, newBool.getValue());
 	}
 	
 	@Test
 	public void testEquals() {
-		BooleanType bool1 = new BooleanType(BooleanType.Value.TRUE);
-		BooleanType bool2 = new BooleanType(BooleanType.Value.TRUE);
-		BooleanType bool3 = new BooleanType(BooleanType.Value.FALSE);
+		BooleanType bool1 = new BooleanType(true);
+		BooleanType bool2 = new BooleanType(true);
+		BooleanType bool3 = new BooleanType(false);
 		
 		// Reflexive
 		assertTrue(bool1.equals(bool1));
@@ -38,8 +38,8 @@ public class BooleanTypeTest {
 	
 	@Test
 	public void testHashCode() {
-		BooleanType bool1 = new BooleanType(BooleanType.Value.TRUE);
-		BooleanType bool2 = new BooleanType(BooleanType.Value.TRUE);
+		BooleanType bool1 = new BooleanType(true);
+		BooleanType bool2 = new BooleanType(true);
 		
 		assertTrue(bool1.equals(bool2));
 		assertEquals(bool1.hashCode(), bool2.hashCode());

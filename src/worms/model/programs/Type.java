@@ -38,4 +38,9 @@ public abstract class Type<C> {
 			return false;
 		return true;
 	}
+	
+	@Override
+	public int hashCode() {
+		return getValue().hashCode();
+	}
 }

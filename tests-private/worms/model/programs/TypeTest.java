@@ -26,7 +26,7 @@ public class TypeTest {
 		e1 = new EntityType(bicky);
 		e2 = new EntityType(bicky);
 		e3 = new EntityType(willy);
-		bool = new BooleanType(BooleanType.Value.FALSE);
+		bool = new BooleanType(false);
 	}
 	
 	@Test

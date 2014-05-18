@@ -14,10 +14,4 @@ public class EntityType extends Type<Entity> {
 	public EntityType getNewTypeOfSameClass(Entity value) {
 		return new EntityType(value);
 	}
-
-	@Override
-	public int hashCode() {
-		Entity e = getValue();
-		return e.getClass().hashCode() * (int) (e.getXCoordinate()*e.getYCoordinate()*e.getRadius());
-	}
 }
