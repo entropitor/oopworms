@@ -316,4 +316,11 @@ public class ProgramFactoryImpl implements worms.model.programs.ProgramFactory<E
 		return null;
 	}
 
+	@Override
+	public Expression createVariableAccess(int line, int column, String name,
+			Type type) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

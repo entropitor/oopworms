@@ -39,7 +39,12 @@ public class AddNewWorm extends InstantaneousCommand {
 				if (parsed != null) {
 					if (parsed.isSuccess()) {
 						Program program = ((Success) parsed).getResult();
-						getFacade().addNewWorm(getWorld(), program);
+						if (getFacade().isWellFormed(program)) {
+							getFacade().addNewWorm(getWorld(), program);
+						} else {
+							cancelExecution();
+							getGUI().showError("The program is not well-formed");
+						}
 						return;
 					} else {
 						List<String> errors = ((Failure) parsed).getResult();
@@ -52,8 +57,10 @@ public class AddNewWorm extends InstantaneousCommand {
 						return;
 					}
 				}
+			} else {
+				cancelExecution();
+				return;
 			}
-			cancelExecution();
 		} else {
 			getFacade().addNewWorm(getWorld(), null);
 		}

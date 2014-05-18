@@ -13,8 +13,8 @@ public class AddExpression extends TwoArgumentExecutable<DoubleExpression, Doubl
 
 	@Override
 	public DoubleType calculate(Program program) {
-		double left = this.getFirstArgument().calculate(program).getDoubleValue();
-		double right = this.getSecondArgument().calculate(program).getDoubleValue();
+		double left = this.getFirstArgument().calculate(program).getValue();
+		double right = this.getSecondArgument().calculate(program).getValue();
 		
 		return new DoubleType(left + right);
 	}

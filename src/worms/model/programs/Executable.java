@@ -1,5 +1,4 @@
 package worms.model.programs;
 
-public interface Executable {
+public interface Executable {}
 
-}

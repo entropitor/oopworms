@@ -101,9 +101,9 @@ public class WormTest_Move {
 		assertTrue(willy.canFall());
 		willy.fall();
 		assertFuzzyEquals(91, willy.getXCoordinate());
-		assertFuzzyEquals(20, willy.getYCoordinate());
+		assertFuzzyEquals(21, willy.getYCoordinate());
 		assertEquals(4448495-1, willy.getActionPoints());
-		assertEquals(4448495-3*(40-20), willy.getHitPoints());
+		assertEquals(4448495-3*(40-21), willy.getHitPoints());
 	}
 
 	@Test

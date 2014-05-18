@@ -1,29 +1,24 @@
 package worms.model.programs.types;
 
+import be.kuleuven.cs.som.annotate.Value;
 
-public class DoubleType implements Type {
-	// TODO use canHaveAs and stuff, dummy implementation
-	
-	public DoubleType(double value){
-		this.value = value;
+@Value
+public class DoubleType extends Type<Double> {
+
+	public DoubleType(Double value) {
+		super(value);
 	}
-
+	
+	public DoubleType(Integer value) {
+		super(new Double(value));
+	}
+	
 	@Override
-	public Double getValue() {
-		return value;
-	}
-	
-	public double getDoubleValue(){
-		return value.doubleValue();
+	public DoubleType getNewTypeOfSameClass(Double value) {
+		return new DoubleType(value);
 	}
 
-	@Override
-	public Type setValue(Object value) throws ClassCastException{
-		// TODO Auto-generated method stub
-		// TODO use canHaveAs and stuff, dummy implementation
-		return new DoubleType((Double)value);
+	public DoubleType getNewTypeOfSameClass(Integer value) {
+		return new DoubleType(value);
 	}
-	
-	Double value;
-	
 }

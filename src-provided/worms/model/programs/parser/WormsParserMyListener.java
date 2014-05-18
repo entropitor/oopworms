@@ -136,6 +136,9 @@ public class WormsParserMyListener<E, S, T> implements WormsParserListener {
 			E e = ExpressionOfExpr(action.expr());
 			return (factory.createTurn(line, column, e));
 		}
+		if (action.MOVE() != null) {
+			return factory.createMove(line, column);
+		}
 
 		assert (false);
 		return (null);
@@ -430,8 +433,14 @@ public class WormsParserMyListener<E, S, T> implements WormsParserListener {
 				return (ExpressionOfNumber(expr.NUMBER()));
 			}
 			if (expr.IDENTIFIER() != null) {
-				return (factory.createVariableAccess(line, column, expr
-						.IDENTIFIER().getText()));
+				String varName =  expr
+						.IDENTIFIER().getText();
+				T type = globals.get(varName);
+				E varExpr = factory.createVariableAccess(line, column, varName, type);
+				if (varExpr == null) {
+					varExpr = factory.createVariableAccess(line, column, varName);
+				}
+				return varExpr;
 			}
 			if (expr.unop() != null) {
 				return (ExpressionOfUnop(expr.unop()));

@@ -20,16 +20,16 @@ public class AddExpressionTest {
 	@Test
 	public void testCalculate() {
 		AddExpression addExpr = new AddExpression(literal3, literal5);
-		assertFuzzyEquals(8, addExpr.calculate(null).getDoubleValue());
+		assertFuzzyEquals(8, addExpr.calculate(null).getValue());
 		
 		addExpr = new AddExpression(literal17, literalNegative20);
-		assertFuzzyEquals(-3, addExpr.calculate(null).getDoubleValue());
+		assertFuzzyEquals(-3, addExpr.calculate(null).getValue());
 		
 		addExpr = new AddExpression(literalNegative20, literal5);
-		assertFuzzyEquals(-15, addExpr.calculate(null).getDoubleValue());
+		assertFuzzyEquals(-15, addExpr.calculate(null).getValue());
 		
 		addExpr = new AddExpression(literalNegative20, literalNegative20);
-		assertFuzzyEquals(-40, addExpr.calculate(null).getDoubleValue());
+		assertFuzzyEquals(-40, addExpr.calculate(null).getValue());
 	}
 
 }
