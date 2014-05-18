@@ -246,4 +246,19 @@ public abstract class Entity {
 	}
 	
 	private World world = null;
+	
+	/**
+	 * Returns a hash value for this entity.
+	 * Equal entities have equal hash values.
+	 * Inequal entities produce mostly distinct hash values.
+	 */
+	@Override
+	public int hashCode() {
+		// Use the class to make sure entities with the same properties but of a different class
+		// (e.g. Projectile vs. Food) do not (always) have the same hash value.
+		int result = getClass().hashCode() * (int) getRadius();
+		if (getPosition() != null)
+			result *= (int) (getXCoordinate()*getYCoordinate());
+		return result;
+	}
 }
