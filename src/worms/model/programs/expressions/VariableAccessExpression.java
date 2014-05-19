@@ -3,7 +3,7 @@ package worms.model.programs.expressions;
 import worms.model.Program;
 import worms.model.programs.types.*;
 
-public class VariableAccessExpression implements Expression<Type<?>> {
+public class VariableAccessExpression<T extends Type<?>> implements Expression<T> {
 	
 	public VariableAccessExpression(String variableName){
 		this.variableName = variableName;
@@ -11,17 +11,16 @@ public class VariableAccessExpression implements Expression<Type<?>> {
 	
 	private final String variableName;
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Type<?> calculate(Program program) {
-		//Returns DoubleType.ZERO in case no value can be found.
+	public T calculate(Program program) {
 		if(program == null)
-			return DoubleType.ZERO;
-		
+			return null;
+
+		//The type of a variable can't change at runtime 
+		//+ the correct expression is constructed in ProgramFactory
 		Type<?> value = program.getVariableValue(variableName);
-		if(value == null)
-			return DoubleType.ZERO;
-		else
-			return value;
+		return (T) value;
 	}
 
 }

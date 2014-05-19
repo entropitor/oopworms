@@ -321,6 +321,13 @@ public class ProgramFactoryImpl implements worms.model.programs.ProgramFactory<E
 	public Expression<?> createVariableAccess(int line, int column, String name,
 			Type<?> type) {
 		// TODO Auto-generated method stub
+		if(type instanceof DoubleType)
+			return new VariableAccessExpression<DoubleType>(name);
+		else if(type instanceof BooleanType)
+			return new VariableAccessExpression<BooleanType>(name);
+		else if(type instanceof EntityType)
+			return new VariableAccessExpression<EntityType>(name);
+		//ELSE return null?????
 		return null;
 	}
 
