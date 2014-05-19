@@ -22,9 +22,9 @@ import worms.model.programs.types.Type;
 public class Program implements Cloneable{
 	
 	@Raw
-	public Program(Statement mainStatement, Map<String, Type> globals, IActionHandler handler){
+	public Program(Statement mainStatement, Map<String, Type<?>> globals, IActionHandler handler){
 		this.mainStatement = mainStatement;
-		this.globals = new HashMap<String, Type>(globals);
+		this.globals = new HashMap<String, Type<?>>(globals);
 		this.handler = handler;
 		this.executionStack = new ArrayDeque<Statement>();
 		//@Raw => worm isn't set at the end but that's ok since this program can be raw at end of a @Raw method.
@@ -32,7 +32,7 @@ public class Program implements Cloneable{
 	
 	@Override
 	public @Raw Program clone(){
-		return new Program(getMainStatement(), new HashMap<String, Type>(this.globals), getActionHandler());
+		return new Program(getMainStatement(), new HashMap<String, Type<?>>(this.globals), getActionHandler());
 	}
 	
 	@Basic @Raw
@@ -79,7 +79,7 @@ public class Program implements Cloneable{
 	private Statement mainStatement;
 	
 	
-	private Map<String, Type> globals;
+	private Map<String, Type<?>> globals;
 	
 	@Raw @Basic
 	public IActionHandler getActionHandler(){

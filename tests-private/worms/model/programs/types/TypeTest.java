@@ -1,4 +1,4 @@
-package worms.model.programs;
+package worms.model.programs.types;
 
 import static java.lang.Math.PI;
 import static org.junit.Assert.*;
