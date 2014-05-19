@@ -19,11 +19,11 @@ import worms.model.programs.types.DoubleType;
 import worms.model.programs.types.EntityType;
 import worms.model.programs.types.Type;
 
-public class VariableAccessExpressionTest {
+public class VariableAccessTest {
 	
-	VariableAccessExpression<DoubleType> expressionDoubleA,expressionDoubleB;
-	VariableAccessExpression<EntityType> expressionEntity;
-	VariableAccessExpression<BooleanType> expressionBoolean;
+	VariableAccess<DoubleType> expressionDoubleA,expressionDoubleB;
+	VariableAccess<EntityType> expressionEntity;
+	VariableAccess<BooleanType> expressionBoolean;
 	Program program;
 	Worm willy;
 	Food pizza;
@@ -33,10 +33,10 @@ public class VariableAccessExpressionTest {
 		World world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
 		pizza = new Food(world);
 		
-		expressionDoubleA = new VariableAccessExpression<>("a");
-		expressionDoubleB = new VariableAccessExpression<>("b");
-		expressionEntity = new VariableAccessExpression<>("entity");
-		expressionBoolean = new VariableAccessExpression<>("bool");
+		expressionDoubleA = new VariableAccess<>("a");
+		expressionDoubleB = new VariableAccess<>("b");
+		expressionEntity = new VariableAccess<>("entity");
+		expressionBoolean = new VariableAccess<>("bool");
 		
 		Map<String, Type<?>>globals = new HashMap<String, Type<?>>();
 		globals.put("a", new DoubleType(3.14));

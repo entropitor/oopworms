@@ -3,9 +3,10 @@ package worms.model.programs.expressions;
 import worms.model.Program;
 import worms.model.programs.types.*;
 
-public class VariableAccessExpression<T extends Type<?>> implements Expression<T> {
+public class VariableAccess<T extends Type<?>> 
+	implements Expression<T> {
 	
-	public VariableAccessExpression(String variableName){
+	public VariableAccess(String variableName){
 		this.variableName = variableName;
 	}
 	

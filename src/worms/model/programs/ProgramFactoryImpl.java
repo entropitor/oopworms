@@ -12,7 +12,7 @@ public class ProgramFactoryImpl implements worms.model.programs.ProgramFactory<E
 	@Override
 	public Expression<?> createDoubleLiteral(int line, int column, double d) {
 		// TODO Auto-generated method stub
-		return new DoubleLiteralExpression(d);
+		return new DoubleLiteral(d);
 	}
 
 	@Override
@@ -179,7 +179,7 @@ public class ProgramFactoryImpl implements worms.model.programs.ProgramFactory<E
 		// TODO Auto-generated method stub
 		// TODO not sure if this is allowed (just casting) or if we need to throw ModelException,
 		//		just adding this one already as an example (for now).
-		return new AddExpression((Expression<DoubleType>) e1, (Expression<DoubleType>) e2);
+		return new Addition((Expression<DoubleType>) e1, (Expression<DoubleType>) e2);
 	}
 
 	@Override
@@ -322,11 +322,11 @@ public class ProgramFactoryImpl implements worms.model.programs.ProgramFactory<E
 			Type<?> type) {
 		// TODO Auto-generated method stub
 		if(type instanceof DoubleType)
-			return new VariableAccessExpression<DoubleType>(name);
+			return new VariableAccess<DoubleType>(name);
 		else if(type instanceof BooleanType)
-			return new VariableAccessExpression<BooleanType>(name);
+			return new VariableAccess<BooleanType>(name);
 		else if(type instanceof EntityType)
-			return new VariableAccessExpression<EntityType>(name);
+			return new VariableAccess<EntityType>(name);
 		//ELSE return null?????
 		return null;
 	}

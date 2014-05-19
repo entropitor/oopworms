@@ -4,9 +4,11 @@ import worms.model.Program;
 import worms.model.programs.TwoArgumentExecutable;
 import worms.model.programs.types.DoubleType;
 
-public class AddExpression extends TwoArgumentExecutable<Expression<DoubleType>, Expression<DoubleType>> implements Expression<DoubleType> {
+public class Addition 
+	extends TwoArgumentExecutable<Expression<DoubleType>, Expression<DoubleType>> 
+	implements Expression<DoubleType> {
 
-	public AddExpression(Expression<DoubleType> left, Expression<DoubleType> right)
+	public Addition(Expression<DoubleType> left, Expression<DoubleType> right)
 			throws IllegalArgumentException {
 		super(left, right);
 	}

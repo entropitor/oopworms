@@ -14,15 +14,15 @@ import worms.model.World;
 import worms.model.Worm;
 import worms.model.programs.types.Type;
 
-public class EntitySelfExpressionTest {
+public class EntitySelfLiteralTest {
 
-	EntitySelfExpression e;
+	EntitySelfLiteral e;
 	Program program;
 	Worm willy;
 	
 	@Before
 	public void setUp() throws Exception {
-		e = new EntitySelfExpression();
+		e = new EntitySelfLiteral();
 		
 		Map<String, Type<?>>globals = new HashMap<String, Type<?>>();
 		program = new Program(null, globals, null);

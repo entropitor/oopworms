@@ -4,11 +4,11 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class EntityNullExpressionTest {
+public class EntityNullLiteralTest {
 
 	@Test
 	public void testCalculate() {
-		EntityNullExpression e = new EntityNullExpression();
+		EntityNullLiteral e = new EntityNullLiteral();
 		assertNull(e.calculate(null).getValue());
 	}
 

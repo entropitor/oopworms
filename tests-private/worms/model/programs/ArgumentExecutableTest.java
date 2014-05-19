@@ -5,21 +5,21 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import worms.model.programs.expressions.AddExpression;
-import worms.model.programs.expressions.DoubleLiteralExpression;
+import worms.model.programs.expressions.Addition;
+import worms.model.programs.expressions.DoubleLiteral;
 
 public class ArgumentExecutableTest {
 	
-	DoubleLiteralExpression literal3, literal5;
-	AddExpression addExpression3and3, addExpression3and5, addExpressionAddand3;
+	DoubleLiteral literal3, literal5;
+	Addition addExpression3and3, addExpression3and5, addExpressionAddand3;
 
 	@Before
 	public void setUp() throws Exception {
-		literal3 = new DoubleLiteralExpression(3);
-		literal5 = new DoubleLiteralExpression(5);
-		addExpression3and3 = new AddExpression(literal3, literal3);
-		addExpression3and5 = new AddExpression(literal3, literal5);
-		addExpressionAddand3 = new AddExpression(addExpression3and3, literal3);
+		literal3 = new DoubleLiteral(3);
+		literal5 = new DoubleLiteral(5);
+		addExpression3and3 = new Addition(literal3, literal3);
+		addExpression3and5 = new Addition(literal3, literal5);
+		addExpressionAddand3 = new Addition(addExpression3and3, literal3);
 	}
 
 	@Test
