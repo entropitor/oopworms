@@ -6,8 +6,8 @@ import worms.model.programs.types.BooleanType;
 public class BooleanLiteral 
 	implements Expression<BooleanType> {
 	
-	public static final BooleanLiteral TRUE_EXPRESSION = new BooleanLiteral(true);
-	public static final BooleanLiteral FALSE_EXPRESSION = new BooleanLiteral(false);
+	public static final BooleanLiteral TRUE_LITERAL = new BooleanLiteral(true);
+	public static final BooleanLiteral FALSE_LITERAL = new BooleanLiteral(false);
 	
 	public BooleanLiteral(boolean value){
 		this.value = new BooleanType(value);

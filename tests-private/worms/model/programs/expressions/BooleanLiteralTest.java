@@ -15,8 +15,8 @@ public class BooleanLiteralTest {
 		BooleanLiteral e2 = new BooleanLiteral(true);
 		assertTrue(e2.calculate(null).getValue());
 		
-		assertTrue(BooleanLiteral.TRUE_EXPRESSION.calculate(null).getValue());
-		assertFalse(BooleanLiteral.FALSE_EXPRESSION.calculate(null).getValue());
+		assertTrue(BooleanLiteral.TRUE_LITERAL.calculate(null).getValue());
+		assertFalse(BooleanLiteral.FALSE_LITERAL.calculate(null).getValue());
 	}
 
 }
