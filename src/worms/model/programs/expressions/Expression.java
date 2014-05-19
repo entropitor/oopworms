@@ -4,10 +4,7 @@ import worms.model.Program;
 import worms.model.programs.Executable;
 import worms.model.programs.types.Type;
 
-public interface Expression extends Executable{
+public interface Expression<T extends Type<?>> extends Executable{
 	
-	/**
-	 * @pre 	| program != null && program.hasAsSubExecutable(this)
-	 */
-	public Type calculate(Program program);
+	public T calculate(Program program);
 }

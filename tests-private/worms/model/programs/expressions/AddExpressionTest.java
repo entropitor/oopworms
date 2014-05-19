@@ -5,9 +5,11 @@ import static worms.util.AssertUtil.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import worms.model.programs.types.DoubleType;
+
 public class AddExpressionTest {
 	
-	DoubleExpression literal3, literal5, literal17, literalNegative20;
+	Expression<DoubleType> literal3, literal5, literal17, literalNegative20;
 	
 	@Before
 	public void setup() {
