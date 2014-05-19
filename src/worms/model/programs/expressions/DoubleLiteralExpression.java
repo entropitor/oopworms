@@ -15,6 +15,6 @@ public class DoubleLiteralExpression implements Expression<DoubleType> {
 		return value;
 	}
 	
-	private DoubleType value;
+	private final DoubleType value;
 
 }

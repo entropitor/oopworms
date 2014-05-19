@@ -78,7 +78,9 @@ public class Program implements Cloneable{
 	}
 	private Statement mainStatement;
 	
-	
+	public Type<?> getVariableValue(String name){
+		return globals.get(name);
+	}
 	private Map<String, Type<?>> globals;
 	
 	@Raw @Basic
