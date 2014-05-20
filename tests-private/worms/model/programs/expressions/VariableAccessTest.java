@@ -14,6 +14,7 @@ import worms.model.Food;
 import worms.model.Program;
 import worms.model.World;
 import worms.model.Worm;
+import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.types.BooleanType;
 import worms.model.programs.types.DoubleType;
 import worms.model.programs.types.EntityType;
@@ -57,14 +58,14 @@ public class VariableAccessTest {
 		assertTrue(expressionBoolean.calculate(program).getValue());
 	}
 	
-	@Test
+	@Test(expected=WormsRuntimeException.class)
 	public void testCalculate_DoesntHaveVariableCase() {
-		assertNull(expressionDoubleB.calculate(program));
+		expressionDoubleB.calculate(program);
 	}
 	
-	@Test
+	@Test(expected=WormsRuntimeException.class)
 	public void testCalculate_NullProgramCase() {
-		assertNull(expressionDoubleA.calculate(null));
+		expressionDoubleA.calculate(null);
 	}
 
 }

@@ -1,6 +1,7 @@
 package worms.model.programs.expressions;
 
 import worms.model.Program;
+import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.types.*;
 
 public class VariableAccess<T extends Type<?>> 
@@ -14,12 +15,15 @@ public class VariableAccess<T extends Type<?>>
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public T calculate(Program program) {
+	public T calculate(Program program) throws WormsRuntimeException {
 		if(program == null)
-			return null;
+			throw new WormsRuntimeException();
+		
+		//If the variable requested doesn't exist in the program, 
+		//a wormsRuntimeException will also be thrown
 
 		//The type of a variable can't change at runtime 
-		//+ the correct expression is constructed in ProgramFactory
+		//+ the correct type is given to this expression at construction.
 		Type<?> value = program.getVariableValue(variableName);
 		return (T) value;
 	}
