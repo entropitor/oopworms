@@ -6,6 +6,8 @@ import worms.model.Entity;
 @Value
 public class EntityType extends Type<Entity> {
 	
+	public static final EntityType NULL_REFERENCE = new EntityType(null);
+	
 	public EntityType(Entity value) {
 		super(value);
 	}

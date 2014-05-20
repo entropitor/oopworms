@@ -4,9 +4,11 @@ import worms.model.Program;
 import worms.model.programs.TwoArgumentExecutable;
 import worms.model.programs.types.DoubleType;
 
-public class AddExpression extends TwoArgumentExecutable<DoubleExpression, DoubleExpression> implements DoubleExpression {
+public class Subtraction 
+	extends TwoArgumentExecutable<Expression<DoubleType>,Expression<DoubleType>> 
+	implements Expression<DoubleType> {
 
-	public AddExpression(DoubleExpression left, DoubleExpression right)
+	public Subtraction(Expression<DoubleType> left, Expression<DoubleType> right)
 			throws IllegalArgumentException {
 		super(left, right);
 	}
@@ -16,7 +18,7 @@ public class AddExpression extends TwoArgumentExecutable<DoubleExpression, Doubl
 		double left = this.getFirstArgument().calculate(program).getValue();
 		double right = this.getSecondArgument().calculate(program).getValue();
 		
-		return new DoubleType(left + right);
+		return new DoubleType(left - right);
 	}
 
 }

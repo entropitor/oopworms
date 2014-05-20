@@ -384,10 +384,10 @@ public class Facade implements IFacade {
 	}
 	
 	public Facade(){
-		parser = new ProgramParser<Expression, Statement, Type>(new ProgramFactoryImpl());
+		parser = new ProgramParser<Expression<? extends Type<?>>, Statement, Type<?>>(new ProgramFactoryImpl());
 	}
 	
-	private ProgramParser<Expression, Statement, Type> parser;
+	private ProgramParser<Expression<? extends Type<?>>, Statement, Type<?>> parser;
 
 	@Override
 	public ParseOutcome<?> parseProgram(String programText, IActionHandler handler) {
