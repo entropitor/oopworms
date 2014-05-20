@@ -54,7 +54,7 @@ public abstract class Entity {
 	 * Returns the position of this entity.
 	 */
 	@Raw @Basic
-	protected Position getPosition(){
+	public Position getPosition(){
 		return position;
 	}
 	private Position position;
