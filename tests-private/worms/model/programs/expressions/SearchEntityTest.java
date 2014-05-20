@@ -29,7 +29,7 @@ public class SearchEntityTest {
 		Map<String, Type<?>>globals = new HashMap<String, Type<?>>();
 		programWithoutWorm = new Program(null, globals, null);
 		
-		final World world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
+		world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
 		
 		willy  = new Worm(world, 0, 0, Math.PI/4-0.3, 1, "Willy Wonka", null, programWithoutWorm);
 		//program is cloned so get correct program
@@ -44,21 +44,69 @@ public class SearchEntityTest {
 	}
 
 	@Test
-	public void testCalculate_SelfWithTeamCase() {
+	public void testCalculate_NormalCase() {
 		expr = new SearchEntity(literalPoint3);
 		assertEquals(otherWorm2, expr.calculate(program).getValue());
 	}
 	
 	@Test(expected = WormsRuntimeException.class)
-	public void testCalculate_SelfWithTeamAndFoodCase() throws Exception {
+	public void testCalculate_NullProgramCase() throws Exception {
 		expr = new SearchEntity(literalPoint3);
 		expr.calculate(null).getValue();
 	}
 	
 	@Test(expected = WormsRuntimeException.class)
-	public void testCalculate_SelfWithTeamAndNullCase() throws Exception {
+	public void testCalculate_ProgramWithoutWormCase() throws Exception {
 		expr = new SearchEntity(literalPoint3);
 		expr.calculate(programWithoutWorm).getValue();
+	}
+	
+	@Test
+	public void testCalculate_CenterOtherDirectionCircleRightDirectionCase() {
+		world.removeAsEntity(otherWorm2);
+		world.removeAsEntity(otherWorm3);
+		world.removeAsEntity(otherWorm4);
+
+		otherWorm2 = new Worm(world, -0.54, -0.26, 1.321, 1, "Other");
+		
+		expr = new SearchEntity(literalPoint3);
+		assertEquals(otherWorm2, expr.calculate(program).getValue());
+	}
+	
+	@Test
+	public void testCalculate_CenterOtherDirectionCircleRightDirectionCase_ReversedLookupDirection() {
+		world.removeAsEntity(otherWorm2);
+		world.removeAsEntity(otherWorm3);
+		world.removeAsEntity(otherWorm4);
+
+		otherWorm2 = new Worm(world, -0.54, -0.26, 1.321, 1, "Other");
+		
+		expr = new SearchEntity(new DoubleLiteral(0.3+Math.PI));
+		assertEquals(otherWorm2, expr.calculate(program).getValue());
+	}
+	
+	@Test
+	public void testCalculate_CenterOtherDirectionCircleOtherDirectionCase() {
+		world.removeAsEntity(otherWorm2);
+		world.removeAsEntity(otherWorm3);
+		world.removeAsEntity(otherWorm4);
+
+		otherWorm2 = new Worm(world, -1.1, -0.84, 1.321, 1, "Other");
+		
+		expr = new SearchEntity(literalPoint3);
+		assertEquals(otherWorm1, expr.calculate(program).getValue());
+	}
+	
+	@Test
+	public void testCalculate_CenterOtherDirectionCircleOtherDirectionCase_ReversedLookupDirection() {
+		world.removeAsEntity(otherWorm2);
+		world.removeAsEntity(otherWorm3);
+		world.removeAsEntity(otherWorm4);
+
+		otherWorm2 = new Worm(world, -1.1, -0.84, 1.321, 1, "Other");
+		
+		expr = new SearchEntity(new DoubleLiteral(0.3+Math.PI));
+		assertEquals(otherWorm2, expr.calculate(program).getValue());
 	}
 
 }
