@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import worms.model.programs.types.DoubleType;
 
-public class CosinusTest {
+public class SineTest {
 	
 	Expression<DoubleType> literal3, literalNegative20;
 	
@@ -19,11 +19,11 @@ public class CosinusTest {
 
 	@Test
 	public void testCalculate_NormalCase() {
-		Cosinus cos = new Cosinus(literal3);
-		assertFuzzyEquals(-0.989992, cos.calculate(null).getValue());
+		Sine cos = new Sine(literal3);
+		assertFuzzyEquals(0.141120, cos.calculate(null).getValue());
 		
-		cos = new Cosinus(literalNegative20);
-		assertFuzzyEquals(0.4080820, cos.calculate(null).getValue());
+		cos = new Sine(literalNegative20);
+		assertFuzzyEquals(-0.912945, cos.calculate(null).getValue());
 	}
 
 }

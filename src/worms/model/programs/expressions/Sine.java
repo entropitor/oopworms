@@ -4,11 +4,11 @@ import worms.model.Program;
 import worms.model.programs.OneArgumentExecutable;
 import worms.model.programs.types.DoubleType;
 
-public class Sinus 
+public class Sine 
 	extends OneArgumentExecutable<Expression<DoubleType>> 
 	implements Expression<DoubleType> {
 
-	public Sinus(Expression<DoubleType> argument)
+	public Sine(Expression<DoubleType> argument)
 			throws IllegalArgumentException {
 		super(argument);
 	}
