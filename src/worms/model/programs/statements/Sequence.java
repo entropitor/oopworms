@@ -6,6 +6,7 @@ import worms.model.Program;
 import worms.model.programs.VarArgumentExecutable;
 import worms.model.programs.WormsRuntimeException;
 
+//FIXME test
 public class Sequence
 		extends VarArgumentExecutable<Statement>
 		implements Statement {
