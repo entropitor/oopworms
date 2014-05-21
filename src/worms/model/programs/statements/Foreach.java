@@ -9,8 +9,6 @@ import worms.model.programs.OneArgumentExecutable;
 import worms.model.programs.ProgramFactory.ForeachType;
 import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.expressions.EntityLiteral;
-import worms.model.programs.expressions.Expression;
-import worms.model.programs.types.Type;
 
 //FIXME test
 public class Foreach

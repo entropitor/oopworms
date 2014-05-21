@@ -144,7 +144,7 @@ public class Program implements Cloneable{
 		if(statement != null)
 			executionStack.push(statement);
 	}
-	private Deque<Statement> executionStack;
+	private Deque<Statement> executionStack = new ArrayDeque<Statement>(); // 'Stack' is obsolete.
 	
 	@Raw @Basic
 	public boolean runtimeErrorOccurred(){
