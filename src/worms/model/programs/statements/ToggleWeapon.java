@@ -14,7 +14,7 @@ public class ToggleWeapon
 
 	@Override
 	public void execute(Program program) throws WormsRuntimeException {
-		if (program == null)
+		if (program == null || program.getWorm() == null)
 			throw new WormsRuntimeException();
 		
 		program.getActionHandler().toggleWeapon(program.getWorm());

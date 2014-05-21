@@ -19,11 +19,15 @@ public class Fire
 
 	@Override
 	public void execute(Program program) throws WormsRuntimeException {
-		if (program == null)
+		if (program == null || program.getWorm() == null)
 			throw new WormsRuntimeException();
 		
 		Worm w = program.getWorm();
 		int yield = (int) floor(getFirstArgument().calculate(program).getValue());
+		
+		if (yield < 0 || yield > 100)
+			throw new WormsRuntimeException();
+		
 		program.getActionHandler().fire(w, yield);
 	}
 

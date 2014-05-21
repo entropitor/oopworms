@@ -14,10 +14,12 @@ public class Move
 
 	@Override
 	public void execute(Program program) throws WormsRuntimeException {
-		if (program == null)
+		if (program == null || program.getWorm() == null)
 			throw new WormsRuntimeException();
-		
-		program.getActionHandler().move(program.getWorm());
+		Worm w = program.getWorm();
+		if (!w.canMove())
+			throw new WormsRuntimeException();
+		program.getActionHandler().move(w);
 	}
 
 	@Override

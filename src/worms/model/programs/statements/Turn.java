@@ -18,11 +18,12 @@ public class Turn
 
 	@Override
 	public void execute(Program program) throws WormsRuntimeException {
-		if (program == null)
+		if (program == null || program.getWorm() == null)
 			throw new WormsRuntimeException();
-		
 		Worm w = program.getWorm();
 		Double angle = getFirstArgument().calculate(program).getValue();
+		if (!w.canTurn(angle))
+			throw new WormsRuntimeException();
 		program.getActionHandler().turn(w, angle);
 	}
 
