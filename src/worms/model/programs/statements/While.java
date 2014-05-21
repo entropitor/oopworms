@@ -20,8 +20,8 @@ public class While
 			throw new WormsRuntimeException();
 		
 		if(getFirstArgument().calculate(program).getValue() == true) {
-			program.scheduleStatement(getSecondArgument());
 			program.scheduleStatement(this);
+			program.scheduleStatement(getSecondArgument());
 		}
 	}
 }
