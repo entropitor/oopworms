@@ -4,6 +4,7 @@
     <property name="src.own.dir"  value="src"/>
     <property name="src.given.dir"  value="src-provided"/>
     <property name="src.dir"     value="${src.given.dir};${src.own.dir}"/>
+    <property name="mocks.dir"   value="mocks"/>
 
     <property name="docs.dir"    value="doc"/>
     <property name="build.dir"   value="build"/>
@@ -40,7 +41,7 @@
 
     <target name="compile">
         <mkdir dir="${classes.dir}"/>
-        <javac encoding="${encoding}" srcdir="${src.dir};${test.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+        <javac encoding="${encoding}" srcdir="${src.dir};${mocks.dir};${test.dir}" destdir="${classes.dir}" classpathref="classpath"/>
     </target>
 
     <target name="jar" depends="compile">
@@ -91,6 +92,7 @@
             <fileset dir="${classes.dir}"/>
             <fileset dir="${src.own.dir}"/>
             <fileset dir="${src.given.dir}"/>
+            <fileset dir="${mocks.dir}"/>
             <fileset dir="${test.own.dir}"/>
             <fileset dir="${test.given.dir}"/>
             <manifest>
