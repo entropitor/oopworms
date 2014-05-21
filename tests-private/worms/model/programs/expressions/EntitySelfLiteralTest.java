@@ -12,12 +12,13 @@ import org.junit.Test;
 import worms.model.Program;
 import worms.model.World;
 import worms.model.Worm;
+import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.types.Type;
 
 public class EntitySelfLiteralTest {
 
 	EntitySelfLiteral e;
-	Program program;
+	Program programWithoutWorm, programWithWorm;
 	Worm willy;
 	
 	@Before
@@ -25,24 +26,29 @@ public class EntitySelfLiteralTest {
 		e = new EntitySelfLiteral();
 		
 		Map<String, Type<?>>globals = new HashMap<String, Type<?>>();
-		program = new Program(null, globals, null);
+		programWithoutWorm = new Program(null, globals, null);
 		
 
 		World world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
-		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka", null, program);
+		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka", null, programWithoutWorm);
 		//program is cloned so get correct program
-		program = willy.getProgram();
+		programWithWorm = willy.getProgram();
 	}
 
 	@Test
 	public void testCalculate_ValidProgram() {
-		assertEquals(willy, program.getWorm());
-		assertEquals(willy, e.calculate(program).getValue());
+		assertEquals(willy, programWithWorm.getWorm());
+		assertEquals(willy, e.calculate(programWithWorm).getValue());
 	}
 	
-	@Test
+	@Test(expected = WormsRuntimeException.class)
 	public void testCalculate_NullProgram() {
-		assertNull(e.calculate(null).getValue());
+		e.calculate(null);
+	}
+	
+	@Test(expected = WormsRuntimeException.class)
+	public void testCalculate_ProgramWithoutWormCase() throws Exception {
+		e.calculate(programWithoutWorm);
 	}
 
 }

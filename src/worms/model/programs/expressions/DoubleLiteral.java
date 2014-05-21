@@ -1,6 +1,7 @@
 package worms.model.programs.expressions;
 
 import worms.model.Program;
+import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.types.DoubleType;
 
 public class DoubleLiteral 
@@ -12,7 +13,9 @@ public class DoubleLiteral
 	}
 
 	@Override
-	public DoubleType calculate(Program program) {
+	public DoubleType calculate(Program program) throws WormsRuntimeException{
+		if(Double.isNaN(value.getValue()))
+			throw new WormsRuntimeException();
 		return value;
 	}
 	
