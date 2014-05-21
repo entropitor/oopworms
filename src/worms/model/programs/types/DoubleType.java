@@ -23,4 +23,9 @@ public class DoubleType extends Type<Double> {
 	public DoubleType getNewTypeOfSameClass(Integer value) {
 		return new DoubleType(value);
 	}
+
+	@Override
+	public DoubleType getDefaultTypeForThisClass() {
+		return DoubleType.ZERO;
+	}
 }

@@ -16,4 +16,9 @@ public class BooleanType extends Type<Boolean> {
 	public BooleanType getNewTypeOfSameClass(Boolean value) {
 		return new BooleanType(value);
 	}
+
+	@Override
+	public BooleanType getDefaultTypeForThisClass() {
+		return BooleanType.FALSE;
+	}
 }

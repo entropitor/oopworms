@@ -48,4 +48,9 @@ public class BooleanTypeTest {
 		
 		// Inequality of hashcodes of inequal objects is not required. 
 	}
+	
+	@Test
+	public void testGetDefaultTypeForThisClass() {
+		assertEquals(false, new BooleanType(true).getDefaultTypeForThisClass().getValue());
+	}
 }

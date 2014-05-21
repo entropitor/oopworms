@@ -65,4 +65,9 @@ public class EntityTypeTest {
 		
 		// Hashcode inequality of inequal objects is not required. 
 	}
+	
+	@Test
+	public void testGetDefaultTypeForThisClass() {
+		assertNull(new EntityType(willy).getDefaultTypeForThisClass().getValue());
+	}
 }

@@ -96,4 +96,12 @@ public class ProgramTest_Globals {
 		program.setVariableValue("b", new BooleanType(true));
 	}
 
+	@Test
+	public void testInitGlobals() {
+		program.initGlobals();
+		assertEquals(new Double(0.0), program.getVariableValue("a").getValue());
+		assertNull(program.getVariableValue("entity").getValue());
+		assertEquals(false, program.getVariableValue("bool").getValue());
+	}
+
 }

@@ -16,4 +16,9 @@ public class EntityType extends Type<Entity> {
 	public EntityType getNewTypeOfSameClass(Entity value) {
 		return new EntityType(value);
 	}
+	
+	@Override
+	public EntityType getDefaultTypeForThisClass(){
+		return EntityType.NULL_REFERENCE;
+	}
 }

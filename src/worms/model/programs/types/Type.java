@@ -46,4 +46,6 @@ public abstract class Type<C> {
 		else
 			return getValue().hashCode();
 	}
+	
+	public abstract Type<C> getDefaultTypeForThisClass();
 }
