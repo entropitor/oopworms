@@ -33,6 +33,12 @@ public class Program implements Cloneable{
 			this.globals = new HashMap<String, Type<?>>(globals);
 		this.handler = handler;
 		this.executionStack = new ArrayDeque<Statement>();
+		
+		//FIXME test this
+		if(!isWellFormed()){
+			encounteredRuntimeError();
+		}
+		
 		//@Raw => worm isn't set at the end but that's ok since this program can be raw at end of a @Raw method.
 	}
 	
@@ -114,14 +120,13 @@ public class Program implements Cloneable{
 	public void run(){
 		if(getWorm() == null)
 			return;
-		if(runtimeErrorOccurred())
+		if(hasRuntimeErrorOccurred())
 			return;
 		
 		int nbStatementsThisTurn = 0;
 		
 		if(executionStack.size() == 0){
-			initGlobals();
-			scheduleStatement(getMainStatement());
+			initProgram();
 		}
 		
 		while(executionStack.size() > 0 && nbStatementsThisTurn < 1000){
@@ -148,11 +153,22 @@ public class Program implements Cloneable{
 	private Deque<Statement> executionStack = new ArrayDeque<Statement>(); // 'Stack' is obsolete.
 	
 	@Raw @Basic
-	public boolean runtimeErrorOccurred(){
+	public boolean hasRuntimeErrorOccurred(){
 		return runtimeErrorOccurred;
 	}
 	public void encounteredRuntimeError(){
 		runtimeErrorOccurred = true;
 	}
 	private boolean runtimeErrorOccurred = false;
+	
+	public boolean isWellFormed(){
+		if(getMainStatement() instanceof ArgumentExecutable)
+			return !((ArgumentExecutable)getMainStatement()).hasActionStatementInsideForEach();
+		return true;
+	}
+	
+	private void initProgram(){
+		initGlobals();
+		scheduleStatement(getMainStatement());
+	}
 }

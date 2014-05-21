@@ -1,5 +1,7 @@
 package worms.model.programs;
 
+import worms.model.programs.statements.ActionStatement;
+import worms.model.programs.statements.Foreach;
 import be.kuleuven.cs.som.annotate.Raw;
 
 public abstract class ArgumentExecutable implements Executable{
@@ -49,5 +51,29 @@ public abstract class ArgumentExecutable implements Executable{
 	}
 	
 	public abstract Executable[] getSubExecutables();
+	
+	public boolean hasActionStatementAsSubExecutable(){
+		for(Executable argument : getSubExecutables()){
+			if(argument instanceof ActionStatement)
+				return true;
+			
+			if(argument instanceof ArgumentExecutable){
+				if(((ArgumentExecutable) argument).hasActionStatementAsSubExecutable())
+					return true;
+			}				
+		}
+		return false;
+	}
+	
+	public boolean hasActionStatementInsideForEach(){
+		if(this instanceof Foreach)
+			return hasActionStatementAsSubExecutable();
+		for(Executable argument : getSubExecutables()){
+			if(argument instanceof ArgumentExecutable 
+					&& ((ArgumentExecutable)argument).hasActionStatementInsideForEach())
+				return true;
+		}
+		return false;
+	}
 
 }

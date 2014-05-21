@@ -49,12 +49,12 @@ public class ProgramTest_Run {
 	}
 
 	@Test
-	public void testRuntimeErrorOccurred_testEncounteredRuntimeError() {
-		assertFalse(program.runtimeErrorOccurred());
+	public void testHasRuntimeErrorOccurred_testEncounteredRuntimeError() {
+		assertFalse(program.hasRuntimeErrorOccurred());
 		program.encounteredRuntimeError();
-		assertTrue(program.runtimeErrorOccurred());
+		assertTrue(program.hasRuntimeErrorOccurred());
 		program.encounteredRuntimeError();
-		assertTrue(program.runtimeErrorOccurred());
+		assertTrue(program.hasRuntimeErrorOccurred());
 	}
 
 }

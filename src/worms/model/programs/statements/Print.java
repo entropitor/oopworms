@@ -8,10 +8,10 @@ import worms.model.programs.types.Type;
 
 //FIXME test
 public class Print
-		extends OneArgumentExecutable<Expression<Type<?>>>
+		extends OneArgumentExecutable<Expression<? extends Type<?>>>
 		implements Statement {
 
-	public Print(Expression<Type<?>> e) throws IllegalArgumentException {
+	public Print(Expression<? extends Type<?>> e) throws IllegalArgumentException {
 		super(e);
 	}
 

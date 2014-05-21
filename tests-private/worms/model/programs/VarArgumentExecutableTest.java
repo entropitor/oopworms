@@ -8,8 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import worms.model.programs.expressions.BooleanLiteral;
-import worms.model.programs.expressions.DoubleLiteral;
-import worms.model.programs.expressions.Sqrt;
 import worms.model.programs.statements.Sequence;
 import worms.model.programs.statements.Skip;
 import worms.model.programs.statements.Statement;
