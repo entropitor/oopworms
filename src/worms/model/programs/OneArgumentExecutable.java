@@ -5,7 +5,6 @@ import be.kuleuven.cs.som.annotate.Raw;
 
 public abstract class OneArgumentExecutable<F extends Executable> extends ArgumentExecutable {
 	
-	//FIXME test
 	public OneArgumentExecutable(F first) throws IllegalArgumentException{
 		if(!canHaveAsSubExecutable(first))
 			throw new IllegalArgumentException();
@@ -20,7 +19,6 @@ public abstract class OneArgumentExecutable<F extends Executable> extends Argume
 	
 	@Override @Raw
 	public Executable[] getSubExecutables(){
-		//FIXME test
 		return new Executable[]{getFirstArgument()};
 	}
 }

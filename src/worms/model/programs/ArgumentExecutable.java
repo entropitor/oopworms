@@ -30,6 +30,15 @@ public abstract class ArgumentExecutable implements Executable{
 		//if(this instanceof ForEachStatement && executable instanceof ActionStatement)
 		//	return false;
 		
+		//The next part is technically not even necessary as it's impossible 
+		//to construct loops at construction time:
+		//Loop = A -> B -> ... -> C -> A (where -> means "hasAsSubExpression")
+		//But to construct C, A needs to exist and be constructed 
+		//since it needs to be given as parameter to C
+		//And to construct A, B must be constructed and thus ... and thus C 
+		//=> A needs to be constructed before it can be constructed 
+		//=> No loops can occur.
+		
 		//No loops in executables
 		if(executable == this)
 			return false;
@@ -39,7 +48,6 @@ public abstract class ArgumentExecutable implements Executable{
 		return !((ArgumentExecutable)executable).hasAsSubExecutable(this);
 	}
 	
-	//FIXME test
 	public abstract Executable[] getSubExecutables();
 
 }

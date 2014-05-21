@@ -5,7 +5,6 @@ import be.kuleuven.cs.som.annotate.Raw;
 
 public abstract class TwoArgumentExecutable<F extends Executable,S extends Executable> extends ArgumentExecutable{
 
-	//FIXME test
 	public TwoArgumentExecutable(F firstArgument, S secondArgument) throws IllegalArgumentException{
 		if(!canHaveAsSubExecutable(firstArgument) || ! canHaveAsSubExecutable(secondArgument))
 			throw new IllegalArgumentException();
@@ -27,7 +26,6 @@ public abstract class TwoArgumentExecutable<F extends Executable,S extends Execu
 	
 	@Override @Raw
 	public Executable[] getSubExecutables(){
-		//FIXME test
 		return new Executable[]{getFirstArgument(),getSecondArgument()};
 	}
 }
