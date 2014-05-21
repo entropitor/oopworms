@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
@@ -11,6 +12,7 @@ import worms.gui.game.IActionHandler;
 import worms.model.programs.ArgumentExecutable;
 import worms.model.programs.Executable;
 import worms.model.programs.WormsRuntimeException;
+import worms.model.programs.statements.ActionStatement;
 import worms.model.programs.statements.Statement;
 import worms.model.programs.types.Type;
 
@@ -96,6 +98,11 @@ public class Program implements Cloneable{
 		
 		globals.put(name, value);
 	}
+	protected void initGlobals(){
+		for(Entry<String, Type<?>> entry : globals.entrySet()){
+			setVariableValue(entry.getKey(), entry.getValue().getDefaultTypeForThisClass());
+		}
+	}
 	private Map<String, Type<?>> globals;
 	
 	@Raw @Basic
@@ -104,6 +111,47 @@ public class Program implements Cloneable{
 	}
 	private IActionHandler handler;
 	
-	
+	public void run(){
+		if(getWorm() == null)
+			return;
+		if(runtimeErrorOccurred())
+			return;
+		
+		int nbStatementsThisTurn = 0;
+		
+		if(executionStack.size() == 0){
+			initGlobals();
+			scheduleStatement(getMainStatement());
+		}
+		
+		while(executionStack.size() > 0 && nbStatementsThisTurn < 1000){
+			Statement nextStatement = executionStack.pop();
+			
+			if(nextStatement instanceof ActionStatement 
+					&& ((ActionStatement)nextStatement).getCost(getWorm()) > getWorm().getActionPoints())
+				return;
+			
+			try{
+				nextStatement.execute(this);
+			}catch(WormsRuntimeException e){
+				encounteredRuntimeError();
+				return;
+			}
+		}
+	}
+	@Raw
+	public void scheduleStatement(Statement statement){
+		if(statement != null)
+			executionStack.push(statement);
+	}
 	private Deque<Statement> executionStack = new ArrayDeque<Statement>();
+	
+	@Raw @Basic
+	public boolean runtimeErrorOccurred(){
+		return runtimeErrorOccurred;
+	}
+	public void encounteredRuntimeError(){
+		runtimeErrorOccurred = true;
+	}
+	private boolean runtimeErrorOccurred = false;
 }
