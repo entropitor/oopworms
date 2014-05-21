@@ -22,7 +22,7 @@ public class Turn
 			throw new WormsRuntimeException();
 		Worm w = program.getWorm();
 		Double angle = getFirstArgument().calculate(program).getValue();
-		if (!w.canTurn(angle))
+		if (!Worm.isValidTurningAngle(angle) || !w.canTurn(angle))
 			throw new WormsRuntimeException();
 		program.getActionHandler().turn(w, angle);
 	}
