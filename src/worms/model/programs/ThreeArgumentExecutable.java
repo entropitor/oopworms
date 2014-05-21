@@ -5,7 +5,6 @@ import be.kuleuven.cs.som.annotate.Raw;
 
 public abstract class ThreeArgumentExecutable<F extends Executable,S extends Executable,T extends Executable> extends ArgumentExecutable {
 
-	//FIXME test
 	public ThreeArgumentExecutable(F firstArgument, S secondArgument, T thirdArgument) throws IllegalArgumentException{
 		if(!canHaveAsSubExecutable(firstArgument) || ! canHaveAsSubExecutable(secondArgument) || !canHaveAsSubExecutable(thirdArgument))
 			throw new IllegalArgumentException();
@@ -34,7 +33,6 @@ public abstract class ThreeArgumentExecutable<F extends Executable,S extends Exe
 	
 	@Override @Raw
 	public Executable[] getSubExecutables(){
-		//FIXME test
 		return new Executable[]{getFirstArgument(),getSecondArgument(),getThirdArgument()};
 	}
 }

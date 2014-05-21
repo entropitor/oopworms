@@ -8,8 +8,9 @@ import be.kuleuven.cs.som.annotate.Raw;
 
 public abstract class VarArgumentExecutable<T extends Executable> extends ArgumentExecutable {
 	
-	//FIXME test
 	public VarArgumentExecutable(List<T> arguments) throws IllegalArgumentException{
+		if(arguments == null)
+			throw new IllegalArgumentException();
 		for(T argument : arguments){
 			if(!canHaveAsSubExecutable(argument))
 				throw new IllegalArgumentException();
@@ -29,7 +30,6 @@ public abstract class VarArgumentExecutable<T extends Executable> extends Argume
 	
 	@Override @Raw
 	public Executable[] getSubExecutables(){
-		//FIXME test
 		return arguments.<Executable>toArray(new Executable[0]);
 	}
 }
