@@ -20,15 +20,14 @@ public class SameTeam
 
 	@Override
 	public BooleanType calculate(Program program) throws WormsRuntimeException{
+		if(program == null || program.getWorm() == null)
+			throw new WormsRuntimeException();
+		
 		Entity other = this.getFirstArgument().calculate(program).getValue();
 		if(!(other instanceof Worm))
 			throw new WormsRuntimeException();
 		
-		Team ownTeam = null;
-		
-		if(program != null && program.getWorm() != null)
-			ownTeam = program.getWorm().getTeam();
-		
+		Team ownTeam = program.getWorm().getTeam();
 		Team otherTeam = ((Worm)other).getTeam();
 		
 		return new BooleanType(ownTeam == otherTeam);

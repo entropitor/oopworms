@@ -5,6 +5,7 @@ import static worms.util.AssertUtil.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.types.DoubleType;
 
 public class SqrtTest {
@@ -25,10 +26,12 @@ public class SqrtTest {
 		
 		sqrt = new Sqrt(literal17);
 		assertFuzzyEquals(4.12311, sqrt.calculate(null).getValue());
-		
-
-		sqrt = new Sqrt(literalNegative20);
-		assertFuzzyEquals(Double.NaN, sqrt.calculate(null).getValue());
+	}
+	
+	@Test(expected = WormsRuntimeException.class)
+	public void testCalculate_NegativeArgumentCase() throws Exception {
+		Sqrt sqrt = new Sqrt(literalNegative20);
+		sqrt.calculate(null);
 	}
 
 }

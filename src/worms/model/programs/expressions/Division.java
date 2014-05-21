@@ -2,6 +2,7 @@ package worms.model.programs.expressions;
 
 import worms.model.Program;
 import worms.model.programs.TwoArgumentExecutable;
+import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.types.DoubleType;
 
 public class Division 
@@ -14,11 +15,14 @@ public class Division
 	}
 
 	@Override
-	public DoubleType calculate(Program program) {
-		double left = this.getFirstArgument().calculate(program).getValue();
-		double right = this.getSecondArgument().calculate(program).getValue();
+	public DoubleType calculate(Program program) throws WormsRuntimeException{
+		double numerator = this.getFirstArgument().calculate(program).getValue();
+		double denominator = this.getSecondArgument().calculate(program).getValue();
 		
-		return new DoubleType(left / right);
+		if(denominator == 0)
+			throw new WormsRuntimeException();
+		
+		return new DoubleType(numerator / denominator);
 	}
 
 }

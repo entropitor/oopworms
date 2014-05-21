@@ -19,7 +19,7 @@ import worms.model.programs.types.EntityType;
 import worms.model.programs.types.Type;
 
 public class SameTeamTest {
-	Program programWithTeam,programWithoutTeam;
+	Program programWithTeam,programWithoutTeam, programWithoutWorm;
 	Worm willyWithTeam,willyWithoutTeam;
 	Expression<EntityType> otherWormFFA, otherWormTeamA, otherWormTeamB;
 	World world;
@@ -31,17 +31,17 @@ public class SameTeamTest {
 	@Before
 	public void setup(){
 		Map<String, Type<?>>globals = new HashMap<String, Type<?>>();
-		programWithTeam = new Program(null, globals, null);
+		programWithoutWorm = new Program(null, globals, null);
 		
 		final World world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
 		final Team teamA = new Team(world, "TeamA");
 		final Team teamB = new Team(world, "TeamB");
 		
-		willyWithTeam  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka", teamA, programWithTeam);
+		willyWithTeam  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka", teamA, programWithoutWorm);
 		//program is cloned so get correct program
 		programWithTeam = willyWithTeam.getProgram();
 		
-		willyWithoutTeam  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka", null, programWithTeam);
+		willyWithoutTeam  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka", null, programWithoutWorm);
 		//program is cloned so get correct program
 		programWithoutTeam = willyWithoutTeam.getProgram();
 		
@@ -129,6 +129,18 @@ public class SameTeamTest {
 	public void testCalculate_SelfwithoutTeamAndNullCase() throws Exception {
 		expr = new SameTeam(literalNull);
 		expr.calculate(programWithoutTeam).getValue();
+	}
+	
+	@Test(expected = WormsRuntimeException.class)
+	public void testCalculate_NullProgramCase() throws Exception {
+		expr = new SameTeam(otherWormTeamB);
+		expr.calculate(null);
+	}
+	
+	@Test(expected = WormsRuntimeException.class)
+	public void testCalculate_ProgramWithoutWormCase() throws Exception {
+		expr = new SameTeam(otherWormTeamB);
+		expr.calculate(programWithoutWorm);
 	}
 
 }
