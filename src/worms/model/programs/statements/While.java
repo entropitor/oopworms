@@ -6,7 +6,6 @@ import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.expressions.Expression;
 import worms.model.programs.types.BooleanType;
 
-//FIXME test
 public class While
 		extends TwoArgumentExecutable<Expression<BooleanType>, Statement>
 		implements Statement {
