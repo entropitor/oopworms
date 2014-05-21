@@ -8,10 +8,10 @@ import worms.model.programs.types.Type;
 
 //FIXME test
 public class Assignment
-		extends OneArgumentExecutable<Expression<Type<?>>>
+		extends OneArgumentExecutable<Expression<? extends Type<?>>>
 		implements Statement {
 
-	public Assignment(String variableName, Expression<Type<?>> rhs) throws IllegalArgumentException {
+	public Assignment(String variableName, Expression<? extends Type<?>> rhs) throws IllegalArgumentException {
 		super(rhs);
 		this.variableName = variableName;
 	}

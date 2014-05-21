@@ -33,7 +33,7 @@ public class Foreach
 			if (((type == ForeachType.WORM || type == ForeachType.ANY) && e instanceof Worm)
 				|| ((type == ForeachType.FOOD || type == ForeachType.ANY) && e instanceof Food)) {
 				program.scheduleStatement(getFirstArgument());
-				program.scheduleStatement(new Assignment(variableName, (Expression<Type<?>>)new EntityLiteral(e)));
+				program.scheduleStatement(new Assignment(variableName, new EntityLiteral(e)));
 			}
 		}
 	}
