@@ -1,7 +1,6 @@
 package worms.model.programs.statements;
 
 import worms.model.Program;
-import worms.model.Worm;
 
 //FIXME test
 public class Skip
@@ -11,7 +10,7 @@ public class Skip
 	public void execute(Program program) { }
 
 	@Override
-	public int getCost(Worm worm) {
+	public int getCost(Program program) {
 		return 0;
 	}
 }

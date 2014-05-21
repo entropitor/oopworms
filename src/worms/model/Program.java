@@ -127,8 +127,8 @@ public class Program implements Cloneable{
 		while(executionStack.size() > 0 && nbStatementsThisTurn < 1000){
 			Statement nextStatement = executionStack.pop();
 			
-			if(nextStatement instanceof ActionStatement 
-					&& ((ActionStatement)nextStatement).getCost(getWorm()) > getWorm().getActionPoints())
+			if(nextStatement instanceof ActionStatement
+					&& ((ActionStatement)nextStatement).getCost(this) > getWorm().getActionPoints())
 				return;
 			
 			try{
