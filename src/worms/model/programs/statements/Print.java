@@ -21,7 +21,6 @@ public class Print
 			throw new WormsRuntimeException();
 		
 		String message = getFirstArgument().calculate(program).getValue().toString();
-		System.out.println("Program says: "+message);
 		program.getActionHandler().print(message);
 	}
 }
