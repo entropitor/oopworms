@@ -2,6 +2,7 @@ package worms.model.programs.statements;
 
 import worms.model.Program;
 import worms.model.programs.ThreeArgumentExecutable;
+import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.expressions.Expression;
 import worms.model.programs.types.BooleanType;
 
@@ -14,10 +15,13 @@ public class If
 	}
 
 	@Override
-	public void execute(Program program) {
+	public void execute(Program program) throws WormsRuntimeException {
+		if (program == null)
+			throw new WormsRuntimeException();
+		
 		if(getFirstArgument().calculate(program).getValue() == true)
-			getSecondArgument().execute(program);
+			program.scheduleStatement(getSecondArgument());
 		else
-			getThirdArgument().execute(program);
+			program.scheduleStatement(getThirdArgument());
 	}
 }
