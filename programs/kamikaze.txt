@@ -1,0 +1,7 @@
+double angle;
+
+while(true) do {
+  angle := getdir self;
+  turn ( (3.14 / 2) - angle);
+  fire(1);
+}

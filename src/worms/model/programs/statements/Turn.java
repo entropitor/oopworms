@@ -33,6 +33,8 @@ public class Turn
 			throw new WormsRuntimeException();
 		
 		Double angle = getFirstArgument().calculate(program).getValue();
+		if (!Worm.isValidTurningAngle(angle))
+			throw new WormsRuntimeException();
 		return Worm.getTurningCost(angle);
 	}
 }

@@ -128,15 +128,14 @@ public class Program implements Cloneable{
 			initProgram();
 		}
 		
-		while(executionStack.size() > 0 && nbStatementsThisTurn < 1000){
+		while(executionStack.size() > 0 && nbStatementsThisTurn < 1000 && !getWorm().isTerminated()){
 			Statement nextStatement = executionStack.pop();
 			++nbStatementsThisTurn;
 			
-			if(nextStatement instanceof ActionStatement
-					&& ((ActionStatement)nextStatement).getCost(this) > getWorm().getActionPoints())
-				return;
-			
 			try{
+				if(nextStatement instanceof ActionStatement
+						&& ((ActionStatement)nextStatement).getCost(this) > getWorm().getActionPoints())
+					return;
 				nextStatement.execute(this);
 			}catch(WormsRuntimeException e){
 				encounteredRuntimeError();
