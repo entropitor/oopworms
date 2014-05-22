@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import worms.model.programs.ProgramFactory.ForeachType;
+import worms.model.programs.expressions.Addition;
 import worms.model.programs.expressions.BooleanLiteral;
 import worms.model.programs.expressions.DoubleLiteral;
 import worms.model.programs.statements.*;
@@ -35,6 +36,12 @@ public class ArgumentExecutableTest_IsWellFormed {
 	public void testHasActionStatementAsSubExecutable_FalseCase() {
 		ArgumentExecutable statement = new Turn(new DoubleLiteral(0));
 		assertFalse(statement.hasActionStatementAsSubExecutable());
+	}
+	
+	@Test
+	public void testHasActionStatementAsSubExecutable_FalseExpressionCase() {
+		ArgumentExecutable expression = new Addition(new DoubleLiteral(5), new DoubleLiteral(7));
+		assertFalse(expression.hasActionStatementAsSubExecutable());
 	}
 
 	@Test
