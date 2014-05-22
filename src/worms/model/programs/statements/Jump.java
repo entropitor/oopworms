@@ -4,7 +4,6 @@ import worms.model.Program;
 import worms.model.Worm;
 import worms.model.programs.WormsRuntimeException;
 
-//FIXME test
 public class Jump
 		implements ActionStatement {
 

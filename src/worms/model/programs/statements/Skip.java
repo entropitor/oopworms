@@ -2,7 +2,6 @@ package worms.model.programs.statements;
 
 import worms.model.Program;
 
-//FIXME test
 public class Skip
 		implements ActionStatement {
 
