@@ -1271,6 +1271,10 @@ public class World {
 			throw new IllegalStateException();
 		hasStarted = true;
 		currentWormIndex = 0;
+		if(getNbWorms() > 0 && getCurrentWorm().getProgram() != null){
+			currentWormIndex = -1;
+			startNextTurn();
+		}
 	}
 	
 	private boolean hasStarted = false;
@@ -1371,6 +1375,8 @@ public class World {
 	 * 				|		new.getCurrentWorm() == getWormAt((indexOldCurrent+1-nbRemoved)%getNbWorms())
 	 * 				|		(new new.getCurrentWorm()).getActionPoints() == new.getCurrentWorm().getMaxActionPoints()
 	 * 				|		(new new.getCurrentWorm()).getHitPoints() == new.getCurrentWorm().getHitPoints()+10
+	 * @effect		This effects bescribed above will repeat N times if the next N worms have a program.
+	 * 				(while calling the run() method of their programs between each 'run' of this method).
 	 * @throws IllegalStateException
 	 * 				| !hasStarted() || isTerminated() || getNbWorms() == 0
 	 */
@@ -1381,26 +1387,37 @@ public class World {
 			throw new IllegalStateException();
 		if(getNbWorms() == 0)
 			throw new IllegalStateException();
-
-		checkForWinners();
-		if(isTerminated)
-			return;
-		
-		//TODO Is total approach good enough here or does it need defensive approach?
-		if(hasProjectile())
-			removeProjectile();
-		
-		for(Worm worm : getWorms()){
-			if(worm.getHitPoints() == 0){
-				removeWorm(worm);
+		//DO-WHILE to simulate a goto statement in java
+		//No recursion because of the problem that when only computerized worms,
+		//a deep stack trace would happen and a lot of memory would be used (causing sort of a memory-leak)
+		//This method should be safe against that leak.
+		do{
+			checkForWinners();
+			if(isTerminated())
+				return;
+			
+			//TODO Is total approach good enough here or does it need defensive approach?
+			if(hasProjectile())
+				removeProjectile();
+			
+			for(Worm worm : getWorms()){
+				if(worm.getHitPoints() == 0){
+					removeWorm(worm);
+				}
 			}
-		}
+			
+			++currentWormIndex;
+			currentWormIndex %=getNbWorms();
+			Worm current = getCurrentWorm();
+			current.replenishActionPoints();
+			current.increaseHitPoints(10);
+
+			if(current.getProgram() != null){
+				current.getProgram().run();
+			}
+			
+		}while(getCurrentWorm() != null && getCurrentWorm().getProgram() != null);
 		
-		++currentWormIndex;
-		currentWormIndex %=getNbWorms();
-		Worm current = getCurrentWorm();
-		current.replenishActionPoints();
-		current.increaseHitPoints(10);
 	}
 	
 	/**

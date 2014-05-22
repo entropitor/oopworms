@@ -30,6 +30,10 @@ public class SameTeam
 		Team ownTeam = program.getWorm().getTeam();
 		Team otherTeam = ((Worm)other).getTeam();
 		
+		if(ownTeam == null){
+			return new BooleanType(other == program.getWorm());
+		}
+		
 		return new BooleanType(ownTeam == otherTeam);
 	}
 

@@ -34,7 +34,6 @@ public class Program implements Cloneable{
 		this.handler = handler;
 		this.executionStack = new ArrayDeque<Statement>();
 		
-		//FIXME test this
 		if(!isWellFormed()){
 			encounteredRuntimeError();
 		}
