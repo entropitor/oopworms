@@ -8,7 +8,6 @@ import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.expressions.Expression;
 import worms.model.programs.types.DoubleType;
 
-//FIXME tests
 public class Fire
 		extends OneArgumentExecutable<Expression<DoubleType>>
 		implements ActionStatement {
