@@ -33,6 +33,20 @@ public abstract class Projectile extends MassiveEntity {
 	}
 	
 	/**
+	 * Construct a new terminated Projectile with a given propulsion yield.
+	 *
+	 * @param propulsionYield
+	 * 			The propulsionyield for the new projectile.
+	 * @effect	| setPropulsionYield(propulsionYield)
+	 * @effect 	| terminate()
+	 */
+	@Raw
+	public Projectile(int propulsionYield){
+		setPropulsionYield(propulsionYield);
+		terminate();
+	}
+	
+	/**
 	 * Gets the propulsion yield for this projectile.
 	 */
 	@Basic @Raw

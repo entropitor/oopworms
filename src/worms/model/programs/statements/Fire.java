@@ -25,6 +25,10 @@ public class Fire
 		Worm w = program.getWorm();
 		int yield = (int) floor(getFirstArgument().calculate(program).getValue());
 		
+
+		if (! program.getWorm().canFire(yield))
+			throw new WormsRuntimeException();
+		
 		if (yield < 0 || yield > 100)
 			throw new WormsRuntimeException();
 		

@@ -156,13 +156,13 @@ public abstract class Entity {
 	 *			with its world.
 	 *			| !new.hasWorld()
 	 * @throws	IllegalStateException
-	 * 			When the world still references this Entity.
-	 * 			| getWorld().hasAsEntity(this)
+	 * 			When the world (if any) still references this Entity.
+	 * 			| getWorld() != null && getWorld().hasAsEntity(this)
 	 */
 	@Raw
 	public void terminate() throws IllegalStateException{
 		if(!isTerminated()){
-			if(world.hasAsEntity(this))
+			if(getWorld() != null && getWorld() .hasAsEntity(this))
 				throw new IllegalStateException();
 			world = null;
 			isTerminated = true;

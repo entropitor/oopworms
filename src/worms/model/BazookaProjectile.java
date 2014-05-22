@@ -11,6 +11,11 @@ public class BazookaProjectile extends Projectile {
 	public BazookaProjectile(World world, int propulsionYield) throws NullPointerException{
 		super(world, propulsionYield);
 	}
+	
+	@Raw
+	public BazookaProjectile(int propulsionYield){
+		super(propulsionYield);
+	}
 
 	/**
 	 * @return	| result == 300e-3

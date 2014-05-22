@@ -15,6 +15,14 @@ public class Bazooka extends Weapon {
 		return null;
 	}
 
+	@Override
+	public Projectile getNewProjectilePrototype(int yield) {
+		if(hasMoreProjectiles()){
+			return new BazookaProjectile(yield);
+		}
+		return null;
+	}
+
 	/** 
 	 * @return		| result == 50
 	 */

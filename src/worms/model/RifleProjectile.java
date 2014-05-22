@@ -11,6 +11,11 @@ public class RifleProjectile extends Projectile {
 	public RifleProjectile(World world, int propulsionYield) throws NullPointerException{
 		super(world, propulsionYield);
 	}
+	
+	@Raw
+	public RifleProjectile(int propulsionYield) throws NullPointerException{
+		super(propulsionYield);
+	}
 
 	/**
 	 * return	| result == 1.5
