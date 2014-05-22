@@ -9,7 +9,6 @@ import static java.lang.Math.round;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.floor;
-
 import static worms.util.ModuloUtil.posMod;
 import static worms.util.Util.fuzzyGreaterThanOrEqualTo;
 import static worms.util.Util.fuzzyLessThanOrEqualTo;
@@ -1022,44 +1021,68 @@ public class Worm extends MassiveEntity {
 	 * @post			The new projectile's direction is set to the direction of this worm.
 	 * 					| fuzzyEquals((new (new getWorld()).getProjectile()).getDirection(),getDirection())
 	 * @throws	IllegalStateException
-	 * 					Thrown when there already is a projectile in the world.
-	 * 					| getWorld().hasProjectile()
-	 * @throws	IllegalStateException
-	 * 					Thrown when this worm has no weapons to fire.
-	 * 					| getNbWeapons() == 0
-	 * @throws	IllegalStateException
-	 * 					Thrown when this worm's selected weapon has no more projectiles.
-	 * 					| !getSelectedWeapon().hasMoreProjectiles()
-	 * @throws	IllegalStateException
-	 * 					Thrown when this worm has not enough action points to fire the currently selected weapon
-	 * 					| getActionPoints() < getSelectedWeapon().getCost()
-	 * @throws	IllegalStateException
-	 * 					Thrown when the worm is on impassable terrain
-	 * 					| !getWorld().isPassablePosition(getPosition(), getRadius())
+	 * 					When this worm can't fire right now
+	 * 					| !canFire(yield)
 	 */
 	public void fire(int yield) throws IllegalStateException{
-		if(getWorld().getProjectile() != null)
-			throw new IllegalStateException();
-		
-		if(getNbWeapons() == 0)
-			throw new IllegalStateException();
-		
-		if(!getSelectedWeapon().hasMoreProjectiles())
-			throw new IllegalStateException();
-		
-		if(getActionPoints() < getSelectedWeapon().getCost())
-			throw new IllegalStateException();
-		
-		if(!getWorld().isPassablePosition(getPosition(), getRadius()))
+		if(!canFire(yield))
 			throw new IllegalStateException();
 		
 		Projectile projectile = getSelectedWeapon().getNewProjectile(getWorld(), yield);
+		double projectileRadius = projectile.getRadius();
+		double distance = getRadius()+projectileRadius+Util.DEFAULT_EPSILON;
+		
 		projectile.setDirection(getDirection());
-		double distance = getRadius()+projectile.getRadius()+Util.DEFAULT_EPSILON;
 		Position pos = getPosition().offset(distance*cos(getDirection()),distance*sin(getDirection()));
 		projectile.setPosition(pos);
 		
 		decreaseActionPoints(getSelectedWeapon().getCost());
+	}
+	
+	/**
+	 * @param yield
+	 * @return		False when there already is a projectile in the world.
+	 * 				| if(getWorld().hasProjectile()) then result == false
+	 * @return		False when this worm has no weapons to fire.
+	 * 				| if(getNbWeapons() == 0) then result == false
+	 * @return		False when this worm's selected weapon has no more projectiles.
+	 * 				| if(!getSelectedWeapon().hasMoreProjectiles()) then result == false
+	 * @return		False when this worm has not enough action points to fire the currently selected weapon
+	 * 				| if(getActionPoints() < getSelectedWeapon().getCost()) then result == false
+	 * @return		False when the worm is on impassable terrain
+	 * 				| if(!getWorld().isPassablePosition(getPosition(), getRadius())) then result == false
+	 * @return  	IFF the new projectile wouldn't be able to jump 
+	 * 				(otherwise a projectile would be added to the world but wouldn't be able to be fired).
+	 * 				| let
+	 * 				|	projectile = getSelectedWeapon().getNewProjectilePrototype(yield)
+	 * 				|	projectileRadius = projectile.getRadius()
+	 * 				|	distance = getRadius()+projectileRadius+Util.DEFAULT_EPSILON
+	 * 				| in
+	 * 				|	result == (!getWorld().isPassablePosition(getPosition().offset(distance*cos(getDirection()),distance*sin(getDirection())), projectileRadius))
+	 */
+	public boolean canFire(int yield){
+		if(getWorld().getProjectile() != null)
+			return false;
+		
+		if(getNbWeapons() == 0)
+			return false;
+		
+		if(!getSelectedWeapon().hasMoreProjectiles())
+			return false;
+		
+		if(getActionPoints() < getSelectedWeapon().getCost())
+			return false;
+		
+		if(!getWorld().isPassablePosition(getPosition(), getRadius()))
+			return false;
+		
+		Projectile projectile = getSelectedWeapon().getNewProjectilePrototype(yield);
+		double projectileRadius = projectile.getRadius();
+		double distance = getRadius()+projectileRadius+Util.DEFAULT_EPSILON;
+		if(!getWorld().isPassablePosition(getPosition().offset(distance*cos(getDirection()),distance*sin(getDirection())), projectileRadius)){
+			return false;
+		}
+		return true;
 	}
 	
 	/**

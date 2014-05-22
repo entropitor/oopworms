@@ -23,6 +23,17 @@ public abstract class Weapon {
 	protected abstract Projectile getNewProjectile(World world, int yield) throws NullPointerException;
 	
 	/**
+	 * Returns a new projectile prototype with the given yield and terminated.
+	 * 
+	 * @param yield		The propulsionYield for the projectile
+	 * @return			| if(hasMoreProjectiles)
+	 * 					|	then result != null && result.getPropulsionYield() == Projectile.legalizePropulsionYield(yield) 
+	 * 					|			&& result.isTerminated()
+	 * 					| else result == null
+	 */
+	public abstract Projectile getNewProjectilePrototype(int yield);
+	
+	/**
 	 * Checks whether or not this weapon has more projectiles to fire.
 	 */
 	@Raw @Basic
