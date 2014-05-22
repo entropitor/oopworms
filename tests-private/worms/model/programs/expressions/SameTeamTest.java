@@ -107,7 +107,7 @@ public class SameTeamTest {
 	@Test
 	public void testCalculate_SelfwithoutTeamCase() {
 		expr = new SameTeam(otherWormFFA);
-		assertTrue(expr.calculate(programWithoutTeam).getValue());
+		assertFalse(expr.calculate(programWithoutTeam).getValue());
 		
 		expr = new SameTeam(otherWormTeamA);
 		assertFalse(expr.calculate(programWithoutTeam).getValue());

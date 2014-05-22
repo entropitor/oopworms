@@ -8,7 +8,6 @@ public class DoubleLiteral
 	implements Expression<DoubleType> {
 	
 	public DoubleLiteral(double value){
-		//TODO does DoubleType throw error in case of weird values??? (like NaN or something like that). (in that case announce throwing of that exception)
 		this.value = new DoubleType(value);
 	}
 

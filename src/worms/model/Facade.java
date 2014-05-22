@@ -366,7 +366,8 @@ public class Facade implements IFacade {
 		try{
 			world.addNewWorm(program);
 		}catch(IllegalStateException e){
-			throw new ModelException(e);
+			//FIXME try again
+			//throw new ModelException(e);
 		}
 	}
 	
@@ -382,17 +383,11 @@ public class Facade implements IFacade {
 			throw new ModelException(e);
 		}
 	}
-	
-	public Facade(){
-		parser = new ProgramParser<Expression<? extends Type<?>>, Statement, Type<?>>(new ProgramFactoryImpl());
-	}
-	
-	private ProgramParser<Expression<? extends Type<?>>, Statement, Type<?>> parser;
 
 	@Override
 	public ParseOutcome<?> parseProgram(String programText, IActionHandler handler) {
 		//Errors aren't cleared in ProgramParser so clear them here.
-		parser.getErrors().clear();
+		ProgramParser<Expression<? extends Type<?>>, Statement, Type<?>> parser = new ProgramParser<Expression<? extends Type<?>>, Statement, Type<?>>(new ProgramFactoryImpl());
 		
 		parser.parse(programText);
 		
@@ -409,8 +404,9 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean isWellFormed(Program program) {
-		// TODO Auto-generated method stub
-		return false;
+		if(program == null)
+			return false;
+		return program.isWellFormed();
 	}
 
 }
