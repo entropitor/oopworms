@@ -794,6 +794,9 @@ public class Worm extends MassiveEntity {
 	 * 			sets this worm's APs to this maximum allowed number.
 	 * 			| if (amount > this.getMaxActionPoints())
 	 *			| 	new.getActionPoints() == getMaxActionPoints()
+	 * @effect 	If the worm has no more APs at the end of the method, startNextTurn is called
+	 * 			| if(new.getActionPoints() == 0 && getWorld() != null && getWorld().hasStarted())
+	 * 			|		then getWorld().startNextTurn();
 	 */
 	@Raw @Model
 	private void setActionPoints(int amount){
@@ -803,6 +806,8 @@ public class Worm extends MassiveEntity {
 			this.actionPoints = 0;
 		if (amount > this.getMaxActionPoints())
 			this.actionPoints = this.getMaxActionPoints();
+		if (getActionPoints() == 0 && getWorld() != null && getWorld().hasStarted())
+			getWorld().startNextTurn();
 	}
 	private int actionPoints;
 
