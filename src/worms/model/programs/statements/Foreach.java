@@ -10,7 +10,6 @@ import worms.model.programs.ProgramFactory.ForeachType;
 import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.expressions.EntityLiteral;
 
-//FIXME test
 public class Foreach
 		extends OneArgumentExecutable<Statement>
 		implements Statement {

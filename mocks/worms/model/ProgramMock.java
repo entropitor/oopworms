@@ -14,6 +14,16 @@ public class ProgramMock extends Program{
 		super(mainStatement, globals, handler);
 	}
 	
+	@Override
+	public Worm getWorm(){
+		return this.worm;
+	}
+	@Override
+	public void setWorm(Worm worm){
+		this.worm = worm;
+	}
+	private Worm worm;
+	
 	public void runStatement(Statement statement){
 		executionStackCopy = new ArrayDeque<Statement>();
 		statement.execute(this);

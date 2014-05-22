@@ -3,7 +3,6 @@ package worms.model.programs.statements;
 import worms.model.Program;
 import worms.model.programs.WormsRuntimeException;
 
-//FIXME test
 public class ToggleWeapon
 		implements ActionStatement {
 

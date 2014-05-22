@@ -71,8 +71,10 @@ public class SimpleActionHandler implements IActionHandler {
 
 	@Override
 	public boolean fire(Worm worm, int propulsion) {
+		System.out.println("SimpleActionHandler.fire() entry");
 		try {
 			facade.shoot(worm, propulsion);
+			System.out.println("SimpleActionHandler.fire() after facade.shoot()");
 			return true;
 		} catch (ModelException e) {
 		}
