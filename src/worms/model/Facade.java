@@ -363,11 +363,17 @@ public class Facade implements IFacade {
 
 	@Override
 	public void addNewWorm(World world, Program program) throws ModelException{
-		try{
-			world.addNewWorm(program);
-		}catch(IllegalStateException e){
-			//FIXME try again
-			//throw new ModelException(e);
+		boolean hasSucceeded = false;
+		int tries = 0;
+		while(!hasSucceeded){
+			try{
+				world.addNewWorm(program);
+				hasSucceeded = true;
+			}catch(IllegalStateException e){
+				++tries;
+				if(tries == 10)
+					throw new ModelException(e);
+			}
 		}
 	}
 	

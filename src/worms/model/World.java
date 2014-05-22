@@ -1393,7 +1393,6 @@ public class World {
 			if(isTerminated())
 				return;
 			
-			//TODO Is total approach good enough here or does it need defensive approach?
 			if(hasProjectile())
 				removeProjectile();
 			

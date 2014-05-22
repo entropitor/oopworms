@@ -6,7 +6,6 @@ import worms.model.programs.WormsRuntimeException;
 import worms.model.programs.expressions.Expression;
 import worms.model.programs.types.Type;
 
-//FIXME test
 public class Print
 		extends OneArgumentExecutable<Expression<? extends Type<?>>>
 		implements Statement {

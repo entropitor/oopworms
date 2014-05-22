@@ -80,7 +80,6 @@ public class Program implements Cloneable{
 		return mainStatement;
 	}
 	public boolean hasAsSubExecutable(Executable executable){
-		//FIXME test
 		if(getMainStatement() instanceof ArgumentExecutable){
 			return ((ArgumentExecutable)getMainStatement()).hasAsSubExecutable(executable);
 		}else{
