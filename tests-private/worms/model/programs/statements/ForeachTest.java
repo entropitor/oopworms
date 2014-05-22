@@ -1,9 +1,7 @@
 package worms.model.programs.statements;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -17,11 +15,9 @@ import worms.model.World;
 import worms.model.Worm;
 import worms.model.programs.ProgramFactory.ForeachType;
 import worms.model.programs.WormsRuntimeException;
-import worms.model.programs.expressions.EntityLiteral;
 import worms.model.programs.types.EntityType;
 import worms.model.programs.types.Type;
 
-//FIXME something with Program/ProgramMock
 public class ForeachTest {
 	
 	Statement foreachWorm, foreachFood, foreachAny;
@@ -47,7 +43,7 @@ public class ForeachTest {
 		World world = new World(20,30,new boolean[][]{{true,true},{false,true},{true,true}},new Random());
 		willy  = new Worm(world, 112, 358, 1.321, 34.55, "Willy Wonka", null, programMock);
 		jef = new Worm(world, 1, 2, 0, 5, "Jef", null, programMock);
-		//programMock = (ProgramMock) jef.getProgram();
+		programMock.setWorm(jef);
 		pizza = new Food(world);
 	}
 
@@ -65,40 +61,61 @@ public class ForeachTest {
 	@Test
 	public void testExecute_ForeachWorm() {
 		programMock.runStatement(foreachWorm);
-		Statement[] willyStatements = 
-				new Statement[]{new Assignment("e", new EntityLiteral(willy)), bodySt1};
-		Statement[] jefStatements = 
-				new Statement[]{new Assignment("e", new EntityLiteral(jef)), bodySt1};
 		
-		assertTrue(hasAsSubArray(programMock.getExecutionStackAsArray(), willyStatements));
-		assertTrue(hasAsSubArray(programMock.getExecutionStackAsArray(), jefStatements));
+		Statement[] stack = programMock.getExecutionStackAsArray();
+		assertTrue(stack[0] instanceof Assignment);
+		assertEquals(bodySt1, stack[1]);
+		assertTrue(stack[2] instanceof Assignment);
+		assertEquals(bodySt1, stack[3]);
+		assertEquals(4, stack.length);
+		
+		
+		programMock.runStatement(stack[0]);
+		Object assigned1 = programMock.getVariableValue("e").getValue();
+		programMock.runStatement(stack[2]);
+		Object assigned2 = programMock.getVariableValue("e").getValue();
+		
+		assertTrue(jef == assigned1 || jef == assigned2);
+		assertTrue(willy == assigned1 || willy == assigned2);
 	}
 	
 	@Test
 	public void testExecute_ForeachFood() {
 		programMock.runStatement(foreachFood);
-		Statement[] pizzaStatements = 
-				new Statement[]{new Assignment("e", new EntityLiteral(pizza)), bodySt2};
 		
-		assertTrue(hasAsSubArray(programMock.getExecutionStackAsArray(), pizzaStatements));
+		Statement[] stack = programMock.getExecutionStackAsArray();
+		assertTrue(stack[0] instanceof Assignment);
+		assertEquals(bodySt2, stack[1]);
+		assertEquals(2, stack.length);
+		
+		programMock.runStatement(stack[0]);
+		assertEquals(pizza, programMock.getVariableValue("e").getValue());
 	}
 	
 	@Test
 	public void testExecute_ForeachAny() {
 		programMock.runStatement(foreachAny);
-		Statement[] willyStatements = 
-				new Statement[]{new Assignment("e", new EntityLiteral(willy)), bodySt3};
-		Statement[] jefStatements = 
-				new Statement[]{new Assignment("e", new EntityLiteral(jef)), bodySt3};
-		Statement[] pizzaStatements = 
-				new Statement[]{new Assignment("e", new EntityLiteral(pizza)), bodySt3};
+
 		
-		assertTrue(hasAsSubArray(programMock.getExecutionStackAsArray(), willyStatements));
-		assertTrue(hasAsSubArray(programMock.getExecutionStackAsArray(), jefStatements));
-		assertTrue(hasAsSubArray(programMock.getExecutionStackAsArray(), pizzaStatements));
-	}
-	
-	private boolean hasAsSubArray(Statement[] array, Statement[] subArray) {
-		return (Collections.indexOfSubList(Arrays.asList(array), Arrays.asList(subArray)) != -1);
+		Statement[] stack = programMock.getExecutionStackAsArray();
+		assertTrue(stack[0] instanceof Assignment);
+		assertEquals(bodySt3, stack[1]);
+		assertTrue(stack[2] instanceof Assignment);
+		assertEquals(bodySt3, stack[3]);
+		assertTrue(stack[4] instanceof Assignment);
+		assertEquals(bodySt3, stack[5]);
+		assertEquals(6, stack.length);
+		
+		
+		programMock.runStatement(stack[0]);
+		Object assigned1 = programMock.getVariableValue("e").getValue();
+		programMock.runStatement(stack[2]);
+		Object assigned2 = programMock.getVariableValue("e").getValue();
+		programMock.runStatement(stack[4]);
+		Object assigned3 = programMock.getVariableValue("e").getValue();
+		
+		assertTrue(jef == assigned1 || jef == assigned2 || jef == assigned3);
+		assertTrue(willy == assigned1 || willy == assigned2 || willy == assigned3);
+		assertTrue(pizza == assigned1 || pizza == assigned2 || pizza == assigned3);
 	}
 }
