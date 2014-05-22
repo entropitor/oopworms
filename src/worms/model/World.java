@@ -1375,7 +1375,7 @@ public class World {
 	 * 				|		new.getCurrentWorm() == getWormAt((indexOldCurrent+1-nbRemoved)%getNbWorms())
 	 * 				|		(new new.getCurrentWorm()).getActionPoints() == new.getCurrentWorm().getMaxActionPoints()
 	 * 				|		(new new.getCurrentWorm()).getHitPoints() == new.getCurrentWorm().getHitPoints()+10
-	 * @effect		This effects bescribed above will repeat N times if the next N worms have a program.
+	 * @effect		The effects described above will repeat N times if the next N worms have a program.
 	 * 				(while calling the run() method of their programs between each 'run' of this method).
 	 * @throws IllegalStateException
 	 * 				| !hasStarted() || isTerminated() || getNbWorms() == 0
