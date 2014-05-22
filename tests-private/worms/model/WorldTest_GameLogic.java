@@ -209,8 +209,8 @@ public class WorldTest_GameLogic {
 	@Test
 	public void testStartNextTurn_NormalCase() {
 		assertTrue(worldWithProjectileAndDeadWorm.hasProjectile());
-		assertTrue(worldWithProjectileAndDeadWorm.hasAsWorm(dead2));
-		assertTrue(worldWithProjectileAndDeadWorm.hasAsWorm(dead5));
+		assertFalse(worldWithProjectileAndDeadWorm.hasAsWorm(dead2));
+		assertFalse(worldWithProjectileAndDeadWorm.hasAsWorm(dead5));
 
 		assertEquals(4448-400, alive1.getHitPoints());
 		assertEquals(4448-60,alive1.getActionPoints());
@@ -238,9 +238,9 @@ public class WorldTest_GameLogic {
 		
 		//Set HP of alive3 to 0
 		alive3.decreaseHitPoints(alive3.getHitPoints());
+		assertFalse(worldWithProjectileAndDeadWorm.hasAsWorm(alive3));
 
 		assertEquals(alive1,worldWithProjectileAndDeadWorm.getCurrentWorm());
-		assertTrue(worldWithProjectileAndDeadWorm.hasAsWorm(alive3));
 		assertEquals(4448-400, alive4.getHitPoints());
 		assertEquals(4448-60,alive4.getActionPoints());
 		assertEquals(4448-400, alive0.getHitPoints());
@@ -248,8 +248,6 @@ public class WorldTest_GameLogic {
 
 		worldWithProjectileAndDeadWorm.startNextTurn();
 		
-		//Alive 3 is gone
-		assertFalse(worldWithProjectileAndDeadWorm.hasAsWorm(alive3));
 		//Alive 4 is new current worm
 		assertEquals(alive4,worldWithProjectileAndDeadWorm.getCurrentWorm());
 		//Alive 4 is replenished
@@ -273,13 +271,13 @@ public class WorldTest_GameLogic {
 		//Set HP of alive3 and alive4 to 0
 		alive3.decreaseHitPoints(alive3.getHitPoints());
 		alive4.decreaseHitPoints(alive4.getHitPoints());
+		assertFalse(worldWithProjectileAndDeadWorm.hasAsWorm(alive3));
+		assertFalse(worldWithProjectileAndDeadWorm.hasAsWorm(alive4));
 		
 		//Decrease AP of alive1
 		alive1.turn(2*Math.PI);
 
 		assertEquals(alive1,worldWithProjectileAndDeadWorm.getCurrentWorm());
-		assertTrue(worldWithProjectileAndDeadWorm.hasAsWorm(alive3));
-		assertTrue(worldWithProjectileAndDeadWorm.hasAsWorm(alive4));
 		assertEquals(4448-400, alive0.getHitPoints());
 		assertEquals(4448-60,alive0.getActionPoints());
 		assertEquals(4448-400+10, alive1.getHitPoints());
@@ -287,9 +285,6 @@ public class WorldTest_GameLogic {
 
 		worldWithProjectileAndDeadWorm.startNextTurn();
 		
-		//Alive3 and Alive4 is gone
-		assertFalse(worldWithProjectileAndDeadWorm.hasAsWorm(alive3));
-		assertFalse(worldWithProjectileAndDeadWorm.hasAsWorm(alive4));
 		//Alive 0 is new current worm
 		assertEquals(alive0,worldWithProjectileAndDeadWorm.getCurrentWorm());
 		//Alive 0 is replenished

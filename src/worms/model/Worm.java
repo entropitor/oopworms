@@ -924,6 +924,8 @@ public class Worm extends MassiveEntity {
 	 * 			sets this worm's HP to this maximum allowed number.
 	 * 			| if (amount > this.getMaxHitPoints())
 	 *			| 	new.getHitPoints() == getMaxHitPoints()
+	 * @effect	If the new hitpoints equals 0, the worm is terminated (if not already).
+	 * 			| if(new.getHitPoints() == 0 && getWorld() != null) then getWorld().removeWorm(this)
 	 */
 	@Raw @Model
 	private void setHitPoints(int amount){
@@ -933,6 +935,8 @@ public class Worm extends MassiveEntity {
 			this.hitPoints = 0;
 		if (amount > this.getMaxHitPoints())
 			this.hitPoints = this.getMaxHitPoints();
+		if(getHitPoints() == 0 && getWorld() != null)
+			getWorld().removeWorm(this);
 	}
 	private int hitPoints;
 	

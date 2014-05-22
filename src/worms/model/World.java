@@ -1364,15 +1364,12 @@ public class World {
 	 * 
 	 * @effect		| checkForWinners()
 	 * @effect		| if(!new.isTerminated() && hasProjectile()) then removeProjectile()
-	 * @effect		| for each worm in getWorms():
-	 * 				|		if(worm.getHitPoints() == 0) then removeWorm(worm);
 	 * @post		| if(!new.isTerminated())
 	 * 				| then
 	 * 				|	let
 	 * 				|		indexOldCurrent = getWorms().indexOf(getCurrentWorm())
-	 * 				|		nbRemoved = count(worm in getWorms(): worm.getHitPoints()==0)
 	 * 				| 	in:
-	 * 				|		new.getCurrentWorm() == getWormAt((indexOldCurrent+1-nbRemoved)%getNbWorms())
+	 * 				|		new.getCurrentWorm() == getWormAt((indexOldCurrent+1)%getNbWorms())
 	 * 				|		(new new.getCurrentWorm()).getActionPoints() == new.getCurrentWorm().getMaxActionPoints()
 	 * 				|		(new new.getCurrentWorm()).getHitPoints() == new.getCurrentWorm().getHitPoints()+10
 	 * @effect		The effects described above will repeat N times if the next N worms have a program.
@@ -1400,12 +1397,6 @@ public class World {
 			if(hasProjectile())
 				removeProjectile();
 			
-			for(Worm worm : getWorms()){
-				if(worm.getHitPoints() == 0){
-					removeWorm(worm);
-				}
-			}
-			
 			++currentWormIndex;
 			currentWormIndex %=getNbWorms();
 			Worm current = getCurrentWorm();
@@ -1414,6 +1405,8 @@ public class World {
 
 			if(current.getProgram() != null){
 				current.getProgram().run();
+				if(current.isTerminated())
+					return;
 			}
 			
 		}while(getCurrentWorm() != null && getCurrentWorm().getProgram() != null);
