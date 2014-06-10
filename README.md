@@ -9,3 +9,5 @@ Run `src-provided/worms/Worms.java`
 ![alt text](https://raw.githubusercontent.com/caske33/oopworms/master/images/worm.png "Willy the Worm")
 
 The code we wrote is mostly in `src` and the accompanying tests are in `tests-private`.
+
+(The code in src-provided and tests was given to us by the team behind the course and isn't ours. That code can be used for non-commercial purposes. It is written by Koen Yskout and Jan Tobias Muelbergh)
